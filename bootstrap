@@ -1,0 +1,15 @@
+if [ -d "include" ]; then
+   echo "Include directory exists"
+else
+   echo "Include directory does not exists, creating one..."
+   mkdir include
+fi
+
+if [ -d "m4" ]; then
+   echo "m4 directory exists"
+else
+   echo "m4 directory does not exists, creating one..."
+   mkdir include
+fi
+
+autoreconf -ivf

@@ -1,0 +1,29 @@
+name: build-and-documentation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  compile_program:
+    name: Compile Program and Documentation
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install doxygen and pdflatex
+        run: sudo apt-get install doxygen
+      - name: Bootstrap and configure
+        run: ./bootstrap && ./configure
+      - name: Compile
+        run: make
+      - name: Documentation
+        run: cd docs && make
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/html/
