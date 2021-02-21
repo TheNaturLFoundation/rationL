@@ -35,10 +35,8 @@ include/config.h.in
 #Docs
 DoxyfileInternal
 DoxyfilePublic
-/docs/Doxyfile
-/docs/html
-/docs/latex
-/docs/man
+/docs/internal
+/docs/public
 
 Makefile.in
 /ar-lib
