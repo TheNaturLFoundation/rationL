@@ -1,0 +1,10 @@
+PROJECT_NAME           = @PACKAGE_NAME@
+PROJECT_NUMBER         = @PACKAGE_VERSION@
+OUTPUT_DIRECTORY       = @top_srcdir@/docs/internal/
+INPUT                  = @top_srcdir@/src \
+GENERATE_LATEX         = NO
+GENERATE_MAN	       = YES
+JAVADOC_BANNER 	       = YES
+EXTRACT_ALL 	       = YES
+RECURSIVE	           = YES
+GENERATE_TREEVIEW      = YES
