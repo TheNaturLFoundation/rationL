@@ -1,5 +1,5 @@
 SUBDIRS = include
-
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/include/
 AM_LDFLAGS = -shared -O3
 
 lib_LTLIBRARIES = librationl.la
@@ -9,7 +9,6 @@ lib_LTLIBRARIES = librationl.la
 # the dynamic library.
 librationl_la_SOURCES = \
 	src/rationl.c
-
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
             $(top_srcdir)/tap-driver.sh

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <stddef.h>
+#include "datatypes/linked_list.h"
 
 /**
- * @struct automaton
+ * @struct Automaton
  * @brief Reprents an automaton as a graph.
  * This struct is used to represent an automaton as a graph
  * using adjacency lists.
@@ -21,5 +22,5 @@ typedef struct
      * The adjacency list used to represent the graph. The length of
      * this adjacency list is state_count     
      */
-    int **states;
-} automaton;
+    LinkedList *adj_list;
+} Automaton;
