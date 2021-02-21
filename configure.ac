@@ -56,7 +56,7 @@ AM_CONDITIONAL([COVERAGE], [[test -n "$LCOV"] && [test -n "$GENHTML"]])
 
 AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 
-AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Doxyfile])])
+AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/DoxyfilePublic docs/DoxyfileInternal])])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Makefile])])
 
 # Configure output files
