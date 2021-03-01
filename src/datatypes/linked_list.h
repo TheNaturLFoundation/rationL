@@ -27,7 +27,7 @@ typedef struct LinkedList
  * @version 1.0.0
  */
 
-LinkedList* create_linked_list();
+LinkedList* list_create();
 
 
 /**
@@ -41,7 +41,7 @@ LinkedList* create_linked_list();
  * @return true(1) if the push_back was successful false(0) otherwise
  * @version 1.0.1
  */
-int push_back(LinkedList *list, void *data);
+int list_push_back(LinkedList *list, void *data);
 
 /**
  * Removes the last element of the linked list and returns it.
@@ -56,4 +56,4 @@ int push_back(LinkedList *list, void *data);
  * @return or a sentinel, NULL otherwise
  * @version 1.0.0
  */
-LinkedList* pop(LinkedList *list);
+LinkedList* list_pop(LinkedList *list);
