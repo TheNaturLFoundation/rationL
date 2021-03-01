@@ -36,3 +36,36 @@ LinkedList* list_pop(LinkedList *list)
     list->next = NULL;
     return last;
 }
+
+LinkedList* list_get(LinkedList* list, int position)
+{
+    if(position < -1)
+        return NULL;
+    if(position == -1)
+    {
+        while(list->next != NULL)
+            list = list->next;
+        return list;
+    }
+    list = list->next;
+    while(list != NULL && position != 0)
+    {
+        list = list->next;
+        position -= 1;
+    }
+    return list;
+}
+
+int list_free(LinkedList *list)
+{
+    if(list == NULL)
+        return 0;
+    while(list != NULL)
+    {
+        LinkedList *next = list->next;
+        free(list->data);
+        free(list);
+        list = next;
+    }
+    return 1;
+}

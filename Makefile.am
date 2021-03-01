@@ -39,7 +39,7 @@ criterion_tests_SOURCES = \
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)
 
-criterion_tests_CFLAGS =  $(CRITERION_CFLAGS)
+criterion_tests_CFLAGS =  $(CRITERION_CFLAGS) -fsanitize=address
 criterion_tests_LDFLAGS =  $(CRITERION_LIBS)
 
 TESTS = criterion_tests
