@@ -2,7 +2,7 @@
 
 #include "datatypes/linked_list.h"
 
-LinkedList* create_linked_list()
+LinkedList* list_create()
 {
     LinkedList *list = SAFEMALLOC(sizeof(LinkedList));
     list->data = NULL;
@@ -11,7 +11,7 @@ LinkedList* create_linked_list()
     return list;
 }
 
-int push_back(LinkedList *list, void *data)
+int list_push_back(LinkedList *list, void *data)
 {
     if(list == NULL)
         return 0;
@@ -25,7 +25,7 @@ int push_back(LinkedList *list, void *data)
     return 1;
 }
 
-LinkedList* pop(LinkedList *list)
+LinkedList* list_pop(LinkedList *list)
 {
     if(list == NULL || list->next == NULL)
         return NULL;
