@@ -8,7 +8,10 @@ lib_LTLIBRARIES = librationl.la
 # that need to be compiled with
 # the dynamic library.
 librationl_la_SOURCES = \
-	src/rationl.c
+	src/rationl.c \
+	src/automaton/automaton.c \
+	src/datatypes/linked_list.c \
+	src/utils/memory_utils.c
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
             $(top_srcdir)/tap-driver.sh
@@ -31,7 +34,8 @@ check_PROGRAMS = criterion_tests
 # criterion tests.
 
 criterion_tests_SOURCES = \
-			test/simple.c
+			test/simple.c \
+			test/linked_list_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)
 
