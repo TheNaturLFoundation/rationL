@@ -1,5 +1,4 @@
 #pragma once
-#include "utils/memory_utils.h"
 
 /**
  * @struct LinkedList
@@ -10,11 +9,10 @@
  */
 typedef struct LinkedList
 {
-    void* data;
+    void *data;
     struct LinkedList *previous;
     struct LinkedList *next;
 } LinkedList;
-
 
 /**
  * Allocates memory for a new sentinel and sets the data
@@ -27,8 +25,7 @@ typedef struct LinkedList
  * @version 1.0.0
  */
 
-LinkedList* list_create();
-
+LinkedList *list_create();
 
 /**
  * Allocates memory for a new element of the list and
@@ -56,9 +53,28 @@ int list_push_back(LinkedList *list, void *data);
  * @date 21/01/2020
  * @return A pointer to the end of the list if the list is not null
  * @return or a sentinel, NULL otherwise
- * @version 1.0.0
+ * @version 1.0.1
  */
-LinkedList* list_pop(LinkedList *list);
+LinkedList *list_pop(LinkedList *list);
+
+/**
+ * Removed the first element of the linked list
+ * @return The first element of the list if exists else NULL
+ * @author Simon Scatton
+ * @date 02/03/2021
+ * @version 1.0.0 */
+
+LinkedList *list_pop_front(LinkedList *list);
+
+/**
+ * Removes the element at position position in the list if -1 is passed
+ * as position it will return the end of the list.
+ * @return the element that was removed, can be freed with free_list
+ * @author Simon Scatton
+ * @date 02/03/2021
+ * @version 1.0.0
+ **/
+LinkedList *list_pop_at(LinkedList *list, int position);
 
 /**
  * Gets the element at position in the list. If the position is
@@ -70,8 +86,7 @@ LinkedList* list_pop(LinkedList *list);
  * @date 01/03/2021
  * @version 1.0.0
  **/
-LinkedList* list_get(LinkedList *list, int position);
-
+LinkedList *list_get(LinkedList *list, int position);
 
 /**
  * Frees the list and the data pointers that are contained in
