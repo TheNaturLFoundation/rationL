@@ -1,4 +1,5 @@
 #include <criterion/criterion.h>
+#include <criterion/redirect.h>
 #include <criterion/internal/assert.h>
 #include "datatypes/array.h"
 #include <stdio.h>
@@ -30,6 +31,13 @@ Test(array, array_get)
 
     for (size_t i = 0; i < size; i++)
         cr_assert_eq(*(int *)array_get(array, i), value);
+}
+
+Test(array, array_get_error, .exit_code = 1)
+{
+    Array *array = Array(int);
+    array_get(array, 10);
+    cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
 }
 
 Test(array, array_set)
@@ -67,7 +75,7 @@ Test(array, array_append)
 Test(array, array_insert)
 {
     const int value = -1;
-    const size_t initial_size = 10;
+    const size_t initial_size = ARR_BASE_CAPACITY;
     Array *array = array_init(initial_size, &value, sizeof(int));
 
     int x = 42;
@@ -100,4 +108,56 @@ Test(array, array_remove)
 
     arr_foreach(int, curr, array)
         cr_assert_eq(curr, value);
+}
+
+Test(array, array_clear)
+{
+    int x = 42;
+    Array *array = array_init(10, &x, sizeof(int));
+    size_t capacity = array->capacity;
+
+    array_clear(array);
+    cr_assert_eq(array->size, 0);
+    cr_assert_eq(array->capacity, capacity);
+}
+
+Test(array, array_free)
+{
+    Array *array = Array(int);
+    array_free(array);
+}
+
+static void square(void *a)
+{
+    int *x = a;
+    *x *= *x;
+}
+
+Test(array, array_map)
+{
+    Array *array = Array(int);
+    for (size_t i = 0; i < 10; i++)
+        array_append(array, &i);
+
+    array_map(array, square);
+    for (size_t i = 0; i < array->size; i++)
+        cr_assert_eq(*(int *)array_get(array, i), i * i);
+}
+
+static void square_and_add(size_t i, void *a)
+{
+    int *x = a;
+    *x *= *x;
+    *x += i;
+}
+
+Test(array, array_mapi)
+{
+    Array *array = Array(int);
+    for (size_t i = 0; i < 10; i++)
+        array_append(array, &i);
+
+    array_mapi(array, square_and_add);
+    for (size_t i = 0; i < array->size; i++)
+        cr_assert_eq(*(int *)array_get(array, i), i * i + i);
 }

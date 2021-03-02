@@ -111,3 +111,15 @@ void array_free(Array *array)
     array->capacity = 0;
     free(array->data);
 }
+
+void array_map(Array *array, void (*function)(void *))
+{
+    for (size_t i = 0; i < array->size; i++)
+        function(array_get(array, i));
+}
+
+void array_mapi(Array *array, void (*function)(size_t, void *))
+{
+    for (size_t i = 0; i < array->size; i++)
+        function(i, array_get(array, i));
+}

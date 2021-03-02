@@ -108,3 +108,19 @@ void array_clear(Array *array);
  * @date 01/03/2021
  */
 void array_free(Array *array);
+
+/**
+ * Applies a function to all elements in an array.
+ * @author Rostan Tabet
+ * @date 02/03/2021
+ * @param function: The function to apply to the array.
+ */
+void array_map(Array *array, void (*function)(void *));
+
+/**
+ * Applies a function to all elements in an array and their indices.
+ * @author Rostan Tabet
+ * @date 02/03/2021
+ * @param function: The function to apply to the array.
+ */
+void array_mapi(Array *array, void (*function)(size_t, void *));
