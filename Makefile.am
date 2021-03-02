@@ -11,6 +11,7 @@ librationl_la_SOURCES = \
 	src/rationl.c \
 	src/automaton/automaton.c \
 	src/datatypes/linked_list.c \
+	src/datatypes/array.c \
 	src/utils/memory_utils.c
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
@@ -35,6 +36,7 @@ check_PROGRAMS = criterion_tests
 
 criterion_tests_SOURCES = \
 			test/simple.c \
+			test/array.c \
 			test/linked_list_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)

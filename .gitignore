@@ -1,6 +1,7 @@
 # http://www.gnu.org/software/automake
 
 .vscode
+.idea
 .DS_Store
 .libs/
 criterion_tests
