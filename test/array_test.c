@@ -54,6 +54,14 @@ Test(array, array_set)
     }
 }
 
+Test(array, array_set_error, .exit_code = 1)
+{
+    Array *array = Array(int);
+    int x = 42;
+    array_set(array, 10, &x);
+    cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
+}
+
 Test(array, array_append)
 {
     Array *array = Array(int);
@@ -93,6 +101,14 @@ Test(array, array_insert)
         cr_assert_eq(*(int *)array_get(array, i), value);
 }
 
+Test(array, array_insert_error, .exit_code = 1)
+{
+    Array *array = Array(int);
+    int x = 42;
+    array_insert(array, 10, &x);
+    cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
+}
+
 Test(array, array_remove)
 {
     const int value = -1;
@@ -108,6 +124,13 @@ Test(array, array_remove)
 
     arr_foreach(int, curr, array)
         cr_assert_eq(curr, value);
+}
+
+Test(array, array_remove_error, .exit_code = 1)
+{
+    Array *array = Array(int);
+    array_remove(array, 10);
+    cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
 }
 
 Test(array, array_clear)

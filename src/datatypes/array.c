@@ -9,7 +9,7 @@
 static void array_grow(Array *array)
 {
     array->capacity *= ARR_GROWTH_FACTOR;
-    array->data = SAFEREALLOC(array->data, array->capacity);
+    array->data = SAFEREALLOC(array->data, array->capacity * array->data_size);
 }
 
 Array *array_create(size_t data_size)
