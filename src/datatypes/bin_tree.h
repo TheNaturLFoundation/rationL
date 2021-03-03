@@ -8,7 +8,7 @@
 
 #define BinTree(T, data, ...)                                           \
   create_node(&(BinTree)                                                \
-              {.size = sizeof(T), .data = value, __VA_ARGS__})
+              {.size = sizeof(T), .data = &(T){data}, __VA_ARGS__})
 
 /*
  * @struct BinTree
