@@ -12,7 +12,8 @@ librationl_la_SOURCES = \
 	src/automaton/automaton.c \
 	src/datatypes/linked_list.c \
 	src/datatypes/array.c \
-	src/utils/memory_utils.c
+	src/utils/memory_utils.c \
+	src/datatypes/bin_tree.c
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
             $(top_srcdir)/tap-driver.sh

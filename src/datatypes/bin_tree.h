@@ -1,24 +1,27 @@
 #ifndef BIN_TREE_H
 #define BIN_TREE_H
 
-#include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define BinTree(T, x)\
-  T x = VALUE;					\
-  create_node(sizeof(type), VALUE);
+
+#define BinTree(T, data, ...)                                           \
+  create_node(&(BinTree)                                                \
+              {.size = sizeof(T), .data = value, __VA_ARGS__})
 
 /*
  * @struct BinTree
  * @debrief Basic generic binary tree implementation
  * @author Vlad Argatu
  * @date 02/03/2020
-*/
-typedef struct BinTree {
-	void *data;
-	struct BinTree * left;
-	struct BinTree * right;
+ */
+typedef struct BinTree
+{
+    void *data;
+    size_t size;
+    struct BinTree *left;
+    struct BinTree *right;
 } BinTree;
 
 /*
@@ -31,8 +34,8 @@ typedef struct BinTree {
  Initializes a binary tree node with both soons as NULL pointers.
 */
 
-BinTree * create_node(size_t data_size, const void * data);
-//use memcopy to copy the data and not ugly cast
+BinTree *create_node(BinTree *macro_defined_tree);
+// use memcopy to copy the data and not ugly cast
 
 /*
  * @author Antoine Sicard
@@ -42,6 +45,6 @@ BinTree * create_node(size_t data_size, const void * data);
 Frees the binary tree.
 */
 
-void free_bintree(BinTree * tree);
+void free_bintree(BinTree *tree);
 
 #endif
