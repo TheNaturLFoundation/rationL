@@ -23,10 +23,12 @@ typedef enum SymbolType
 } SymbolType;
 
 /**
- * Representation of the three regular operators:<br/>
- * - Union<br/>
+ * Representation regular expression operators:<br/>
  * - Concatenation<br/>
- * - Kleene star<br/>
+ * - Union (|)<br/>
+ * - Kleene star (*)<br/>
+ * - Exists (+)<br/>
+ * - Maybe (?)
  * @author Rostan Tabet
  * @date 04/03/2021
  */
@@ -35,6 +37,8 @@ typedef enum Operator
     KLEENE_STAR;
     CONCATENATION;
     UNION;
+    EXISTS;
+    MAYBE;
 } Operator;
 
 /**
@@ -52,8 +56,7 @@ typedef union SymbolValue
 /**
  * @struct Symbol
  * @brief Representation of a regex symbol.
- * It can be either a letter of the alphabet or
- * one of the three regular operators (union, concatenation, Kleene star)
+ * It can be either a letter of the alphabet or an operator.
  * @author Rostan Tabet
  * @date 04/03/2021
  */
