@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 #include "datatypes/linked_list.h"
-#include "parsing/lexer.h"
+#include "parsing/parsing.h"
 
 /**
  * @struct Automaton

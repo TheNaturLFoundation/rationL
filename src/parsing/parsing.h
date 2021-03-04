@@ -1,4 +1,5 @@
 #pragma once
+#include "datatypes/bin_tree.h"
 
 /**
  * Type used to represent letters in regular expressions.
@@ -65,3 +66,5 @@ typedef struct Symbol
     SymbolType type;
     SymbolValue value;
 } Symbol;
+
+BinTree *parse_symbols(char *);
