@@ -1,5 +1,6 @@
 #pragma once
 #include "lexer.h"
+#include "datatypes/array.h"
 #include "datatypes/bin_tree.h"
 
 /**
@@ -64,4 +65,4 @@ typedef struct Symbol
  * @date 04/03/2021
  * @return The binary tree corresponding to the parsed expression.
  */
-BinTree *parse_symbols(char *);
+BinTree *parse_symbols(Array *);
