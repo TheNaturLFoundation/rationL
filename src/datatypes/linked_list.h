@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stddef.h>
+
+#define LinkedList(type) list_create(sizeof(type))
 /**
  * @struct LinkedList
  * @brief Basic single linked list.
@@ -10,6 +13,7 @@
 typedef struct LinkedList
 {
     void *data;
+    size_t size;
     struct LinkedList *previous;
     struct LinkedList *next;
 } LinkedList;
@@ -22,10 +26,10 @@ typedef struct LinkedList
  * @author Simon Scatton
  * @date 21/01/2020
  * @return A new LinkedList* sentinel.
- * @version 1.0.0
+ * @version 1.0.1
  */
 
-LinkedList *list_create();
+LinkedList *list_create(size_t size);
 
 /**
  * Allocates memory for a new element of the list and

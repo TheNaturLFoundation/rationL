@@ -1,13 +1,15 @@
 #include "datatypes/linked_list.h"
 
 #include <stdlib.h>
-
+#include <string.h>
 #include "utils/memory_utils.h"
 
-LinkedList *list_create()
+
+LinkedList *list_create(size_t size)
 {
     LinkedList *list = SAFEMALLOC(sizeof(LinkedList));
     list->data = NULL;
+    list->size = size;
     list->next = NULL;
     list->previous = NULL;
     return list;
@@ -20,9 +22,11 @@ int list_push_back(LinkedList *list, void *data)
     while (list->next != NULL)
         list = list->next;
     LinkedList *newList = SAFEMALLOC(sizeof(LinkedList));
-    newList->data = data;
+    newList->data = SAFEMALLOC(list->size);
+    memcpy(newList->data, data, list->size);
     newList->next = NULL;
     newList->previous = list;
+    newList->size = list->size;
     list->next = newList;
     return 1;
 }
