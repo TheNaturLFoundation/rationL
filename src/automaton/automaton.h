@@ -2,10 +2,11 @@
 
 #include <stddef.h>
 #include "datatypes/linked_list.h"
+#include "parsing/lexer.h"
 
 /**
  * @struct Automaton
- * @brief Reprents an automaton as a graph.
+ * @brief Represents an automaton as a graph.
  * This struct is used to represent an automaton as a graph
  * using adjacency lists.
  * @author Simon Scatton
@@ -15,12 +16,55 @@
 typedef struct
 {
     /**
-     * This contains the number of states (nodes of the graph)
+     * This order of the graph i.e. the number of states in the automaton.
      */
-    size_t state_count;
+    size_t size;
     /**
-     * The adjacency list used to represent the graph. The length of
-     * this adjacency list is state_count     
+     * The array `adj_lists` contains automaton transitions.
+     * For the ith state, its transitions is the linked list adj_Lists[i]
+     * where i is an integer from 0 to size - 1.
+     * The size of the array is the order of the graph.
      */
-    LinkedList *adj_list;
+    Array *adj_lists;
+    /**
+     * An array containing all of the entry points of the automaton.
+     */
+     Array *starting_states;
 } Automaton;
+
+/**
+ * @struct State
+ * @brief Representation of an automaton state.
+ * @author Rostan Tabet
+ * @date 04/03/2021
+ */
+typedef struct State
+{
+    /**
+     * Identifier of the state in the automaton.
+     * From 0 to n - 1 where n is the order of the graph.
+     */
+    size_t id;
+    /**
+     * True if the state is a terminal state.
+     */
+    int terminal;
+} State;
+
+/**
+ * @struct Transition
+ * @brief Representation of an automaton transition.
+ * Contains the target state and the value of the transition itself.
+ * @author Rostan Tabet
+ * @date 04/03/2021
+ */
+typedef struct Transition
+{
+    State target;
+    /**
+     * Value of the transition if it is not an epsilon transition.
+     * If the field `is_epsilon` is set to 1, the value can be anything.
+     */
+    Letter value;
+    int is_epsilon;
+} Transition;
