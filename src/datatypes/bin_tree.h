@@ -6,9 +6,9 @@
 #include <string.h>
 
 
-#define BinTree(T, data, ...)                                           \
+#define BinTree(T, value, ...)                                           \
   create_node(&(BinTree)                                                \
-              {.size = sizeof(T), .data = &(T){data}, __VA_ARGS__})
+              {.size = sizeof(T), .data = &(T){value}, __VA_ARGS__})
 
 /*
  * @struct BinTree
@@ -45,6 +45,6 @@ BinTree *create_node(BinTree *macro_defined_tree);
 Frees the binary tree.
 */
 
-void free_bintree(BinTree *tree);
+void bintree_free(BinTree *tree);
 
 #endif

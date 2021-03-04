@@ -7,6 +7,7 @@
 BinTree *create_node(BinTree *macro_tree_data)
 {
     BinTree *bintree = SAFEMALLOC(sizeof(BinTree));
+    bintree->data = SAFEMALLOC(macro_tree_data->size);
     bintree->size = macro_tree_data->size;
     memcpy(bintree->data, macro_tree_data->data, macro_tree_data->size);
     bintree->left = macro_tree_data->left;
@@ -14,13 +15,13 @@ BinTree *create_node(BinTree *macro_tree_data)
     return bintree;
 }
 
-void free_bintree(BinTree *tree)
+void bintree_free(BinTree *tree)
 {
     if (tree != NULL)
     {
         free(tree->data);
-        free_bintree(tree->left);
-        free_bintree(tree->right);
+        bintree_free(tree->left);
+        bintree_free(tree->right);
         free(tree);
     }
 }
