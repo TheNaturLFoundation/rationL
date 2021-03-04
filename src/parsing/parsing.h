@@ -1,15 +1,6 @@
 #pragma once
+#include "lexer.h"
 #include "datatypes/bin_tree.h"
-
-/**
- * Type used to represent letters in regular expressions.
- * Equivalent to char for now, meaning that regular expressions only
- * support ASCII.
- * @author Rostan Tabet
- * @date 04/03/2021
- */
-typedef char Letter;
-
 
 /**
  * Used to distinguish between the two types of symbols contained in
@@ -67,4 +58,10 @@ typedef struct Symbol
     SymbolValue value;
 } Symbol;
 
+/**
+ * Turn an string of characters into a binary tree of symbols.
+ * @author Antoine Sicard
+ * @date 04/03/2021
+ * @return The binary tree corresponding to the parsed expression.
+ */
 BinTree *parse_symbols(char *);
