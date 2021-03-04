@@ -10,6 +10,7 @@ Test(array, array_create)
     cr_assert_eq(array->capacity, ARR_BASE_CAPACITY);
     cr_assert_eq(array->size, 0);
     cr_assert_eq(array->data_size, sizeof(int));
+    array_free(array);
 }
 
 Test(array, array_init)
@@ -21,6 +22,7 @@ Test(array, array_init)
     int *p = array->data;
     for (size_t i = 0; i < size; i++, p++)
         cr_assert_eq(*p, value);
+    array_free(array);
 }
 
 Test(array, array_get)
@@ -31,6 +33,7 @@ Test(array, array_get)
 
     for (size_t i = 0; i < size; i++)
         cr_assert_eq(*(int *)array_get(array, i), value);
+    array_free(array);
 }
 
 Test(array, array_get_error, .exit_code = 1)
@@ -38,6 +41,7 @@ Test(array, array_get_error, .exit_code = 1)
     Array *array = Array(int);
     array_get(array, 10);
     cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
+    array_free(array);
 }
 
 Test(array, array_set)
@@ -52,6 +56,7 @@ Test(array, array_set)
         int *x = array_get(array, i);
         cr_assert_eq(*x, i);
     }
+    array_free(array);
 }
 
 Test(array, array_set_error, .exit_code = 1)
@@ -60,6 +65,7 @@ Test(array, array_set_error, .exit_code = 1)
     int x = 42;
     array_set(array, 10, &x);
     cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
+    array_free(array);
 }
 
 Test(array, array_append)
@@ -78,6 +84,7 @@ Test(array, array_append)
 
     for (i = 0; i < array->size; i++)
         cr_assert_eq(*(int *)array_get(array, i), i);
+    array_free(array);
 }
 
 Test(array, array_insert)
@@ -99,6 +106,7 @@ Test(array, array_insert)
 
     for (size_t i = 1; i < array->size - 1; i++)
         cr_assert_eq(*(int *)array_get(array, i), value);
+    array_free(array);
 }
 
 Test(array, array_insert_error, .exit_code = 1)
@@ -107,6 +115,7 @@ Test(array, array_insert_error, .exit_code = 1)
     int x = 42;
     array_insert(array, 10, &x);
     cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
+    array_free(array);
 }
 
 Test(array, array_remove)
@@ -124,6 +133,7 @@ Test(array, array_remove)
 
     arr_foreach(int, curr, array)
         cr_assert_eq(curr, value);
+    array_free(array);
 }
 
 Test(array, array_remove_error, .exit_code = 1)
@@ -131,6 +141,7 @@ Test(array, array_remove_error, .exit_code = 1)
     Array *array = Array(int);
     array_remove(array, 10);
     cr_assert_stderr_eq_str("Index 10 is out of range for array of size 0", "");
+    array_free(array);
 }
 
 Test(array, array_clear)
@@ -142,6 +153,7 @@ Test(array, array_clear)
     array_clear(array);
     cr_assert_eq(array->size, 0);
     cr_assert_eq(array->capacity, capacity);
+    array_free(array);
 }
 
 Test(array, array_free)
@@ -165,6 +177,7 @@ Test(array, array_map)
     array_map(array, square);
     for (size_t i = 0; i < array->size; i++)
         cr_assert_eq(*(int *)array_get(array, i), i * i);
+    array_free(array);
 }
 
 static void square_and_add(size_t i, void *a)
@@ -183,4 +196,5 @@ Test(array, array_mapi)
     array_mapi(array, square_and_add);
     for (size_t i = 0; i < array->size; i++)
         cr_assert_eq(*(int *)array_get(array, i), i * i + i);
+    array_free(array);
 }
