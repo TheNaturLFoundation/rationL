@@ -13,7 +13,8 @@ librationl_la_SOURCES = \
 	src/datatypes/linked_list.c \
 	src/datatypes/array.c \
 	src/utils/memory_utils.c \
-	src/datatypes/bin_tree.c
+	src/datatypes/bin_tree.c \
+	src/parsing/lexer.c
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
             $(top_srcdir)/tap-driver.sh
@@ -39,7 +40,8 @@ criterion_tests_SOURCES = \
 			test/simple.c \
 			test/array_test.c \
 			test/bin_tree_test.c \
-			test/linked_list_test.c
+			test/linked_list_test.c \
+			test/lexer_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)
 

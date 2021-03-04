@@ -18,8 +18,8 @@ typedef char Letter;
  */
 typedef enum TokenType
 {
-    LITERAL;
-    PUNCTUATION;
+    LITERAL,
+    PUNCTUATION
 } TokenType;
 
 /**

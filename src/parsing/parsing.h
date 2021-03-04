@@ -11,8 +11,8 @@
  */
 typedef enum SymbolType
 {
-    OPERATOR;
-    LETTER;
+    OPERATOR,
+    LETTER
 } SymbolType;
 
 /**
@@ -27,11 +27,11 @@ typedef enum SymbolType
  */
 typedef enum Operator
 {
-    KLEENE_STAR;
-    CONCATENATION;
-    UNION;
-    EXISTS;
-    MAYBE;
+    KLEENE_STAR,
+    CONCATENATION,
+    UNION,
+    EXISTS,
+    MAYBE
 } Operator;
 
 /**
@@ -60,7 +60,7 @@ typedef struct Symbol
 } Symbol;
 
 /**
- * Turn an string of characters into a binary tree of symbols.
+ * Turn an array of tokens into a binary tree of symbols.
  * @author Antoine Sicard
  * @date 04/03/2021
  * @return The binary tree corresponding to the parsed expression.
