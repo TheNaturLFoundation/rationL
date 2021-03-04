@@ -38,11 +38,12 @@ check_PROGRAMS = criterion_tests
 criterion_tests_SOURCES = \
 			test/simple.c \
 			test/array_test.c \
+			test/bin_tree_test.c \
 			test/linked_list_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)
 
-criterion_tests_CFLAGS =  $(CRITERION_CFLAGS)
+criterion_tests_CFLAGS =  $(CRITERION_CFLAGS) -fsanitize=address -g
 criterion_tests_LDFLAGS =  $(CRITERION_LIBS)
 
 TESTS = criterion_tests
