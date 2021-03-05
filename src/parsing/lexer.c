@@ -44,6 +44,24 @@ static void tokenize_group(const char **string, Array *tokens)
         errx(EXIT_FAILURE, "brackets not balanced");
 }
 
+static void tokenize_dot(Array *tokens)
+{
+    const Token or_token = { .type = PUNCTUATION, .value = '|' };
+    const Token par_token = { .type = PUNCTUATION, .value = '(' };
+
+    array_append(tokens, &par_token);
+    Token token;
+    token.type = LITERAL;
+    for (char c = ASCII_FIRST_PRINTABLE; c < ASCII_LAST_PRINTABLE; c++)
+    {
+        token.value = c;
+        array_append(tokens, &token);
+        array_append(tokens, &or_token);
+    }
+    token.value = ASCII_LAST_PRINTABLE;
+    array_append(tokens, &token);
+}
+
 // Assumes that the string ends with 0
 Array *tokenize(const char *string)
 {
@@ -51,6 +69,8 @@ Array *tokenize(const char *string)
     const Token concat_token = { .type = PUNCTUATION, .value = '.' };
     // True if the previous character is implicitly concatenated to a literal
     int previous_concat = 0;
+    // True if the previous character was an escaping '\'
+    int escaped = 0;
 
     for (char c = *string; c != 0; c = *++string)
     {
@@ -61,6 +81,9 @@ Array *tokenize(const char *string)
         token.value = c;
         switch (c)
         {
+        case '\\':
+            escaped = 1;
+            continue;
         case '*':
         case '|':
         case '+':
@@ -81,6 +104,14 @@ Array *tokenize(const char *string)
             curr_concat = previous_concat;
             tokenize_group(&string, tokens);
             c = ')';
+            goto char_switch;  // Don't hurt me. Please.
+            break;
+        case '.':
+            curr_concat = previous_concat;
+            previous_concat = 1;
+            tokenize_dot(tokens);
+            string++;
+            c = ')';
             goto char_switch;
             break;
         default:
@@ -89,6 +120,7 @@ Array *tokenize(const char *string)
             token.type = LITERAL;
             break;
         }
+        escaped = 0;
 
         if (curr_concat)
             array_append(tokens, &concat_token);

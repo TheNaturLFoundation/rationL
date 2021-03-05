@@ -8,6 +8,13 @@ void assert_eq_token(Token *actual, Token *expected)
     cr_assert_eq(actual->value, expected->value);
 }
 
+void print_tokens(Array *tokens)
+{
+    for (size_t i = 0; i < tokens->size; i++)
+        printf("%c", ((Token *)array_get(tokens, i))->value);
+    puts("");
+}
+
 Test(lexer, simple_single)
 {
     char *regexp = "a";
@@ -195,10 +202,6 @@ Test(lexer, implicit_groups)
         { .type = PUNCTUATION, .value = ')' }
     };
 
-    for (size_t i = 0; i < tokens->size; i++)
-        printf("%c", ((Token *)array_get(tokens, i))->value);
-    puts("");
-    printf("size = %zu\n", tokens->size);
     cr_assert_eq(tokens->size, 19);
     for (size_t i = 0; i < tokens->size; i++)
     {
@@ -206,6 +209,33 @@ Test(lexer, implicit_groups)
         Token expected = expected_tokens[i];
         assert_eq_token(actual, &expected);
     }
+
+    array_free(tokens);
+}
+
+Test(lexer, simple_dot)
+{
+    char *regexp = ".";
+    Array *tokens = tokenize(regexp);
+
+    size_t expected_size = (ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 1;
+    cr_assert_eq(tokens->size, expected_size);
+    cr_assert_eq(((Token *)array_get(tokens, 0))->value, '(');
+
+    Token or_token = { .type = PUNCTUATION, .value = '|' };
+    char c;
+    size_t i = 1;
+    for (c = ASCII_FIRST_PRINTABLE; c < ASCII_LAST_PRINTABLE; i += 2, c++)
+    {
+        Token expected = { .type = LITERAL, .value = c };
+        Token *actual = array_get(tokens, i);
+        assert_eq_token(actual, &expected);
+
+        Token *actual_or = array_get(tokens, i + 1);
+        assert_eq_token(actual_or, &or_token);
+    }
+    cr_assert_eq(((Token *)array_get(tokens, i))->value, c);
+    cr_assert_eq(((Token *)array_get(tokens, i + 1))->value, ')');
 
     array_free(tokens);
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include "datatypes/array.h"
 
+#define ASCII_FIRST_PRINTABLE 33
+#define ASCII_LAST_PRINTABLE 126
+
 /**
  * Type used to represent letters in regular expressions.
  * Equivalent to char for now, meaning that regular expressions only
