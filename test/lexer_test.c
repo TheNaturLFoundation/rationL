@@ -61,6 +61,7 @@ Test(lexer, simple_punctuation)
         { .type = PUNCTUATION, .value = '(' },
         { .type = LITERAL, .value = 'a' },
         { .type = PUNCTUATION, .value = '+' },
+        { .type = PUNCTUATION, .value = '.' },
         { .type = LITERAL, .value = 'b' },
         { .type = PUNCTUATION, .value = ')' },
         { .type = PUNCTUATION, .value = '*' },
@@ -69,7 +70,7 @@ Test(lexer, simple_punctuation)
         { .type = PUNCTUATION, .value = '*' },
     };
 
-    cr_assert_eq(tokens->size, 9);
+    cr_assert_eq(tokens->size, 10);
     for (size_t i = 0; i < tokens->size; i++)
     {
         Token *actual = array_get(tokens, i);
@@ -89,6 +90,7 @@ Test(lexer, par_concat)
         { .type = PUNCTUATION, .value = '(' },
         { .type = LITERAL, .value = 'a' },
         { .type = PUNCTUATION, .value = '+' },
+        { .type = PUNCTUATION, .value = '.' },
         { .type = LITERAL, .value = 'b' },
         { .type = PUNCTUATION, .value = ')' },
         { .type = PUNCTUATION, .value = '.' },
@@ -100,7 +102,7 @@ Test(lexer, par_concat)
         { .type = PUNCTUATION, .value = '*' }
     };
 
-    cr_assert_eq(tokens->size, 12);
+    cr_assert_eq(tokens->size, 13);
     for (size_t i = 0; i < tokens->size; i++)
     {
         Token *actual = array_get(tokens, i);

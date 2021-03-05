@@ -84,10 +84,7 @@ Array *tokenize(const char *string)
         case '\\':
             escaped = 1;
             continue;
-        case '*':
         case '|':
-        case '+':
-        case '?':
             previous_concat = 0;
             token.type = PUNCTUATION;
             break;
@@ -96,6 +93,9 @@ Array *tokenize(const char *string)
             previous_concat = 0;
             token.type = PUNCTUATION;
             break;
+        case '+':
+        case '?':
+        case '*':
         case ')':
             previous_concat = 1;
             token.type = PUNCTUATION;
