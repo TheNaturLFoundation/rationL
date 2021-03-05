@@ -1,8 +1,12 @@
 #pragma once
 
 #include <stddef.h>
+#include "utils/memory_utils.h"
 #include "datatypes/linked_list.h"
+#include "datatypes/array.h"
 #include "parsing/lexer.h"
+
+#define Automaton() automaton_create();
 
 /**
  * @struct Automaton
@@ -68,3 +72,10 @@ typedef struct Transition
     Letter value;
     int is_epsilon;
 } Transition;
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @return Pointer on the new automaton allocated on the heap
+*/
+Automaton * automaton_create();
