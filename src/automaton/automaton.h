@@ -79,3 +79,54 @@ typedef struct Transition
  * @return Pointer on the new automaton allocated on the heap
 */
 Automaton * automaton_create();
+
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param state: the state to be added.
+ * @param is_entry: boolean that specifies wether or not the state need to be added to the etry list.
+ * @brief adds the state 'state' to the automaton 'automaton'.
+*/
+void automaton_add_state(Automaton * automaton, State * state, int is_entry);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param state: the state to be deleted.  
+*/
+
+void automaton_remove_state(Automaton * automaton, State * state);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param src: the source state in the adj_list.
+ * @param dst: the destiation state.
+ * @param value: the value of the transition, this value is ignored if epsilon is set.
+ * @param epsilon: boolean, if set the transition is epsilon and value is ignored.
+ * @brief adds the transition specified in the automaton.
+*/
+
+void automaton_add_transition(Automatonn * automaton, 
+    State * src, State * dst, Letter value, int epsilon);
+
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param src: the source state of the transition.
+ * @param dst: the destination state of the trasition.
+*/
+void automaton_remove_transition(Automaton * automaton, State * src, State * dst);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton to free.
+*/
+void automaton_free(Automaton * automaton);
