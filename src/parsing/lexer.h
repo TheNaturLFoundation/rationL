@@ -41,4 +41,4 @@ typedef struct Token
  * @return The array of tokens.
  * @warning The array needs to be freed.
  */
-Array *tokenize(char *string);
+Array *tokenize(const char *string);
