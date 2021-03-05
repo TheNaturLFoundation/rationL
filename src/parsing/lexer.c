@@ -2,6 +2,52 @@
 #include <err.h>
 #include <stdio.h>
 
+static int is_group_last(const char *string)
+{
+    return *string == 0 || *string == ']';
+}
+
+static int get_group_range(const char **string, char *lower, char *upper)
+{
+    if (is_group_last(*string + 1) || (*string)[1] != '-' ||
+        is_group_last(*string + 2))
+        return 0;
+
+    *lower = **string;
+    *upper = (*string)[2];
+    *string += 2;
+
+    if (*upper < *lower)
+        errx(EXIT_FAILURE, "invalid character range (%c-%c)", *lower, *upper);
+
+    return 1;
+}
+
+static void add_range(Array *tokens, char lower, char upper)
+{
+    Token or_token = { .type = PUNCTUATION, .value = '|' };
+    Token token;
+    token.type = LITERAL;
+    for (token.value = lower; token.value < upper; token.value++)
+    {
+        array_append(tokens, &token);
+        array_append(tokens, &or_token);
+    }
+    array_append(tokens, &token);
+}
+
+static void add_literal(Array *tokens, char literal)
+{
+    const Token token = { .type = LITERAL, .value = literal };
+    array_append(tokens, &token);
+}
+
+static void add_punctuation(Array *tokens, char punctuation)
+{
+    const Token token = { .type = PUNCTUATION, .value = punctuation };
+    array_append(tokens, &token);
+}
+
 static void tokenize_group(const char **string, Array *tokens)
 {
     const Token or_token = { .type = PUNCTUATION, .value = '|' };
@@ -9,34 +55,18 @@ static void tokenize_group(const char **string, Array *tokens)
 
     array_append(tokens, &par_token);
     (*string)++;
-    int is_last = **string == 0 || **string == ']';
-    while (!is_last)
+    while (!is_group_last(*string))
     {
-        char curr = **string;
-        Token token = { .type = LITERAL, .value = curr };
-        (*string)++;
-        is_last = **string == 0 || **string == ']';
-
-        array_append(tokens, &token);
-        if (!is_last && **string == '-' &&
-            (*string)[1] != 0 && (*string)[1] != ']')
+        char range_lower, range_upper;
+        if (!is_group_last(*string) &&
+            get_group_range(string, &range_lower, &range_upper))
+            add_range(tokens, range_lower, range_upper);
+        else
         {
-            char next = (*string)[1];
-            if (**string == '-' && next != 0 && next != ']')
-            {
-                if (next < curr)
-                    errx(EXIT_FAILURE, "invalid character range");
-                for (++curr; curr <= next; ++curr)
-                {
-                    array_append(tokens, &or_token);
-                    Token t = { .type = LITERAL, .value = curr };
-                    array_append(tokens, &t);
-                }
-                *string += 2;
-            }
+            Token token = { .type = LITERAL, .value = **string };
+            array_append(tokens, &token);
         }
-        is_last = **string == 0 || **string == ']';
-        if (!is_last)
+        if (!is_group_last(++*string))
             array_append(tokens, &or_token);
     }
 
@@ -52,9 +82,15 @@ static void tokenize_dot(Array *tokens)
     array_append(tokens, &par_token);
     Token token;
     token.type = LITERAL;
-    for (char c = ASCII_FIRST_PRINTABLE; c < ASCII_LAST_PRINTABLE; c++)
+    for (token.value = ASCII_FIRST_CONTROL; token.value <= ASCII_LAST_CONTROL;
+         token.value++)
     {
-        token.value = c;
+        array_append(tokens, &token);
+        array_append(tokens, &or_token);
+    }
+    for (token.value = ASCII_FIRST_PRINTABLE; token.value < ASCII_LAST_PRINTABLE;
+         token.value++)
+    {
         array_append(tokens, &token);
         array_append(tokens, &or_token);
     }
@@ -77,6 +113,7 @@ Array *tokenize(const char *string)
         int curr_concat = 0;
         int is_escapable = 0;
         Token token;
+        Token par_token = { .type = PUNCTUATION, .value = '(' };
 
         char_switch:
         token.value = c;
@@ -85,6 +122,85 @@ Array *tokenize(const char *string)
         case '\\':
             if (!escaped)
             {
+                switch (*(string + 1))
+                {
+                case 'd':
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    array_append(tokens, &par_token);
+                    add_range(tokens, '0', '9');
+                    string++;
+                    c = ')';
+                    goto char_switch;
+                case 'D':
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    array_append(tokens, &par_token);
+                    add_range(tokens, ASCII_FIRST_CONTROL, ASCII_LAST_CONTROL);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, ASCII_FIRST_PRINTABLE, '0' - 1);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, '9' + 1, ASCII_LAST_PRINTABLE);
+                    string++;
+                    c = ')';
+                    goto char_switch;
+                case 'w':
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    array_append(tokens, &par_token);
+                    add_range(tokens, 'a', 'z');
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, 'A', 'Z');
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, '0', '9');
+                    add_punctuation(tokens, '|');
+                    add_literal(tokens, '_');
+                    string++;
+                    c = ')';
+                    goto char_switch;
+                case 'W':
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    array_append(tokens, &par_token);
+                    add_range(tokens, ASCII_FIRST_CONTROL, ASCII_LAST_CONTROL);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, ASCII_FIRST_PRINTABLE, '0' - 1);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, '9' + 1, 'A' - 1);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, 'Z' + 1, '_' - 1);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, '_' + 1, 'a' - 1);
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, 'z' + 1, ASCII_LAST_PRINTABLE);
+                    string++;
+                    c = ')';
+                    goto char_switch;
+                case 's':
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    array_append(tokens, &par_token);
+                    add_literal(tokens, ' ');
+                    add_punctuation(tokens, '|');
+                    add_range(tokens, ASCII_FIRST_CONTROL, ASCII_LAST_CONTROL);
+                    string++;
+                    c = ')';
+                    goto char_switch;
+                case 'S':
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    array_append(tokens, &par_token);
+                    add_range(tokens, ' ' + 1, ASCII_LAST_PRINTABLE);
+                    string++;
+                    c = ')';
+                    goto char_switch;
+                }
                 escaped = 1;
                 continue;
             }
@@ -120,7 +236,9 @@ Array *tokenize(const char *string)
         case '[':
             if (!escaped)
             {
-                curr_concat = previous_concat;
+                if (previous_concat)
+                    array_append(tokens, &concat_token);
+                previous_concat = 1;
                 tokenize_group(&string, tokens);
                 c = ')';
                 goto char_switch; // Don't hurt me. Please.

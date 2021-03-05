@@ -1,8 +1,11 @@
 #pragma once
 #include "datatypes/array.h"
 
-#define ASCII_FIRST_PRINTABLE 33
+#define ASCII_FIRST_PRINTABLE 32
 #define ASCII_LAST_PRINTABLE 126
+// Supported control characters are \t, \n, \v, \f and \r
+#define ASCII_FIRST_CONTROL 9
+#define ASCII_LAST_CONTROL 13
 
 /**
  * Type used to represent letters in regular expressions.
