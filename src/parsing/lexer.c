@@ -75,6 +75,7 @@ Array *tokenize(const char *string)
     for (char c = *string; c != 0; c = *++string)
     {
         int curr_concat = 0;
+        int is_escapable = 0;
         Token token;
 
         char_switch:
@@ -82,39 +83,65 @@ Array *tokenize(const char *string)
         switch (c)
         {
         case '\\':
-            escaped = 1;
-            continue;
+            if (!escaped)
+            {
+                escaped = 1;
+                continue;
+            }
+            is_escapable = 1;
         case '|':
-            previous_concat = 0;
-            token.type = PUNCTUATION;
-            break;
+            if (!escaped)
+            {
+                previous_concat = 0;
+                token.type = PUNCTUATION;
+                break;
+            }
+            is_escapable = 1;
         case '(':
-            curr_concat = previous_concat;
-            previous_concat = 0;
-            token.type = PUNCTUATION;
-            break;
+            if (!escaped)
+            {
+                curr_concat = previous_concat;
+                previous_concat = 0;
+                token.type = PUNCTUATION;
+                break;
+            }
+            is_escapable = 1;
         case '+':
         case '?':
         case '*':
         case ')':
-            previous_concat = 1;
-            token.type = PUNCTUATION;
-            break;
+            if (!escaped)
+            {
+                previous_concat = 1;
+                token.type = PUNCTUATION;
+                break;
+            }
+            is_escapable = 1;
         case '[':
-            curr_concat = previous_concat;
-            tokenize_group(&string, tokens);
-            c = ')';
-            goto char_switch;  // Don't hurt me. Please.
-            break;
+            if (!escaped)
+            {
+                curr_concat = previous_concat;
+                tokenize_group(&string, tokens);
+                c = ')';
+                goto char_switch; // Don't hurt me. Please.
+                break;
+            }
+            is_escapable = 1;
         case '.':
-            curr_concat = previous_concat;
-            previous_concat = 1;
-            tokenize_dot(tokens);
-            string++;
-            c = ')';
-            goto char_switch;
-            break;
+            if (!escaped)
+            {
+                curr_concat = previous_concat;
+                previous_concat = 1;
+                tokenize_dot(tokens);
+                string++;
+                c = ')';
+                goto char_switch;
+                break;
+            }
+            is_escapable = 1;
         default:
+            if (escaped && !is_escapable)
+                errx(EXIT_FAILURE, "Can't escape character '%c'", c);
             curr_concat = previous_concat;
             previous_concat = 1;
             token.type = LITERAL;

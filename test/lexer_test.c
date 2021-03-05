@@ -241,3 +241,34 @@ Test(lexer, simple_dot)
 
     array_free(tokens);
 }
+
+Test(lexer, escaping)
+{
+    char *regexp = "\\\\\\(a\\+b*\\)";
+    Array *tokens = tokenize(regexp);
+
+    Token expected_tokens[] = {
+        { .type = LITERAL, .value = '\\' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '(' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '+' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'b' },
+        { .type = PUNCTUATION, .value = '*' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = ')' },
+    };
+
+    cr_assert_eq(tokens->size, 12);
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+
+    array_free(tokens);
+}
