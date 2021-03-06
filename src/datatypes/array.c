@@ -32,7 +32,7 @@ Array *array_init(size_t n, const void *value, size_t data_size)
     while (capacity < n)
         capacity *= ARR_GROWTH_FACTOR;
     array->capacity = capacity;
-    array->data = SAFEMALLOC(data_size * capacity);
+    array->data = SAFEREALLOC(array->data, data_size * capacity);
 
     char *p = array->data;
     for (size_t i = 0; i < n; i++)
@@ -110,6 +110,7 @@ void array_free(Array *array)
     array->size = 0;
     array->capacity = 0;
     free(array->data);
+    free(array);
 }
 
 void array_map(Array *array, void (*function)(void *))
