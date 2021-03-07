@@ -1,6 +1,21 @@
 #include "lexer.h"
+#include "datatypes/linked_list.h"
+#include "datatypes/array.h"
 #include <err.h>
 #include <stdio.h>
+
+struct scope
+{
+    /**
+     * Either '(' or '['.
+     */
+    char start_char;
+    size_t start_index;
+    /**
+     * -1 if undefined.
+     */
+    ssize_t end_index;
+};
 
 static int is_group_last(const char *string)
 {
@@ -98,20 +113,108 @@ static void tokenize_dot(Array *tokens)
     array_append(tokens, &token);
 }
 
+/**
+ * Returns the unsigned integer pointed by the string.
+ * If there is no integer, return -1.
+ */
+static ssize_t get_uint(const char **string)
+{
+    if (**string < '0' || **string > '9')
+        return -1;
+
+    ssize_t total = 0;
+    while (**string >= '0' && **string <= '9')
+    {
+        total += **string - '0';
+        (*string)++;
+    }
+
+    return total;
+}
+
+/**
+ * Repeat a group of tokens based on the repetition pattern inside curly braces.
+ * Move the string pointer at the end of the curly braces pattern.
+ * If the pattern is incorrect, return 0, keep the string pointer unchanged.
+ */
+static int tokenize_repetition(const char **string, Array *tokens,
+                               size_t start_index, size_t end_index)
+{
+    const char *orig = (*string)++;
+    ssize_t lower = get_uint(string);
+
+    if (lower == -1)
+    {
+        *string = orig;
+        return 0;
+    }
+
+    ssize_t upper = -1;
+    int comma = 0;
+    if (**string != '}')
+    {
+        if (*(*string)++ != ',')
+        {
+            *string = orig;
+            return 0;
+        }
+        comma = 1;
+        upper = get_uint(string);
+        if (**string != '}')
+        {
+            *string = orig;
+            return 0;
+        }
+    }
+
+    if (upper != -1 && upper < lower)
+        errx(EXIT_FAILURE, "min repeat greater than max repeat");
+
+    Array *range = array_sub(tokens, start_index, end_index);
+    for (size_t i = 0; i < lower - 1; i++)
+    {
+        add_punctuation(tokens, '.');
+        array_concat(tokens, range);
+    }
+
+    if (!comma)
+        return 1;
+
+    if (upper == -1)
+        add_punctuation(tokens, '+');
+    else
+    {
+        add_punctuation(range, '?');
+        for (size_t i = 0; i < upper - lower; i++)
+        {
+            add_punctuation(tokens, '.');
+            array_concat(tokens, range);
+        }
+    }
+
+    return 1;
+}
+
 // Assumes that the string ends with 0
 Array *tokenize(const char *string)
 {
     Array *tokens = Array(Token);
     const Token concat_token = { .type = PUNCTUATION, .value = '.' };
-    // True if the previous character is implicitly concatenated to a literal
+    // True if the previous character is implicitly concatenated to a literal.
     int previous_concat = 0;
-    // True if the previous character was an escaping '\'
+    // True if the previous character was an escaping '\'.
     int escaped = 0;
+
+    // Stack of scopes.
+    LinkedList *scopes = LinkedList(struct scope);
+    struct scope last_scope;
+    last_scope.end_index = -1;
 
     for (char c = *string; c != 0; c = *++string)
     {
         int curr_concat = 0;
         int is_escapable = 0;
+        int false_par = 0;
         Token token;
         Token par_token = { .type = PUNCTUATION, .value = '(' };
 
@@ -125,6 +228,13 @@ Array *tokenize(const char *string)
                 switch (*(string + 1))
                 {
                 case 'd':
+                {
+                    struct scope scope = {
+                        .start_char = '[',
+                        .start_index = tokens->size + previous_concat,
+                        .end_index = -1
+                    };
+                    list_push_back(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -133,7 +243,15 @@ Array *tokenize(const char *string)
                     string++;
                     c = ')';
                     goto char_switch;
+                }
                 case 'D':
+                {
+                    struct scope scope = {
+                        .start_char = '[',
+                        .start_index = tokens->size + previous_concat,
+                        .end_index = -1
+                    };
+                    list_push_back(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -146,7 +264,15 @@ Array *tokenize(const char *string)
                     string++;
                     c = ')';
                     goto char_switch;
+                }
                 case 'w':
+                {
+                    struct scope scope = {
+                        .start_char = '[',
+                        .start_index = tokens->size + previous_concat,
+                        .end_index = -1
+                    };
+                    list_push_back(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -161,7 +287,15 @@ Array *tokenize(const char *string)
                     string++;
                     c = ')';
                     goto char_switch;
+                }
                 case 'W':
+                {
+                    struct scope scope = {
+                        .start_char = '[',
+                        .start_index = tokens->size + previous_concat,
+                        .end_index = -1
+                    };
+                    list_push_back(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -180,7 +314,15 @@ Array *tokenize(const char *string)
                     string++;
                     c = ')';
                     goto char_switch;
+                }
                 case 's':
+                {
+                    struct scope scope = {
+                        .start_char = '[',
+                        .start_index = tokens->size + previous_concat,
+                        .end_index = -1
+                    };
+                    list_push_back(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -191,7 +333,15 @@ Array *tokenize(const char *string)
                     string++;
                     c = ')';
                     goto char_switch;
+                }
                 case 'S':
+                {
+                    struct scope scope = {
+                        .start_char = '[',
+                        .start_index = tokens->size + previous_concat,
+                        .end_index = -1
+                    };
+                    list_push_back(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -200,6 +350,7 @@ Array *tokenize(const char *string)
                     string++;
                     c = ')';
                     goto char_switch;
+                }
                 }
                 escaped = 1;
                 continue;
@@ -214,18 +365,37 @@ Array *tokenize(const char *string)
             }
             is_escapable = 1;
         case '(':
-            if (!escaped)
+        {
+            if (!escaped && !false_par)
             {
+                struct scope scope = {
+                    .start_char = '[',
+                    .start_index = tokens->size + previous_concat,
+                    .end_index = -1
+                };
+                list_push_back(scopes, &scope);
                 curr_concat = previous_concat;
                 previous_concat = 0;
                 token.type = PUNCTUATION;
                 break;
             }
             is_escapable = 1;
+        }
+        case ')':
+        {
+            if (!escaped)
+            {
+                if (scopes->next == NULL)
+                    errx(EXIT_FAILURE, "parenthesis not balanced");
+                LinkedList *last_scope_node = list_pop(scopes);
+                last_scope = *(struct scope *)last_scope_node->data;
+                last_scope.end_index = tokens->size;
+                list_free(last_scope_node);
+            }
+        }
         case '+':
         case '?':
         case '*':
-        case ')':
             if (!escaped)
             {
                 previous_concat = 1;
@@ -236,6 +406,12 @@ Array *tokenize(const char *string)
         case '[':
             if (!escaped)
             {
+                struct scope scope = {
+                    .start_char = '[',
+                    .start_index = tokens->size + previous_concat,
+                    .end_index = -1
+                };
+                list_push_back(scopes, &scope);
                 if (previous_concat)
                     array_append(tokens, &concat_token);
                 previous_concat = 1;
@@ -245,16 +421,36 @@ Array *tokenize(const char *string)
                 break;
             }
             is_escapable = 1;
+        case ']':
+            if (!escaped)
+                errx(EXIT_FAILURE, "unbalanced brackets");
+            is_escapable = 1;
         case '.':
             if (!escaped)
             {
-                curr_concat = previous_concat;
+                struct scope scope = {
+                    .start_char = '(',
+                    .start_index = tokens->size + previous_concat,
+                    .end_index = -1
+                };
+                list_push_back(scopes, &scope);
+                if (previous_concat)
+                    array_append(tokens, &concat_token);
                 previous_concat = 1;
                 tokenize_dot(tokens);
-                string++;
                 c = ')';
                 goto char_switch;
-                break;
+            }
+            is_escapable = 1;
+        case '{':
+            if (!escaped && tokens->size != 0)
+            {
+                size_t upper = tokens->size - 1;
+                size_t lower = upper;
+                if (last_scope.end_index == upper)
+                    lower = last_scope.start_index;
+                if (tokenize_repetition(&string, tokens, lower, upper))
+                    continue;
             }
             is_escapable = 1;
         default:

@@ -124,3 +124,17 @@ void array_map(Array *array, void (*function)(void *));
  * @param function: The function to apply to the array.
  */
 void array_mapi(Array *array, void (*function)(size_t, void *));
+
+/**
+ * Returns the sub-array contained between `start` and `end`, both included.
+ * @author Rostan Tabet
+ * @date 06/03/2021
+ */
+Array *array_sub(Array *array, size_t start, size_t end);
+
+/**
+ * Add an array to another one.
+ * @author Rostan Tabet
+ * @date 06/03/2021
+ */
+void array_concat(Array *destination, Array *array);

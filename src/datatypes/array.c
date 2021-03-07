@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 #include "utils/memory_utils.h"
 #include "datatypes/array.h"
 
@@ -123,4 +122,18 @@ void array_mapi(Array *array, void (*function)(size_t, void *))
 {
     for (size_t i = 0; i < array->size; i++)
         function(i, array_get(array, i));
+}
+
+Array *array_sub(Array *array, size_t start, size_t end)
+{
+    Array *sub = array_create(array->data_size);
+    for (size_t i = start; i <= end; i++)
+        array_append(sub, array_get(array, i));
+    return sub;
+}
+
+void array_concat(Array *destination, Array *array)
+{
+    for (size_t i = 0; i < array->size; i++)
+        array_append(destination, array_get(array, i));
 }

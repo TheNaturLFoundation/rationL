@@ -198,3 +198,38 @@ Test(array, array_mapi)
         cr_assert_eq(*(int *)array_get(array, i), i * i + i);
     array_free(array);
 }
+
+Test(array, array_sub)
+{
+    Array *array = Array(int);
+    for (size_t i = 0; i < 10; i++)
+        array_append(array, &i);
+
+    Array *sub = array_sub(array, 2, 5);
+    array_free(array);
+
+    cr_assert_eq(sub->size, 4);
+    for (size_t i = 2; i <= 5; i++)
+        cr_assert_eq(*(int *)array_get(sub, i - 2), i);
+
+    array_free(sub);
+}
+
+Test(array, array_concat)
+{
+    Array *array = Array(int);
+    for (size_t i = 0; i < 10; i++)
+        array_append(array, &i);
+
+    Array *array2 = Array(int);
+    for (size_t i = 10; i < 20; i++)
+        array_append(array2, &i);
+    array_concat(array, array2);
+    array_free(array2);
+
+    cr_assert_eq(array->size, 20);
+    for (size_t i = 0; i < array->size; i++)
+        cr_assert_eq(*(int *)array_get(array, i), i);
+
+    array_free(array);
+}

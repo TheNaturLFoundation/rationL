@@ -452,3 +452,91 @@ Test(lexer, space_special)
 
     array_free(tokens);
 }
+
+Test(lexer, braces_repeat)
+{
+    char *regexp = "a{2}[ab]{1,3}(ab){2,}";
+    Array *tokens = tokenize(regexp);
+
+    Token expected_tokens[] = {
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = PUNCTUATION, .value = '(' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '|' },
+        { .type = LITERAL, .value = 'b' },
+        { .type = PUNCTUATION, .value = ')' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = PUNCTUATION, .value = '(' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '|' },
+        { .type = LITERAL, .value = 'b' },
+        { .type = PUNCTUATION, .value = ')' },
+        { .type = PUNCTUATION, .value = '?' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = PUNCTUATION, .value = '(' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '|' },
+        { .type = LITERAL, .value = 'b' },
+        { .type = PUNCTUATION, .value = ')' },
+        { .type = PUNCTUATION, .value = '?' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = PUNCTUATION, .value = '(' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'b' },
+        { .type = PUNCTUATION, .value = ')' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = PUNCTUATION, .value = '(' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'b' },
+        { .type = PUNCTUATION, .value = ')' },
+        { .type = PUNCTUATION, .value = '+' }
+    };
+
+    print_tokens(tokens);
+    cr_assert_eq(tokens->size, 36);
+
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+
+    array_free(tokens);
+}
+
+Test(lexer, braces_no_repeat)
+{
+    char *regexp = "a{2-3}";
+    Array *tokens = tokenize(regexp);
+
+    Token expected_tokens[] = {
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '{' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '2' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '-' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '3' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '}' },
+    };
+
+    cr_assert_eq(tokens->size, 11);
+
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+
+    array_free(tokens);
+}
