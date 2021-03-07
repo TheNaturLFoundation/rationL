@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "automaton/automaton.h"
 
+
 Test(automaton, add_order_update)
 {
     Automaton * automaton = Automaton();
@@ -25,6 +26,7 @@ Test(automaton, add_classic_state_adj_lists_check1)
     /*
     Checks if the array is expanded correcty
     */
+
     Automaton * automaton = Automaton();
     State * to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
@@ -37,11 +39,12 @@ Test(automaton, add_classic_state_adj_lists_check2)
     /*
     Checks if the empty adj_list is correctly initialized
     */
+
     Automaton * automaton = Automaton();
     State * to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
     LinkedList ** adj = array_get(automaton->adj_lists,0);
-    cr_assert_eq((*adj)->size, 1);
+    cr_assert_eq((*adj)->next, NULL, "got %lu, expected 0\n", (*adj)->size);
     automaton_free(automaton);
 }
 
@@ -51,12 +54,13 @@ Test(automaton, add_classic_state_states)
     Checks if the state is correctly appended to the array of
     states
     */
+
     Automaton * automaton = Automaton();
     State * to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
     State ** s = array_get(automaton->states, 0);
     cr_assert_eq(*s, to_add);
-    automaton_free(automatonn);
+    automaton_free(automaton);
 }
 
 Test(automaton, add_starting_state)
@@ -65,11 +69,12 @@ Test(automaton, add_starting_state)
     Checks if the entry state is correctly added to the 
     starting_states array of automaton
     */
+
     Automaton * automaton = Automaton();
     State * to_add = State(0);
     automaton_add_state(automaton, to_add, 1);
-    State * elt = array_get(automaton->starting_states, 0); 
-    cr_assert_eq(elt, to_add);
+    State ** elt = array_get(automaton->starting_states, 0); 
+    cr_assert_eq(*elt, to_add, "got %p expected %p\n", elt, to_add);
     automaton_free(automaton);
 }
 

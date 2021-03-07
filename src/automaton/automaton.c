@@ -25,6 +25,7 @@ void automaton_free(Automaton * automaton)
     array_free(automaton->states);
     array_free(automaton->adj_lists);
     array_free(automaton->starting_states);
+    free(automaton);
 }
 
 State * state_create(int is_terminal)
