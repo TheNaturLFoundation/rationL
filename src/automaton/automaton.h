@@ -7,6 +7,8 @@
 #include "parsing/lexer.h"
 
 #define Automaton() automaton_create();
+#define State(term) state_create(term);
+
 
 /**
  * @struct Automaton
@@ -31,9 +33,15 @@ typedef struct
      */
     Array *adj_lists;
     /**
-     * An array containing all of the entry points of the automaton.
+     * An array containing poinnters on all of the entry points of the automaton.
      */
-     Array *starting_states;
+    Array *starting_states;
+
+    /**
+     * An array containing all states
+    */
+    Array *states;
+
 } Automaton;
 
 /**
@@ -64,7 +72,7 @@ typedef struct State
  */
 typedef struct Transition
 {
-    State target;
+    State * target;
     /**
      * Value of the transition if it is not an epsilon transition.
      * If the field `is_epsilon` is set to 1, the value can be anything.
@@ -72,6 +80,15 @@ typedef struct Transition
     Letter value;
     int is_epsilon;
 } Transition;
+
+/**
+ * @author Vlad Argatu
+ * @date 07/03/2021
+ * @param is_terminal: booleen indicating if the state is terminal or not.
+ * @return The heap allocated state.
+*/
+
+State * state_create(int is_terminal);
 
 /**
  * @author Vlad Argatu
@@ -111,7 +128,7 @@ void automaton_remove_state(Automaton * automaton, State * state);
  * @brief adds the transition specified in the automaton.
 */
 
-void automaton_add_transition(Automatonn * automaton, 
+void automaton_add_transition(Automaton * automaton, 
     State * src, State * dst, Letter value, int epsilon);
 
 
