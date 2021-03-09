@@ -5,6 +5,7 @@
 #include "datatypes/linked_list.h"
 #include "datatypes/array.h"
 #include "parsing/lexer.h"
+#include <err.h>
 
 #define Automaton() automaton_create();
 #define State(term) state_create(term);
@@ -33,7 +34,7 @@ typedef struct
      */
     Array *adj_lists;
     /**
-     * An array containing poinnters on all of the entry points of the automaton.
+     * An array containing pointers on all of the entry points of the automaton.
      */
     Array *starting_states;
 
@@ -41,6 +42,8 @@ typedef struct
      * An array containing all states
     */
     Array *states;
+
+    int is_determined;
 
 } Automaton;
 

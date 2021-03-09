@@ -7,6 +7,7 @@ Automaton * automaton_create()
     autom->adj_lists = Array(LinkedList *);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
+    autom->is_determined = 0;
     return autom;
 }
 
@@ -45,5 +46,19 @@ void automaton_add_state(Automaton * automaton, State * state, int is_entry)
     if(is_entry == 1)
     {
         array_append(automaton->starting_states, &state);
+    }
+}
+
+void automaton_add_transition(Automaton * automaton, State * src, 
+    State *dst, Letter value, int epsilon)
+{
+    LinkedList ** adj_list = array_get(automaton->adj_lists, src->id);
+    Transition tr;
+    tr.target = dst;
+    tr.value = value;
+    tr.is_epsilon = epsilon;
+    if(list_push_back(*adj_list, &tr) == 0)
+    {
+        err(1, "Unable to append to the list at address %p", adj_list);
     }
 }
