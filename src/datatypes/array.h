@@ -5,10 +5,13 @@
 #define ARR_GROWTH_FACTOR 2.0
 
 #define Array(type) array_create(sizeof(type))
-#define arr_foreach(T, var, array) \
-    T var; \
-    for (size_t i = 0; i < (array)->size && \
-         (((var) = *(T *)array_get(array, i)) || 1); i++)
+#define arr_foreach(T, var, array)                       \
+    T var;                                               \
+    if ((array)->size)                                   \
+        (var) = *(T *)array_get(array, 0);               \
+    for (size_t i_ = 0; i_ < (array)->size; i_++,        \
+                (var) = *(T *)array_get(array,           \
+                i_ < (array)->size ? i_ : (array)->size - 1))
 
 /**
  * @struct Array
@@ -76,13 +79,12 @@ void array_set(Array *array, size_t index, const void *value);
 void array_append(Array *array, const void *value);
 
 /**
- * Removes an element from an array and returns it.
+ * Removes an element from an array.
  * @author Rostan Tabet
  * @date 01/03/2021
  * @param index: Position of the element to remove.
- * @return the element that was at the specified index.
  */
-void *array_remove(Array *array, size_t index);
+void array_remove(Array *array, size_t index);
 
 /**
  * Insert an element in an array.

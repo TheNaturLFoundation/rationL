@@ -69,19 +69,15 @@ void array_append(Array *array, const void *value)
     array_set(array, array->size - 1, value);
 }
 
-void *array_remove(Array *array, size_t index)
+void array_remove(Array *array, size_t index)
 {
     if (index >= array->size)
         errx(1, "Index %zu is out of range for array of size %zu\n",
              index, array->size);
 
-
-    void *element = array_get(array, index);
     for (size_t i = index; i < array->size - 1; i++)
         array_set(array, i, array_get(array, i + 1));
     array->size--;
-
-    return element;
 }
 
 void array_insert(Array *array, size_t index, void *value)

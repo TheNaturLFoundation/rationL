@@ -18,8 +18,8 @@ typedef char Letter;
  */
 typedef enum SymbolType
 {
-    OPERATOR;
-    LETTER;
+    OPERATOR,
+    LETTER
 } SymbolType;
 
 /**
@@ -32,9 +32,9 @@ typedef enum SymbolType
  */
 typedef enum Operator
 {
-    KLEENE_STAR;
-    CONCATENATION;
-    UNION;
+    KLEENE_STAR,
+    CONCATENATION,
+    UNION
 } Operator;
 
 /**
