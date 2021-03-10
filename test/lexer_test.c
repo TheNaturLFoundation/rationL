@@ -1,6 +1,7 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
 #include "parsing/lexer.h"
+#include <stdio.h>
 
 void assert_eq_token(Token *actual, Token *expected)
 {
@@ -497,7 +498,6 @@ Test(lexer, braces_repeat)
         { .type = PUNCTUATION, .value = '+' }
     };
 
-    print_tokens(tokens);
     cr_assert_eq(tokens->size, 36);
 
     for (size_t i = 0; i < tokens->size; i++)

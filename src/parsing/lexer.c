@@ -468,5 +468,6 @@ Array *tokenize(const char *string)
         array_append(tokens, &token);
     }
 
+    list_free(scopes);
     return tokens;
 }
