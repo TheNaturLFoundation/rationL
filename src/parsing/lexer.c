@@ -178,7 +178,10 @@ static int tokenize_repetition(const char **string, Array *tokens,
     }
 
     if (!comma)
+    {
+        array_free(range);
         return 1;
+    }
 
     if (upper == -1)
         add_punctuation(tokens, '+');
