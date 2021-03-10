@@ -192,6 +192,7 @@ static int tokenize_repetition(const char **string, Array *tokens,
         }
     }
 
+    array_free(range);
     return 1;
 }
 
