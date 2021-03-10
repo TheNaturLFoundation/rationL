@@ -224,44 +224,193 @@ Test(automaton, add_multpile_tr)
     automaton_free(automaton);
 }
 
-/*
-Test(automaton, remove_state_order_update)
+Test(automaton, automaton_remove_transition1)
 {
     Automaton * automaton = Automaton();
-    State * to_add = State(0);
-    automaton_add_state(automaton, to_add, 0);
-    automaton_remove_state(automaton, to_add);
-    cr_assert_eq(automaton->size, 0);
+    State * s1 = State(0);
+    State * s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+    int ret = automaton_remove_transition(automaton, s1, s2, 'A', 0);
+    LinkedList ** list = array_get(automaton->adj_lists, 0);
+    cr_assert_eq((*list)->next, NULL);
+    list = array_get(automaton->adj_lists, 1);
+    cr_assert_eq(ret, 0);
+    cr_assert_eq((*list)->next, NULL);
+
     automaton_free(automaton);
 }
-*/
-/*
-Test(automaton, remove_state_normal)
+
+Test(automaton, automaton_remove_transion2)
 {
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(1);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_transition(automaton, s1, s2, ' ', 1);
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+
+    int ret =  automaton_remove_transition(automaton, s1, s2, 'A', 0);
+
+    LinkedList ** list = array_get(automaton->adj_lists, 0);
+    cr_assert_eq(ret, 0);
+    cr_assert_eq((*list)->next->next, NULL);
     
-    Verifies if after removing from the automaton is empty
-    again
-    Automaton * automaton = Automaton();
-    State * to_add = State(0);
-    automaton_add_state(automaton, to_add, 0);
-    automaton_remove_state(automaton, to_add);
-    size_t n = automaton->adj_lists->size;
-    cr_assert_eq(n, 0);
+    Transition * tr = (*list)->next->data;
+    cr_assert_eq(tr->value, ' ');
+    cr_assert_eq(tr->target, s2);
+
     automaton_free(automaton);
 }
-*/
-/*
-Test(automaton, remove_state_entry)
+
+Test(automaton, automaton_remove_transition3)
 {
-    /*
-    Verifies if after removing from the automaton the
-    starting_states array is updated
     Automaton * automaton = Automaton();
-    State * to_add = State(0);
-    automaton_add_state(automaton, to_add, 1);
-    automaton_remove_state(automaton, to_add);
-    size_t n = automaton->starting_states->size;
-    cr_assert_eq(n, 0);
+    State * s1 = State(0);
+    State * s2 = State(1);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_transition(automaton, s1, s2, ' ', 1);
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+
+    int ret =  automaton_remove_transition(automaton, s1, s2, 's', 1);
+
+    LinkedList ** list_ptr = array_get(automaton->adj_lists, 0);
+    Transition * tr = (*list_ptr)->next->data;
+
+    cr_assert_eq(ret, 0);
+    cr_assert_eq((*list_ptr)->next->next, NULL);
+    cr_assert_eq(tr->value, 'A');
+    cr_assert_eq(tr->is_epsilon, 0);
+
     automaton_free(automaton);
 }
-    */
+
+Test(automaton, automaton_remove_transition4)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(1);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_transition(automaton, s1, s2, ' ', 1);
+    automaton_add_transition(automaton, s1, s2, 'A', 1);
+
+    int ret =  automaton_remove_transition(automaton, s1, s2, 's', 1);
+
+    LinkedList ** list = array_get(automaton->adj_lists, 0);
+    Transition * tr = (*list)->next->data;
+
+    cr_assert_eq(ret, 0);
+    cr_assert_eq((*list)->next->next, NULL);
+    cr_assert_eq(tr->value, 'A');
+    cr_assert_eq(tr->is_epsilon, 1);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_transition_fail1)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(1);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+
+    int ret = automaton_remove_transition(automaton, s1, s2, 'A', 1);
+
+    cr_assert_eq(ret, 1);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_transition_fail2)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(1);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+
+    int ret = automaton_remove_transition(automaton, s1, s2, 'A', 0);
+
+    cr_assert_eq(ret, 1);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_state_no_entry)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+    automaton_remove_state(automaton, s1);
+
+    cr_assert_eq(automaton->size, 1, "got %lu expected 1\n", automaton->size);
+    cr_assert_eq(automaton->adj_lists->size, 1);
+    cr_assert_eq(automaton->states->size, 1);
+    cr_assert_eq(automaton->starting_states->size, 1);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_state_entry)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+    automaton_remove_state(automaton, s2);
+
+    cr_assert_eq(automaton->size, 1);
+    cr_assert_eq(automaton->adj_lists->size, 1);
+    cr_assert_eq(automaton->states->size, 1);
+    cr_assert_eq(automaton->starting_states->size, 0);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_state_upgrade)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(0);
+    State * s3 = State(1);
+    State * s4vj = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+    automaton_add_state(automaton, s3, 0);
+    automaton_add_state(automaton, s4vj, 1);
+    automaton_add_transition(automaton, s2, s1, 'C', 0);
+
+    automaton_remove_state(automaton, s1);
+
+    cr_assert_eq(s2->id, 0);
+    cr_assert_eq(s3->id, 1);
+    cr_assert_eq(s4vj->id, 2);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_state_transitions)
+{
+    Automaton * automaton = Automaton();
+    State * s1 = State(0);
+    State * s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+    automaton_add_transition(automaton, s2, s1, 'C', 0);
+    automaton_remove_state(automaton, s1);
+
+    LinkedList * list = *(LinkedList **)array_get(automaton->adj_lists, 0);
+
+    cr_assert_eq(list->next, NULL);
+
+    automaton_free(automaton);
+}
+

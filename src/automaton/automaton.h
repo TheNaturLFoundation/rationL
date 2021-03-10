@@ -10,7 +10,6 @@
 #define Automaton() automaton_create();
 #define State(term) state_create(term);
 
-
 /**
  * @struct Automaton
  * @brief Represents an automaton as a graph.
@@ -141,8 +140,14 @@ void automaton_add_transition(Automaton * automaton,
  * @param automaton: the automaton on which the operation is performed.
  * @param src: the source state of the transition.
  * @param dst: the destination state of the trasition.
+ * @param value: the value of the transition to remove.
+ * @param epsilon: boolean, if set the value is ignored and it only deletes epsilon transitions between those states.
+ * @return returns 0 if successfull 1 otherwise.
+
+ If multiple transition have the same target with the same values, deletes the first one.
 */
-void automaton_remove_transition(Automaton * automaton, State * src, State * dst);
+int automaton_remove_transition(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
 
 /**
  * @author Vlad Argatu
