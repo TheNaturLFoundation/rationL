@@ -402,15 +402,23 @@ Test(automaton, automaton_remove_state_transitions)
     Automaton * automaton = Automaton();
     State * s1 = State(0);
     State * s2 = State(0);
+    State * s3 = State(1);
+    State * s4vj = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
+    automaton_add_state(automaton, s3, 0);
+    automaton_add_state(automaton, s4vj, 1);
     automaton_add_transition(automaton, s2, s1, 'C', 0);
+    automaton_add_transition(automaton, s3, s4vj, 'D', 0);
+    automaton_add_transition(automaton, s3, s1, ' ', 1);
+    automaton_add_transition(automaton, s3, s2, ' ', 1);
     automaton_remove_state(automaton, s1);
 
     LinkedList * list = *(LinkedList **)array_get(automaton->adj_lists, 0);
-
     cr_assert_eq(list->next, NULL);
+    list = *(LinkedList **)array_get(automaton->adj_lists, s3->id);
+    Transition * tr = list->next->data;
+    cr_assert_eq(tr->target, s4vj);
 
     automaton_free(automaton);
 }
-
