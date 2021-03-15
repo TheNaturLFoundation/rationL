@@ -43,6 +43,7 @@ criterion_tests_SOURCES = \
 			test/bin_tree_test.c \
 			test/linked_list_test.c \
 			test/lexer_test.c \
+			test/automaton_test.c \
 			test/parsing_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)

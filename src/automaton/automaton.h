@@ -5,8 +5,10 @@
 #include "datatypes/linked_list.h"
 #include "datatypes/array.h"
 #include "parsing/lexer.h"
+#include <err.h>
 
 #define Automaton() automaton_create();
+#define State(term) state_create(term);
 
 /**
  * @struct Automaton
@@ -31,9 +33,17 @@ typedef struct
      */
     Array *adj_lists;
     /**
-     * An array containing all of the entry points of the automaton.
+     * An array containing pointers on all of the entry points of the automaton.
      */
-     Array *starting_states;
+    Array *starting_states;
+
+    /**
+     * An array containing all states
+    */
+    Array *states;
+
+    int is_determined;
+
 } Automaton;
 
 /**
@@ -64,7 +74,7 @@ typedef struct State
  */
 typedef struct Transition
 {
-    State target;
+    State * target;
     /**
      * Value of the transition if it is not an epsilon transition.
      * If the field `is_epsilon` is set to 1, the value can be anything.
@@ -75,7 +85,73 @@ typedef struct Transition
 
 /**
  * @author Vlad Argatu
+ * @date 07/03/2021
+ * @param is_terminal: booleen indicating if the state is terminal or not.
+ * @return The heap allocated state.
+*/
+
+State * state_create(int is_terminal);
+
+/**
+ * @author Vlad Argatu
  * @date 05/03/2021
  * @return Pointer on the new automaton allocated on the heap
 */
 Automaton * automaton_create();
+
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param state: the state to be added.
+ * @param is_entry: boolean that specifies wether or not the state need to be added to the etry list.
+ * @brief adds the state 'state' to the automaton 'automaton'.
+*/
+void automaton_add_state(Automaton * automaton, State * state, int is_entry);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param state: the state to be deleted.  
+*/
+
+void automaton_remove_state(Automaton * automaton, State * state);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param src: the source state in the adj_list.
+ * @param dst: the destiation state.
+ * @param value: the value of the transition, this value is ignored if epsilon is set.
+ * @param epsilon: boolean, if set the transition is epsilon and value is ignored.
+ * @brief adds the transition specified in the automaton.
+*/
+
+void automaton_add_transition(Automaton * automaton, 
+    State * src, State * dst, Letter value, int epsilon);
+
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton on which the operation is performed.
+ * @param src: the source state of the transition.
+ * @param dst: the destination state of the trasition.
+ * @param value: the value of the transition to remove.
+ * @param epsilon: boolean, if set the value is ignored and it only deletes epsilon transitions between those states.
+ * @return returns 0 if successfull 1 otherwise.
+
+ If multiple transition have the same target with the same values, deletes the first one.
+*/
+int automaton_remove_transition(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/03/2021
+ * @param automaton: the automaton to free.
+*/
+void automaton_free(Automaton * automaton);
