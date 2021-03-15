@@ -303,7 +303,7 @@ Test(parse_symbols, a_or_bc)
     // data in b.left == 'a' ?
     symbol = (*(Symbol *)(b->left->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'a');
+    cr_assert_eq(symbol.value.letter, 'a');
     cr_assert_eq(b->left->left, NULL);
     cr_assert_eq(b->left->right, NULL);
 

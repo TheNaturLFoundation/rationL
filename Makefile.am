@@ -54,12 +54,21 @@ TESTS = criterion_tests
 
 COVERAGE_INFO_FILE = $(top_builddir)/coverage.info
 COVERAGE_REPORT_DIR = $(top_builddir)/reports/coverage
-
+COVERAGE_REPORT_FILES_GCNO = $(librationl_la_SOURCES:.c=.gcno)
 CODE_QUALITY_DIR = $(top_builddir)/reports/scan
 
 COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
 
-.PHONY: coverage scan-build analysis
+
+.PHONY: coverage scan-build analysis clean-local-coverage
+
+
+clean-local-coverage:
+	rm -rf $(COVERAGE_REPORT_FILES_GCNO)
+	rm -rf test/*.gcda
+	rm -rf test/*.gcno
+
+clean-local: clean-local-coverage
 
 coverage:
 	make clean
