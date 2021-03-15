@@ -5,11 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define BinTree(T, value, ...)                                          \
+  create_node(&(BinTree)                                                \
+              {.size = sizeof(T), .data = value, __VA_ARGS__})
 
-#define BinTree(T, value, ...)                                           \
+#define BinTreeAtomic(T, value, ...)                                    \
   create_node(&(BinTree)                                                \
               {.size = sizeof(T), .data = &(T){value}, __VA_ARGS__})
-
 /*
  * @struct BinTree
  * @debrief Basic generic binary tree implementation
