@@ -60,9 +60,22 @@ typedef struct Symbol
 } Symbol;
 
 /**
+ * Turn a token into a symbol
+ * @author Antoine Sicard
+ * @date 13/03/2021
+ * @return The created symbol
+ */
+Symbol token_to_symbol(Token token);
+
+BinTree *parse_star_exists_or_maybe(BinTree *left, Array *arr, size_t *pos);
+BinTree *parse_union_or_concatenation(BinTree *left, Array *arr, size_t *pos);
+BinTree *parse(Array *arr, size_t *pos);
+
+
+/**
  * Turn an array of tokens into a binary tree of symbols.
  * @author Antoine Sicard
  * @date 04/03/2021
  * @return The binary tree corresponding to the parsed expression.
  */
-BinTree *parse_symbols(Array *);
+BinTree *parse_symbols(Array *arr);
