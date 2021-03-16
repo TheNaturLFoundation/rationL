@@ -9,7 +9,6 @@
 
     - "ab"
     - "abc"
-    - "abcd"
 
     - "a|b"
     - "a|b|c"
@@ -25,6 +24,31 @@
     - "ab*"
     - "a|b*"
     - "a*b"
+    - "a*|b"
+
+    - "a+"
+    - "ab+"
+    - "a|b+"
+    - "a+b"
+    - "a+|b"
+
+    - "a?"
+    - "ab?"
+    - "a|b?"
+    - "a?b"
+    - "a?|b"
+
+    - "(a)"
+    - "(ab)"
+    - "a(b)"
+    - "(a)b"
+    - "(a)*b"
+
+    - "a(c|d)"
+    - "a|(c|d)"
+    - "a((c|d))"
+    - "a(((c|d)))"    -
+
 */
 
 
@@ -49,11 +73,8 @@ Test(parse_symbol, one_element)
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'a');
 
-    void *b_left = b->left;
-    cr_assert_eq(b_left, NULL);
-
-    void *b_right = b->right;
-    cr_assert_eq(b_right, NULL);
+    cr_assert_eq(b->left, NULL);
+    cr_assert_eq(b->right, NULL);
 
     bintree_free(b);
 }
@@ -619,6 +640,7 @@ Test(parse_symbol, a_or_b_star)
     symbol = (*(Symbol *)(b->right->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, KLEENE_STAR);
+    cr_assert_eq(b->right->right, NULL);
 
     //data in b.right.left == 'b' ?
     symbol = (*(Symbol *)(b->right->left->data));
@@ -648,6 +670,48 @@ Test(parse_symbol, a_star_b)
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == KLEENE_STAR ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, KLEENE_STAR);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.left.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left->left, NULL);
+    cr_assert_eq(b->left->left->right, NULL);
+
+    //data in b.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, a_star_or_b)
+{
+    Array *arr = tokenize("a*|b");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //     |
+    //    / \
+    //   *   b
+    //  /
+    // a
+
+    //data in b == UNION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
 
     //data in b.left == KLEENE_STAR ?
     symbol = (*(Symbol *)(b->left->data));
@@ -726,7 +790,6 @@ Test(parse_symbol, abc_star)
     bintree_free(b);
 }
 
-
 Test(parse_symbol, a_exists)
 {
     Array *arr = tokenize("a+");
@@ -751,6 +814,49 @@ Test(parse_symbol, a_exists)
     cr_assert_eq(symbol.value.letter, 'a');
     cr_assert_eq(b->left->left, NULL);
     cr_assert_eq(b->left->right, NULL);
+
+    bintree_free(b);
+}
+
+
+Test(parse_symbol, ab_exists)
+{
+    Array *arr = tokenize("ab+");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //    .
+    //   / \
+    //  a   +
+    //     /
+    //    b
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.right == EXISTS ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, EXISTS);
+    cr_assert_eq(b->right->right, NULL);
+
+    //data in b.right.left == 'b' ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left->left, NULL);
+    cr_assert_eq(b->right->left->right, NULL);
 
     bintree_free(b);
 }
@@ -785,6 +891,7 @@ Test(parse_symbol, a_or_b_exists)
     symbol = (*(Symbol *)(b->right->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, EXISTS);
+    cr_assert_eq(b->right->right, NULL);
 
     //data in b.right.left == 'b' ?
     symbol = (*(Symbol *)(b->right->left->data));
@@ -795,6 +902,91 @@ Test(parse_symbol, a_or_b_exists)
 
     bintree_free(b);
 }
+
+Test(parse_symbol, a_exists_b)
+{
+    Array *arr = tokenize("a+b");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //     .
+    //    / \
+    //   +   b
+    //  /
+    // a
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == EXISTS ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, EXISTS);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.left.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left->left, NULL);
+    cr_assert_eq(b->left->left->right, NULL);
+
+    //data in b.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, a_exists_or_b)
+{
+    Array *arr = tokenize("a+|b");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //     |
+    //    / \
+    //   +   b
+    //  /
+    // a
+
+    //data in b == UNION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.left == EXISTS ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, EXISTS);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.left.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left->left, NULL);
+    cr_assert_eq(b->left->left->right, NULL);
+
+    //data in b.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
 
 Test(parse_symbol, a_maybe)
 {
@@ -820,6 +1012,49 @@ Test(parse_symbol, a_maybe)
     cr_assert_eq(symbol.value.letter, 'a');
     cr_assert_eq(b->left->left, NULL);
     cr_assert_eq(b->left->right, NULL);
+
+    bintree_free(b);
+}
+
+
+Test(parse_symbol, ab_maybe)
+{
+    Array *arr = tokenize("ab?");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //    .
+    //   / \
+    //  a   ?
+    //     /
+    //    b
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.right == MAYBE ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, MAYBE);
+    cr_assert_eq(b->right->right, NULL);
+
+    //data in b.right.left == 'b' ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left->left, NULL);
+    cr_assert_eq(b->right->left->right, NULL);
 
     bintree_free(b);
 }
@@ -854,6 +1089,7 @@ Test(parse_symbol, a_or_b_maybe)
     symbol = (*(Symbol *)(b->right->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, MAYBE);
+    cr_assert_eq(b->right->right, NULL);
 
     //data in b.right.left == 'b' ?
     symbol = (*(Symbol *)(b->right->left->data));
@@ -865,36 +1101,431 @@ Test(parse_symbol, a_or_b_maybe)
     bintree_free(b);
 }
 
-/*
+Test(parse_symbol, a_maybe_b)
+{
+    Array *arr = tokenize("a?b");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //     .
+    //    / \
+    //   ?   b
+    //  /
+    // a
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == MAYBE ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, MAYBE);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.left.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left->left, NULL);
+    cr_assert_eq(b->left->left->right, NULL);
+
+    //data in b.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, a_maybe_or_b)
+{
+    Array *arr = tokenize("a?|b");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    //   EXPECTED :
+    //     |
+    //    / \
+    //   ?   b
+    //  /
+    // a
+
+    //data in b == UNION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.left == MAYBE ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, MAYBE);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.left.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left->left, NULL);
+    cr_assert_eq(b->left->left->right, NULL);
+
+    //data in b.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+
+Test(parse_symbol, left_a_right)
+{
+    Array *arr = tokenize("(a)");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //     a
+
+    //data in b == a ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, left_ab_right)
+{
+    Array *arr = tokenize("(ab)");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //     .
+    //    / \
+    //   a   b
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == a ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.right == b ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, a_left_b_right)
+{
+    Array *arr = tokenize("a(b)");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //     .
+    //    / \
+    //   a   b
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == a ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.right == b ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, left_a_right_b)
+{
+    Array *arr = tokenize("(a)b");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //     .
+    //    / \
+    //   a   b
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == a ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.right == b ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, left_a_right_star_b)
+{
+    Array *arr = tokenize("(a)*b");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //     .
+    //    / \
+    //   *   b
+    //  /
+    // a
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == a ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.letter, KLEENE_STAR);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.left.left == 'b' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left->left, NULL);
+    cr_assert_eq(b->left->left->right, NULL);
+
+    //data in b.right == 'a' ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+    cr_assert_eq(b->right->left, NULL);
+    cr_assert_eq(b->right->right, NULL);
+
+    bintree_free(b);
+}
+
+
 Test(parse_symbol, a_left_c_or_d_right)
 {
     Array *arr = tokenize("a(c|d)");
     BinTree *b = parse_symbols(arr);
     Symbol symbol;
 
+    array_free(arr);
 
-    for (int i = 0; i<7; i++)
-        {
-            Token token = *(Token *)array_get(arr, i);
-            printf("\n%i : %i", i, token.type);
-            printf("\n%i : %c\n\n", i, token.value);
-        }
+    //   EXPECTED :
+    //      .
+    //     / \
+    //    a   |
+    //       / \
+    //       c  d
+
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    //data in b.right == UNION ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.right.left == 'c' ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'c');
+
+    //data in b.right.right == 'd' ?
+    symbol = (*(Symbol *)(b->right->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'd');
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, a_or_left_c_or_d_right)
+{
+    Array *arr = tokenize("a|(c|d)");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //      |
+    //     / \
+    //    a   |
+    //       / \
+    //       c  d
+
+
+    //data in b == UNION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    //data in b.right == UNION ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.right.left == 'c' ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'c');
+
+    //data in b.right.right == 'd' ?
+    symbol = (*(Symbol *)(b->right->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'd');
+
+    bintree_free(b);
+}
+
+Test(parse_symbol, a_left_left_c_or_d_right_right)
+{
+    Array *arr = tokenize("a((c|d))");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
 
     array_free(arr);
 
     //   EXPECTED :
     //      .
     //     / \
-    //    .   |
-    //   / \ / \
-    //  a  b c  d
+    //    a   |
+    //       / \
+    //       c  d
 
 
-    //data in b == UNION ?
+    //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, CONCATENATION);
 
+    //data in b.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    //data in b.right == UNION ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.right.left == 'c' ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'c');
+
+    //data in b.right.right == 'd' ?
+    symbol = (*(Symbol *)(b->right->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'd');
+
     bintree_free(b);
 }
-*/
+
+Test(parse_symbol, a_left_left_left_c_or_d_right_right_right)
+{
+    Array *arr = tokenize("a(((c|d)))");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    //   EXPECTED :
+    //      .
+    //     / \
+    //    a   |
+    //       / \
+    //       c  d
+
+
+    //data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    //data in b.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    //data in b.right == UNION ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.right.left == 'c' ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'c');
+
+    //data in b.right.right == 'd' ?
+    symbol = (*(Symbol *)(b->right->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.operator, 'd');
+
+    bintree_free(b);
+}

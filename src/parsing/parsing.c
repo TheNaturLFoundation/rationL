@@ -54,32 +54,25 @@ Symbol array_element_to_symbol(Array *arr, size_t pos)
 BinTree *parse_sub(Array *arr, size_t *pos, Token old_token)
   {
     Symbol symbol = array_element_to_symbol(arr, *pos);
-    BinTree *b = BinTree(Symbol, &symbol);
-
-    *pos += 1;
-    if (*pos >= arr->size)
-      return b;
 
     Token tok = *(Token *)(array_get(arr, *pos));
 
-    switch(old_token.value)
+    if(tok.value == '(')
       {
+        *pos+=1;
+        return parse_sub(arr, pos, tok);
+      }
 
-      case '.':
-        switch(tok.value)
-          {
-          case '*':
-          case '+':
-          case '?':
-            b = parse_star_exists_or_maybe(b, arr, pos);
-            break;
-          }
-        break;
+    BinTree *b = BinTree(Symbol, &symbol);
 
-      case'|':
+    if (old_token.value == '(')
+      {
+        *pos+=1;
+        tok = *(Token *)(array_get(arr, *pos));
         switch(tok.value)
           {
           case '.':
+          case '|':
             b = parse_union_or_concatenation(b, arr, pos);
             break;
           case '*':
@@ -88,10 +81,47 @@ BinTree *parse_sub(Array *arr, size_t *pos, Token old_token)
             b = parse_star_exists_or_maybe(b, arr, pos);
             break;
           }
-        break;
-      default:
-        break;
-        break;
+      }
+
+    *pos += 1;
+    if (*pos >= arr->size)
+      return b;
+
+    tok = *(Token *)(array_get(arr, *pos));
+
+    if(tok.value == ')')
+      {
+        *pos += 1;
+        return b;
+      }
+
+    if(old_token.value == '.')
+      {
+        switch(tok.value)
+          {
+          case '*':
+          case '+':
+          case '?':
+            b = parse_star_exists_or_maybe(b, arr, pos);
+            break;
+          }
+      }
+    else
+      {
+        if(old_token.value == '|')
+          {
+            switch(tok.value)
+              {
+              case '.':
+                b = parse_union_or_concatenation(b, arr, pos);
+                break;
+              case '*':
+              case '+':
+              case '?':
+                b = parse_star_exists_or_maybe(b, arr, pos);
+                break;
+              }
+          }
       }
     return b;
   }
@@ -132,9 +162,17 @@ BinTree *parse_symbols(Array *arr)
 
   if (pos < arr->size)
     {
-      Symbol symbol = array_element_to_symbol(arr, pos);
-      b = BinTree(Symbol, &symbol);
-      pos+=1;
+      Token token = *(Token *)array_get(arr, pos);
+      if (token.value == '(')
+        {
+          b = parse_sub(arr, &pos, token);
+        }
+      else
+        {
+          Symbol symbol = array_element_to_symbol(arr, pos);
+          b = BinTree(Symbol, &symbol);
+          pos+=1;
+        }
     }
 
   while (pos < arr->size)
@@ -152,6 +190,7 @@ BinTree *parse_symbols(Array *arr)
             case '+':
             case '?':
               b = parse_star_exists_or_maybe(b, arr, &pos);
+              break;
             }
         }
     }
