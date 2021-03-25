@@ -23,7 +23,7 @@ Test(parse_escaped_character, a_dot_b)
     // data in b == '.' ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, '.');
+    cr_assert_eq(symbol.value.letter, '.');
 
     bintree_free(b);
 }
@@ -41,7 +41,7 @@ Test(parse_escaped_character, a_escaped_union_b)
     // data in b == '|' ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, '|');
+    cr_assert_eq(symbol.value.letter, '|');
 
     bintree_free(b);
 }
@@ -59,7 +59,7 @@ Test(parse_escaped_character, a_escaped_star_b)
     // data in b == '*' ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, '*');
+    cr_assert_eq(symbol.value.letter, '*');
 
     bintree_free(b);
 }
@@ -77,7 +77,7 @@ Test(parse_escaped_character, a_escaped_exists_b)
     // data in b == '+' ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, '+');
+    cr_assert_eq(symbol.value.letter, '+');
 
     bintree_free(b);
 }
@@ -95,7 +95,7 @@ Test(parse_escaped_character, a_escaped_maybe_b)
     // data in b == '?' ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, '?');
+    cr_assert_eq(symbol.value.letter, '?');
 
     bintree_free(b);
 }

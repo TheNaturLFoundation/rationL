@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "automaton.h"
 
 Automaton * automaton_create()
@@ -132,4 +135,169 @@ void automaton_remove_state(Automaton * automaton, State * state)
     array_remove(automaton->states, state->id);
     automaton->size -= 1;
     free(state);
+}
+
+static int is_blank(char c)
+{
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+/**
+ * Go forward in a string until the next non-blank character.
+ * @return 0 if end-of-file is reached.
+ */
+static int move_to_next(const char **string)
+{
+    while (**string && is_blank(**string))
+        (*string)++;
+    return **string != 0;
+}
+
+/**
+ * Read the next adjacent non-blank characaters in the provided string.
+ * @return A string containing the symbol. Must be freed by the user.
+ */
+static char *get_symbol(const char **string)
+{
+    Array *symbol_array = Array(char);
+    while (**string && !is_blank(**string))
+        array_append(symbol_array, (*string)++);
+
+    // Turn the array into a string
+    char *symbol = calloc(symbol_array->size + 1, sizeof(char));
+    size_t i = 0;
+    arr_foreach(char, c, symbol_array)
+        symbol[i++] = c;
+
+    array_free(symbol_array);
+    return symbol;
+}
+
+static int map_state(Array *mapping, size_t alias, size_t real)
+{
+    if (alias < mapping->size)
+    {
+        if (*(size_t *)array_get(mapping, alias) == -1)
+        {
+            array_set(mapping, alias, &real);
+            return 1;
+        }
+        return 0; // Return 0 if the state is already in the array
+    }
+
+    ssize_t x = -1;
+    while (mapping->size < alias)
+        array_append(mapping, &x);
+    array_append(mapping, &real);
+
+    // Return 1 to indicate that the element has been added successfully
+    return 1;
+}
+
+/**
+ * Read a lign from a .daut file and create the new transition in the array.
+ * @param automaton The target automaton.
+ * @param line The line from the .daut file.
+ * @param mapping An array allowing mapping from states in the .daut file
+ * to the actual state numbers in the automaton
+ */
+static void parse_line(Automaton *automaton, const char *line,
+                       Array *mapping)
+{
+    // Get the source state
+    if (!move_to_next(&line))
+        return;  // Ignore if empty
+
+    char *source_symbol = get_symbol(&line);
+    size_t source = atol(source_symbol);
+    int is_entry = strcmp(source_symbol, "$") == 0;
+    if (!is_entry && source == 0 && strcmp(source_symbol, "0") != 0)
+        errx(EXIT_FAILURE,
+             "Invalid state: %s: only integers are supported for now",
+             source_symbol);
+    free(source_symbol);
+
+    // Get the middle arrow
+    if (!move_to_next(&line))
+        errx(EXIT_FAILURE, "Expected '->' after state");
+    char *arrow_symbol = get_symbol(&line);
+    if (strcmp(arrow_symbol, "->") != 0)
+        errx(EXIT_FAILURE, "Expected '->' after state");
+    free(arrow_symbol);
+
+    // Get the target state
+    if (!move_to_next(&line))
+        errx(EXIT_FAILURE, "Expected a target state");
+    char *target_symbol = get_symbol(&line);
+    size_t target = atol(target_symbol);
+    int is_terminal = strcmp(target_symbol, "$") == 0;
+    if (!is_terminal && target == 0 && strcmp(target_symbol, "0") != 0)
+        errx(EXIT_FAILURE,
+             "Invalid state: %s: only integers are supported for now",
+             target_symbol);
+    free(target_symbol);
+
+    // Get the value of the transition
+    int is_epsilon = !move_to_next(&line);
+    Letter value = 0;
+    if (!is_epsilon)
+        value = *(line++);
+
+    // Get the states, add them if it they don't exist yet
+    State *src_state;
+    if (!is_entry && map_state(mapping, source, automaton->size))
+    {
+        src_state = State(is_terminal);
+        automaton_add_state(automaton, src_state, 0);
+    }
+    else if (!is_entry)
+    {
+        size_t *index = array_get(mapping, source);
+        src_state = *(State **)array_get(automaton->states, *index);
+        src_state->terminal = src_state->terminal || is_terminal;
+    }
+    State *dst_state;
+    if (!is_terminal && map_state(mapping, target, automaton->size))
+    {
+        dst_state = State(0);
+        automaton_add_state(automaton, dst_state, is_entry);
+    }
+    else if (!is_terminal)
+    {
+        size_t *index = array_get(mapping, target);
+        dst_state = *(State **)array_get(automaton->states, *index);
+        if (is_entry)
+        {
+            int is_dst_entry = 0;
+            arr_foreach(State *, curr, automaton->starting_states)
+                if (curr->id == *index)
+                {
+                    is_dst_entry = 1;
+                    break;
+                }
+            if (!is_dst_entry)
+                array_append(automaton->starting_states, &dst_state);
+        }
+    }
+
+    if (!is_terminal && !is_entry)
+        automaton_add_transition(automaton, src_state, dst_state, value, is_epsilon);
+}
+
+Automaton *automaton_from_daut(const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+        err(EXIT_FAILURE, "Couldn't open %s", filename);
+    Automaton *automaton = Automaton();
+
+    char *line = NULL;
+    size_t linecap = 0;
+    Array *mapping = Array(size_t);
+    while (getline(&line, &linecap, file) > 0)
+        parse_line(automaton, line, mapping);
+    free(line);
+    fclose(file);
+
+    return automaton;
 }

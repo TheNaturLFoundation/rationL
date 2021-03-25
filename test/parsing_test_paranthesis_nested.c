@@ -43,12 +43,12 @@ Test(parse_paranthesis_nested, a_left_c_or_d_right)
     //data in b.right.left == 'c' ?
     symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'c');
+    cr_assert_eq(symbol.value.letter, 'c');
 
     //data in b.right.right == 'd' ?
     symbol = (*(Symbol *)(b->right->right->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'd');
+    cr_assert_eq(symbol.value.letter, 'd');
 
     bintree_free(b);
 }
@@ -88,12 +88,12 @@ Test(parse_paranthesis_nested, a_or_left_c_or_d_right)
     //data in b.right.left == 'c' ?
     symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'c');
+    cr_assert_eq(symbol.value.letter, 'c');
 
     //data in b.right.right == 'd' ?
     symbol = (*(Symbol *)(b->right->right->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'd');
+    cr_assert_eq(symbol.value.letter, 'd');
 
     bintree_free(b);
 }
@@ -133,12 +133,12 @@ Test(parse_paranthesis_nested, a_left_left_c_or_d_right_right)
     //data in b.right.left == 'c' ?
     symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'c');
+    cr_assert_eq(symbol.value.letter, 'c');
 
     //data in b.right.right == 'd' ?
     symbol = (*(Symbol *)(b->right->right->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'd');
+    cr_assert_eq(symbol.value.letter, 'd');
 
     bintree_free(b);
 }
@@ -178,12 +178,12 @@ Test(parse_paranthesis_nested, a_left_left_left_c_or_d_right_right_right)
     //data in b.right.left == 'c' ?
     symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'c');
+    cr_assert_eq(symbol.value.letter, 'c');
 
     //data in b.right.right == 'd' ?
     symbol = (*(Symbol *)(b->right->right->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.operator, 'd');
+    cr_assert_eq(symbol.value.letter, 'd');
 
     bintree_free(b);
 }

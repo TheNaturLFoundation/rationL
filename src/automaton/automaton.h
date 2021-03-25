@@ -155,3 +155,10 @@ int automaton_remove_transition(Automaton * automaton, State * src, State * dst,
  * @param automaton: the automaton to free.
 */
 void automaton_free(Automaton * automaton);
+
+/**
+ * @author Rostan Tabet
+ * @date 24/03/2021
+ * @filename: path to the .daut file.
+ */
+Automaton *automaton_from_daut(const char *filename);

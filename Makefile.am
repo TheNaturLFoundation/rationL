@@ -52,7 +52,8 @@ criterion_tests_SOURCES = \
 			test/parsing_test_paranthesis_simple.c \
 			test/parsing_test_paranthesis_nested.c \
 			test/parsing_test_paranthesis_combinaision.c \
-			test/parsing_test_escaped_characters.c
+			test/parsing_test_escaped_characters.c \
+			test/daut_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)
 

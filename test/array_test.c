@@ -2,7 +2,6 @@
 #include <criterion/redirect.h>
 #include <criterion/internal/assert.h>
 #include "datatypes/array.h"
-#include <stdio.h>
 
 Test(array, array_create)
 {
@@ -36,7 +35,7 @@ Test(array, array_get)
     array_free(array);
 }
 
-Test(array, array_get_error, .exit_code = 1)
+Test(array, array_get_error, .exit_code = EXIT_FAILURE, .init = cr_redirect_stderr)
 {
     Array *array = Array(int);
     array_get(array, 10);
@@ -59,7 +58,7 @@ Test(array, array_set)
     array_free(array);
 }
 
-Test(array, array_set_error, .exit_code = 1)
+Test(array, array_set_error, .exit_code = 1, .init = cr_redirect_stderr)
 {
     Array *array = Array(int);
     int x = 42;
@@ -109,7 +108,7 @@ Test(array, array_insert)
     array_free(array);
 }
 
-Test(array, array_insert_error, .exit_code = 1)
+Test(array, array_insert_error, .exit_code = 1, .init = cr_redirect_stderr)
 {
     Array *array = Array(int);
     int x = 42;
@@ -136,7 +135,7 @@ Test(array, array_remove)
     array_free(array);
 }
 
-Test(array, array_remove_error, .exit_code = 1)
+Test(array, array_remove_error, .exit_code = 1, .init = cr_redirect_stderr)
 {
     Array *array = Array(int);
     array_remove(array, 10);
