@@ -98,7 +98,7 @@ int is_unary(Token *token)
 BinTree *parse_unary_operator(BinTree *left, Array *arr, size_t *pos)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
-    BinTree *b = BinTree(Symbol, &symbol);
+    BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
 
     b->left = left;
     *pos += 1;
@@ -110,7 +110,7 @@ BinTree *parse_unary_operator(BinTree *left, Array *arr, size_t *pos)
 BinTree *parse_binary_operator(BinTree *left, Array *arr, size_t *pos)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
-    BinTree *b = BinTree(Symbol, &symbol);
+    BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
 
     b->left = left;
     *pos += 1;
@@ -123,7 +123,7 @@ BinTree *parse_binary_operator(BinTree *left, Array *arr, size_t *pos)
         if (is_unary(token))
         {
             Symbol symbol = array_element_to_symbol(arr, *pos);
-            b->right = BinTree(Symbol, &symbol);
+            b->right = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
             *pos += 2;
             b = parse_unary_operator(b, arr, pos);
         }
@@ -157,7 +157,7 @@ BinTree *parse_sub(Array *arr, size_t *pos)
 
     // Initialise the binay tree
     Symbol symbol = array_element_to_symbol(arr, *pos);
-    b = BinTree(Symbol, &symbol);
+    b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
 
     // Increment the position
     *pos += 1;

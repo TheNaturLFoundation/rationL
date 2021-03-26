@@ -1,5 +1,6 @@
 #include "utils/memory_utils.h"
 
+//LCOV_EXCL_START
 void* safe_malloc(size_t n, unsigned long line)
 {
     void* p = malloc(n);
@@ -21,7 +22,6 @@ void *safe_realloc(void *p, size_t n, unsigned long line)
 
     return new_p;
 }
-
 void* safe_calloc(size_t n, size_t m, unsigned long line)
 {
     void* p = calloc(n, m);
@@ -31,3 +31,4 @@ void* safe_calloc(size_t n, size_t m, unsigned long line)
 
     return p;
 }
+//LCOV_EXCL_STOP

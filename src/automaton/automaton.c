@@ -66,7 +66,7 @@ void automaton_add_transition(Automaton * automaton, State * src,
     tr.is_epsilon = epsilon;
     if(list_push_back(*adj_list, &tr) == 0)
     {
-        errx(1, "Unable to append to the list at address %p", (void*) adj_list);
+        errx(1, "Unable to append to the list at address %p", (void*) adj_list); //LCOV_EXCL_LINE
     }
 }
 
@@ -216,27 +216,27 @@ static void parse_line(Automaton *automaton, const char *line,
     size_t source = atol(source_symbol);
     int is_entry = strcmp(source_symbol, "$") == 0;
     if (!is_entry && source == 0 && strcmp(source_symbol, "0") != 0)
-        errx(EXIT_FAILURE,
+        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
              source_symbol);
     free(source_symbol);
 
     // Get the middle arrow
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected '->' after state");
+        errx(EXIT_FAILURE, "Expected '->' after state"); //LCOV_EXCL_LINE
     char *arrow_symbol = get_symbol(&line);
     if (strcmp(arrow_symbol, "->") != 0)
-        errx(EXIT_FAILURE, "Expected '->' after state");
+        errx(EXIT_FAILURE, "Expected '->' after state"); //LCOV_EXCL_LINE
     free(arrow_symbol);
 
     // Get the target state
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected a target state");
+        errx(EXIT_FAILURE, "Expected a target state"); //LCOV_EXCL_LINE
     char *target_symbol = get_symbol(&line);
     size_t target = atol(target_symbol);
     int is_terminal = strcmp(target_symbol, "$") == 0;
     if (!is_terminal && target == 0 && strcmp(target_symbol, "0") != 0)
-        errx(EXIT_FAILURE,
+        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
              target_symbol);
     free(target_symbol);
@@ -297,7 +297,7 @@ Automaton *automaton_from_daut(const char *filename)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
-        err(EXIT_FAILURE, "Couldn't open %s", filename);
+        err(EXIT_FAILURE, "Couldn't open %s", filename);//LCOV_EXCL_LINE
     Automaton *automaton = Automaton();
 
     char *line = NULL;

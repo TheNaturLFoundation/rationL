@@ -34,7 +34,7 @@ static int get_group_range(const char **string, char *lower, char *upper)
     *string += 2;
 
     if (*upper < *lower)
-        errx(EXIT_FAILURE, "invalid character range (%c-%c)", *lower, *upper);
+        errx(EXIT_FAILURE, "invalid character range (%c-%c)", *lower, *upper); //LCOV_EXCL_LINE
 
     return 1;
 }
@@ -87,7 +87,7 @@ static void tokenize_group(const char **string, Array *tokens)
     }
 
     if (*string == 0)
-        errx(EXIT_FAILURE, "brackets not balanced");
+        errx(EXIT_FAILURE, "brackets not balanced"); //LCOV_EXCL_LINE
 }
 
 static void tokenize_dot(Array *tokens)
@@ -169,7 +169,7 @@ static int tokenize_repetition(const char **string, Array *tokens,
     }
 
     if (upper != -1 && upper < lower)
-        errx(EXIT_FAILURE, "min repeat greater than max repeat");
+        errx(EXIT_FAILURE, "min repeat greater than max repeat"); //LCOV_EXCL_LINE
 
     Array *range = array_sub(tokens, start_index, end_index);
     for (ssize_t i = 0; i < lower - 1; i++)
@@ -394,7 +394,7 @@ Array *tokenize(const char *string)
             if (!escaped)
             {
                 if (scopes->next == NULL)
-                    errx(EXIT_FAILURE, "parenthesis not balanced");
+                    errx(EXIT_FAILURE, "parenthesis not balanced"); //LCOV_EXCL_LINE
                 LinkedList *last_scope_node = list_pop(scopes);
                 last_scope = *(struct scope *)last_scope_node->data;
                 last_scope.end_index = tokens->size;
@@ -434,7 +434,7 @@ Array *tokenize(const char *string)
             /* fall through */
         case ']':
             if (!escaped)
-                errx(EXIT_FAILURE, "unbalanced brackets");
+                errx(EXIT_FAILURE, "unbalanced brackets"); //LCOV_EXCL_LINE
             is_escapable = 1;
             /* fall through */
         case '.':
@@ -469,7 +469,7 @@ Array *tokenize(const char *string)
             /* fall through */
         default:
             if (escaped && !is_escapable)
-                errx(EXIT_FAILURE, "Can't escape character '%c'", c);
+                errx(EXIT_FAILURE, "Can't escape character '%c'", c); //LCOV_EXCL_LINE
             curr_concat = previous_concat;
             previous_concat = 1;
             token.type = LITERAL;
