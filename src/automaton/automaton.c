@@ -298,6 +298,6 @@ Automaton *automaton_from_daut(const char *filename)
         parse_line(automaton, line, mapping);
     free(line);
     fclose(file);
-
+    array_free(mapping);
     return automaton;
 }
