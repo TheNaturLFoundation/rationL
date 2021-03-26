@@ -85,31 +85,31 @@ void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
     }
 }
 
-//Test(daut, a_or_b)
-//{
-//    /*
-//     *      /--- 1->
-//     *     /  a
-//     *  ->0
-//     *     \  b
-//     *      \--- 2->
-//     */
-//    Automaton *expected = automaton_create();
-//    State *q0 = State(0);
-//    State *q1 = State(1);
-//    State *q2 = State(1);
-//    automaton_add_state(expected, q0, 1);
-//    automaton_add_state(expected, q1, 0);
-//    automaton_add_state(expected, q2, 0);
-//    automaton_add_transition(expected, q0, q1, 'a', 0);
-//    automaton_add_transition(expected, q0, q2, 'b', 0);
-//
-//    Automaton *a_or_b = automaton_from_daut(TEST_PATH "a+b.daut");
-//    ASSERT_AUTOMATON_EQ(a_or_b, expected);
-//
-//    automaton_free(expected);
-//    automaton_free(a_or_b);
-//}
+Test(daut, a_or_b)
+{
+    /*
+     *      /--- 1->
+     *     /  a
+     *  ->0
+     *     \  b
+     *      \--- 2->
+     */
+    Automaton *expected = automaton_create();
+    State *q0 = State(0);
+    State *q1 = State(1);
+    State *q2 = State(1);
+    automaton_add_state(expected, q0, 1);
+    automaton_add_state(expected, q1, 0);
+    automaton_add_state(expected, q2, 0);
+    automaton_add_transition(expected, q0, q1, 'a', 0);
+    automaton_add_transition(expected, q0, q2, 'b', 0);
+
+    Automaton *a_or_b = automaton_from_daut(TEST_PATH "a+b.daut");
+    ASSERT_AUTOMATON_EQ(a_or_b, expected);
+
+    automaton_free(expected);
+    automaton_free(a_or_b);
+}
 
 Test(daut, abba)
 {
