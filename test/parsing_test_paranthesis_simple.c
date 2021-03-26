@@ -18,8 +18,9 @@ Test(parse_paranthesis_simple, left_a_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     a
+    /*   EXPECTED :
+           a
+    */
 
     //data in b == a ?
     symbol = (*(Symbol *)(b->data));
@@ -38,10 +39,11 @@ Test(parse_paranthesis_simple, left_ab_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   a   b
+    /*   EXPECTED :
+           .
+          / \
+         a   b
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -74,10 +76,11 @@ Test(parse_paranthesis_simple, a_left_b_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   a   b
+    /*   EXPECTED :
+           .
+          / \
+         a   b
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -110,10 +113,11 @@ Test(parse_paranthesis_simple, left_a_right_b)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   a   b
+    /*   EXPECTED :
+           .
+          / \
+         a   b
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -146,12 +150,13 @@ Test(parse_paranthesis_simple, left_a_right_star_b)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   *   b
-    //  /
-    // a
+    /*   EXPECTED :
+           .
+          / \
+         *   b
+        /
+       a
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -190,10 +195,11 @@ Test(parse_paranthesis_simple, left_a_star_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     *
-    //    /
-    //   a
+    /*   EXPECTED :
+           *
+          /
+         a
+    */
 
     //data in b == KLEENE_STAR ?
     symbol = (*(Symbol *)(b->data));

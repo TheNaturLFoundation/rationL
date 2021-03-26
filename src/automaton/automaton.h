@@ -1,11 +1,9 @@
 #pragma once
 
-#include <stddef.h>
-#include "utils/memory_utils.h"
-#include "datatypes/linked_list.h"
+
 #include "datatypes/array.h"
+#include "datatypes/linked_list.h"
 #include "parsing/lexer.h"
-#include <err.h>
 
 #define Automaton() automaton_create();
 #define State(term) state_create(term);

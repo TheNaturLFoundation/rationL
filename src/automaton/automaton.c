@@ -1,7 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <err.h>
 #include <string.h>
+#include <stdio.h>
+#include <sys/types.h>
+
+#include "datatypes/bin_tree.h"
 #include "automaton.h"
+#include "utils/memory_utils.h"
 
 Automaton * automaton_create()
 {
@@ -52,7 +56,7 @@ void automaton_add_state(Automaton * automaton, State * state, int is_entry)
     }
 }
 
-void automaton_add_transition(Automaton * automaton, State * src, 
+void automaton_add_transition(Automaton * automaton, State * src,
     State *dst, Letter value, int epsilon)
 {
     LinkedList ** adj_list = array_get(automaton->adj_lists, src->id);
@@ -62,11 +66,11 @@ void automaton_add_transition(Automaton * automaton, State * src,
     tr.is_epsilon = epsilon;
     if(list_push_back(*adj_list, &tr) == 0)
     {
-        err(1, "Unable to append to the list at address %p", adj_list);
+        errx(1, "Unable to append to the list at address %p", (void*) adj_list); //LCOV_EXCL_LINE
     }
 }
 
-int automaton_remove_transition(Automaton * automaton, State * src, 
+int automaton_remove_transition(Automaton * automaton, State * src,
     State * dst, Letter value, int epsilon)
 {
     LinkedList * list = *(LinkedList **)array_get(automaton->adj_lists, src->id);
@@ -113,7 +117,7 @@ void automaton_remove_state(Automaton * automaton, State * state)
                 antoine++;
             }
         }
-        
+
     }
     //Remove from starting_states
     antoine = 0;
@@ -177,7 +181,7 @@ static int map_state(Array *mapping, size_t alias, size_t real)
 {
     if (alias < mapping->size)
     {
-        if (*(size_t *)array_get(mapping, alias) == -1)
+        if (*(long *)array_get(mapping, alias) == -1)
         {
             array_set(mapping, alias, &real);
             return 1;
@@ -212,27 +216,27 @@ static void parse_line(Automaton *automaton, const char *line,
     size_t source = atol(source_symbol);
     int is_entry = strcmp(source_symbol, "$") == 0;
     if (!is_entry && source == 0 && strcmp(source_symbol, "0") != 0)
-        errx(EXIT_FAILURE,
+        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
              source_symbol);
     free(source_symbol);
 
     // Get the middle arrow
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected '->' after state");
+        errx(EXIT_FAILURE, "Expected '->' after state"); //LCOV_EXCL_LINE
     char *arrow_symbol = get_symbol(&line);
     if (strcmp(arrow_symbol, "->") != 0)
-        errx(EXIT_FAILURE, "Expected '->' after state");
+        errx(EXIT_FAILURE, "Expected '->' after state"); //LCOV_EXCL_LINE
     free(arrow_symbol);
 
     // Get the target state
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected a target state");
+        errx(EXIT_FAILURE, "Expected a target state"); //LCOV_EXCL_LINE
     char *target_symbol = get_symbol(&line);
     size_t target = atol(target_symbol);
     int is_terminal = strcmp(target_symbol, "$") == 0;
     if (!is_terminal && target == 0 && strcmp(target_symbol, "0") != 0)
-        errx(EXIT_FAILURE,
+        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
              target_symbol);
     free(target_symbol);
@@ -284,11 +288,16 @@ static void parse_line(Automaton *automaton, const char *line,
         automaton_add_transition(automaton, src_state, dst_state, value, is_epsilon);
 }
 
+/*Automaton *thompson(BinTree *tree)
+{
+
+}*/
+
 Automaton *automaton_from_daut(const char *filename)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
-        err(EXIT_FAILURE, "Couldn't open %s", filename);
+        err(EXIT_FAILURE, "Couldn't open %s", filename);//LCOV_EXCL_LINE
     Automaton *automaton = Automaton();
 
     char *line = NULL;

@@ -74,7 +74,7 @@ Test(automaton, add_starting_state)
     State * to_add = State(0);
     automaton_add_state(automaton, to_add, 1);
     State ** elt = array_get(automaton->starting_states, 0); 
-    cr_assert_eq(*elt, to_add, "got %p expected %p\n", elt, to_add);
+    cr_assert_eq(*elt, to_add, "got %p expected %p\n", (void*) elt, (void*) to_add);
     automaton_free(automaton);
 }
 
@@ -112,13 +112,12 @@ Test(automaton, add_transition_no_epsilion)
     automaton_add_transition(automaton, s1, s2, 'A', 0);
 
     LinkedList ** adj1 = array_get(automaton->adj_lists, 0);
-    LinkedList ** adj2 = array_get(automaton->adj_lists, 1);
 
     LinkedList * elt = list_get(*adj1, 0);
     Transition * tr = elt->data;
     
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", elt->next);
-    cr_assert_eq(tr->target, s2, "got %p expected %p\n", tr->target, s2);
+    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void*) elt->next);
+    cr_assert_eq(tr->target, s2, "got %p expected %p\n", (void*) tr->target, (void*) s2);
     cr_assert_eq(tr->value, 'A', "got '%c' expected 'A'\n", tr->value);
     cr_assert_eq(tr->is_epsilon, 0, "got %i expected 0", tr->is_epsilon);
 
@@ -134,14 +133,13 @@ Test(automaton, add_transition_no_epsilion2)
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s2, s1, 'A', 0);
 
-    LinkedList ** adj1 = array_get(automaton->adj_lists, 0);
     LinkedList ** adj2 = array_get(automaton->adj_lists, 1);
-    
+
     LinkedList * elt = list_get(*adj2, 0);
     Transition * tr = elt->data;
     
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", elt->next);
-    cr_assert_eq(tr->target, s1, "got %p expected %p\n", tr->target, s1);
+    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void*) elt->next);
+    cr_assert_eq(tr->target, s1, "got %p expected %p\n", (void*) tr->target, (void*) s1);
     cr_assert_eq(tr->value, 'A', "got '%c' expected 'A'\n", tr->value);
     cr_assert_eq(tr->is_epsilon, 0, "got %i expected 0", tr->is_epsilon);
 
@@ -158,13 +156,12 @@ Test(automaton, add_transition_epsilon)
     automaton_add_transition(automaton, s1, s2, 'A', 1);
 
     LinkedList ** adj1 = array_get(automaton->adj_lists, 0);
-    LinkedList ** adj2 = array_get(automaton->adj_lists, 1);
-    
+
     LinkedList * elt = list_get(*adj1, 0);
     Transition * tr = elt->data;
     
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", elt->next);
-    cr_assert_eq(tr->target, s2, "got %p expected %p\n", tr->target, s2);
+    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void*) elt->next);
+    cr_assert_eq(tr->target, s2, "got %p expected %p\n", (void*) tr->target, (void*) s2);
     cr_assert_eq(tr->is_epsilon, 1, "got %i expected 0", tr->is_epsilon);
 
     automaton_free(automaton);
@@ -200,7 +197,7 @@ Test(automaton, add_multpile_tr)
         s = *state_collector;
         tr = list->next->data;
         list = list->next;
-        cr_assert_eq(tr->target, s, "got %p, expected %p at %lu\n", tr->target, s, i);
+        cr_assert_eq(tr->target, s, "got %p, expected %p at %lu\n", (void*) tr->target, (void*) s, i);
     }
     size_t count = 0;
     list = *list_collector;

@@ -71,7 +71,7 @@ Test(array, array_append)
 {
     Array *array = Array(int);
 
-    int i;
+    size_t i;
     for (i = 0; i < ARR_BASE_CAPACITY; i++)
         array_append(array, &i);
     cr_assert_eq(array->capacity, ARR_BASE_CAPACITY);
@@ -82,7 +82,7 @@ Test(array, array_append)
     cr_assert_eq(array->size, ARR_BASE_CAPACITY + 1);
 
     for (i = 0; i < array->size; i++)
-        cr_assert_eq(*(int *)array_get(array, i), i);
+        cr_assert_eq(*(int *)array_get(array, i), (int) i);
     array_free(array);
 }
 
@@ -175,7 +175,7 @@ Test(array, array_map)
 
     array_map(array, square);
     for (size_t i = 0; i < array->size; i++)
-        cr_assert_eq(*(int *)array_get(array, i), i * i);
+        cr_assert_eq(*(int *)array_get(array, i), (int) (i * i));
     array_free(array);
 }
 
@@ -194,7 +194,7 @@ Test(array, array_mapi)
 
     array_mapi(array, square_and_add);
     for (size_t i = 0; i < array->size; i++)
-        cr_assert_eq(*(int *)array_get(array, i), i * i + i);
+        cr_assert_eq(*(int *)array_get(array, i), (int) (i * i + i));
     array_free(array);
 }
 
@@ -209,7 +209,7 @@ Test(array, array_sub)
 
     cr_assert_eq(sub->size, 4);
     for (size_t i = 2; i <= 5; i++)
-        cr_assert_eq(*(int *)array_get(sub, i - 2), i);
+        cr_assert_eq(*(int *)array_get(sub, i - 2), (int) i);
 
     array_free(sub);
 }
@@ -228,7 +228,7 @@ Test(array, array_concat)
 
     cr_assert_eq(array->size, 20);
     for (size_t i = 0; i < array->size; i++)
-        cr_assert_eq(*(int *)array_get(array, i), i);
+        cr_assert_eq(*(int *)array_get(array, i), (int) i);
 
     array_free(array);
 }

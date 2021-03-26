@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <sys/types.h>
 
 #define LinkedList(type) list_create(sizeof(type))
 /**
@@ -78,7 +79,7 @@ LinkedList *list_pop_front(LinkedList *list);
  * @date 02/03/2021
  * @version 1.0.0
  **/
-LinkedList *list_pop_at(LinkedList *list, int position);
+LinkedList *list_pop_at(LinkedList *list, ssize_t position);
 
 /**
  * Gets the element at position in the list. If the position is
@@ -90,7 +91,7 @@ LinkedList *list_pop_at(LinkedList *list, int position);
  * @date 01/03/2021
  * @version 1.0.0
  **/
-LinkedList *list_get(LinkedList *list, int position);
+LinkedList *list_get(LinkedList *list, ssize_t position);
 
 /**
  * Frees the list and the data pointers that are contained in

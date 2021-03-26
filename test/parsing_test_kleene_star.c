@@ -16,10 +16,11 @@ Test(parse_kleene_star, a_star)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //   *
-    //  /
-    // a
+    /*   EXPECTED :
+         *
+        /
+       a
+    */
 
     //data in b == KLEENE_STAR ?
     symbol = (*(Symbol *)(b->data));
@@ -45,12 +46,13 @@ Test(parse_kleene_star, ab_star)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //    .
-    //   / \
-    //  a   *
-    //     /
-    //    b
+    /*   EXPECTED :
+          .
+         / \
+        a   *
+           /
+          b
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -88,13 +90,13 @@ Test(parse_kleene_star, a_or_b_star)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //    |
-    //   / \
-    //  a   *
-    //     /
-    //    b
-
+    /*   EXPECTED :
+          |
+         / \
+        a   *
+           /
+          b
+    */
     //data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, OPERATOR);
@@ -131,12 +133,13 @@ Test(parse_kleene_star, a_star_b)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   *   b
-    //  /
-    // a
+    /*   EXPECTED :
+           .
+          / \
+         *   b
+        /
+       a
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -174,12 +177,13 @@ Test(parse_symbol, a_star_or_b)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     |
-    //    / \
-    //   *   b
-    //  /
-    // a
+    /*   EXPECTED :
+           |
+          / \
+         *   b
+        /
+       a
+    */
 
     //data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
@@ -217,12 +221,13 @@ Test(parse_symbol, abc_star)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //      .
-    //     / \
-    //    .   *
-    //   / \  /
-    //  a   b c
+    /*   EXPECTED :
+            .
+           / \
+          .   *
+         / \  /
+        a   b c
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));

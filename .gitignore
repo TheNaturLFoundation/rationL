@@ -9,8 +9,9 @@ criterion_tests
 libtool
 rationl-*.tar.gz
 rationl-*/
-src/*.lo
-
+*.lo
+compile_commands.json
+.cache/
 *.gcov
 *.o
 *.stamp

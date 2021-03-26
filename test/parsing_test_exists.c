@@ -17,10 +17,11 @@ Test(parse_exists, a_exists)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //   +
-    //  /
-    // a
+    /*   EXPECTED :
+         +
+        /
+       a
+    */
 
     //data in b == EXISTS ?
     symbol = (*(Symbol *)(b->data));
@@ -46,12 +47,13 @@ Test(parse_exists, ab_exists)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //    .
-    //   / \
-    //  a   +
-    //     /
-    //    b
+    /*   EXPECTED :
+          .
+         / \
+        a   +
+           /
+          b
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -88,12 +90,13 @@ Test(parse_exists, a_or_b_exists)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //    |
-    //   / \
-    //  a   +
-    //     /
-    //    b
+    /*   EXPECTED :
+          |
+         / \
+        a   +
+           /
+          b
+    */
 
     //data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
@@ -130,12 +133,13 @@ Test(parse_exists, a_exists_b)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   +   b
-    //  /
-    // a
+    /*   EXPECTED :
+           .
+          / \
+         +   b
+        /
+       a
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -172,12 +176,13 @@ Test(parse_exists, a_exists_or_b)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     |
-    //    / \
-    //   +   b
-    //  /
-    // a
+    /*   EXPECTED :
+           |
+          / \
+         +   b
+        /
+       a
+    */
 
     //data in b == UNION ?
     symbol = (*(Symbol *)(b->data));

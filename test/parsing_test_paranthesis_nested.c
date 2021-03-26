@@ -17,13 +17,13 @@ Test(parse_paranthesis_nested, a_left_c_or_d_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //      .
-    //     / \
-    //    a   |
-    //       / \
-    //       c  d
-
+    /*   EXPECTED :
+            .
+           / \
+          a   |
+             / \
+            c  d
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -62,13 +62,13 @@ Test(parse_paranthesis_nested, a_or_left_c_or_d_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //      |
-    //     / \
-    //    a   |
-    //       / \
-    //       c  d
-
+    /*   EXPECTED :
+            |
+           / \
+          a   |
+             / \
+            c  d
+    */
 
     //data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
@@ -107,13 +107,13 @@ Test(parse_paranthesis_nested, a_left_left_c_or_d_right_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //      .
-    //     / \
-    //    a   |
-    //       / \
-    //       c  d
-
+    /*   EXPECTED :
+            .
+           / \
+          a   |
+             / \
+            c  d
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -152,12 +152,13 @@ Test(parse_paranthesis_nested, a_left_left_left_c_or_d_right_right_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //      .
-    //     / \
-    //    a   |
-    //       / \
-    //       c  d
+    /*   EXPECTED :
+            .
+           / \
+          a   |
+             / \
+            c  d
+    */
 
 
     //data in b == CONCATENATION ?
