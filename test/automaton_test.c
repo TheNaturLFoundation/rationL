@@ -112,7 +112,6 @@ Test(automaton, add_transition_no_epsilion)
     automaton_add_transition(automaton, s1, s2, 'A', 0);
 
     LinkedList ** adj1 = array_get(automaton->adj_lists, 0);
-    LinkedList ** adj2 = array_get(automaton->adj_lists, 1);
 
     LinkedList * elt = list_get(*adj1, 0);
     Transition * tr = elt->data;
@@ -134,9 +133,8 @@ Test(automaton, add_transition_no_epsilion2)
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s2, s1, 'A', 0);
 
-    LinkedList ** adj1 = array_get(automaton->adj_lists, 0);
     LinkedList ** adj2 = array_get(automaton->adj_lists, 1);
-    
+
     LinkedList * elt = list_get(*adj2, 0);
     Transition * tr = elt->data;
     
@@ -158,8 +156,7 @@ Test(automaton, add_transition_epsilon)
     automaton_add_transition(automaton, s1, s2, 'A', 1);
 
     LinkedList ** adj1 = array_get(automaton->adj_lists, 0);
-    LinkedList ** adj2 = array_get(automaton->adj_lists, 1);
-    
+
     LinkedList * elt = list_get(*adj1, 0);
     Transition * tr = elt->data;
     

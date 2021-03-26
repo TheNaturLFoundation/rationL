@@ -49,10 +49,11 @@ Test(parsing_union_or_concatenation, ab)
     BinTree *b = parse_symbols(arr);
     array_free(arr);
 
-    //   EXPECTED :
-    //   .
-    //  / \
-    // a   b
+    /*   EXPECTED :
+         .
+        / \
+       a   b
+    */
 
     // data in b == CONCATENATION ?
     Symbol symbol = (*(Symbol *)(b->data));
@@ -83,13 +84,13 @@ Test(parsing_union_or_concatenation, abc)
     BinTree *b = parse_symbols(arr);
     array_free(arr);
 
-    //   EXPECTED :
-    //      .
-    //     / \
-    //    .   c
-    //   / \
-    //  a   b
-    //
+    /*   EXPECTED :
+            .
+           / \
+          .   c
+         / \
+        a   b
+    */
 
 
     // data in b == CONCATENATION ?
@@ -133,11 +134,11 @@ Test(parsing_union_or_concatenation, a_or_b)
     BinTree *b = parse_symbols(arr);
     array_free(arr);
 
-    //   EXPECTED :
-    //   |
-    //  / \
-    // a   b
-
+    /*   EXPECTED :
+         |
+        / \
+       a   b
+    */
 
     // data in b == UNION ?
     Symbol symbol = (*(Symbol *)(b->data));
@@ -169,13 +170,13 @@ Test(parsing_union_or_concatenation, a_or_b_or_c)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     |
-    //    / \
-    //   |   c
-    //  / \
-    // a   b
-
+    /*   EXPECTED :
+           |
+          / \
+         |   c
+        / \
+       a   b
+    */
 
     // data in b == UNION ?
     symbol = (*(Symbol *)(b->data));

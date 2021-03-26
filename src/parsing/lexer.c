@@ -1,9 +1,10 @@
+#include <err.h>
+#include <stdio.h>
+#include <sys/types.h>
+
 #include "lexer.h"
 #include "datatypes/linked_list.h"
 #include "datatypes/array.h"
-#include <err.h>
-#include <stdio.h>
-
 struct scope
 {
     /**
@@ -171,7 +172,7 @@ static int tokenize_repetition(const char **string, Array *tokens,
         errx(EXIT_FAILURE, "min repeat greater than max repeat");
 
     Array *range = array_sub(tokens, start_index, end_index);
-    for (size_t i = 0; i < lower - 1; i++)
+    for (ssize_t i = 0; i < lower - 1; i++)
     {
         add_punctuation(tokens, '.');
         array_concat(tokens, range);
@@ -188,7 +189,7 @@ static int tokenize_repetition(const char **string, Array *tokens,
     else
     {
         add_punctuation(range, '?');
-        for (size_t i = 0; i < upper - lower; i++)
+        for (ssize_t i = 0; i < upper - lower; i++)
         {
             add_punctuation(tokens, '.');
             array_concat(tokens, range);
@@ -360,6 +361,7 @@ Array *tokenize(const char *string)
                 continue;
             }
             is_escapable = 1;
+        /* fall through */
         case '|':
             if (!escaped)
             {
@@ -368,6 +370,7 @@ Array *tokenize(const char *string)
                 break;
             }
             is_escapable = 1;
+        /* fall through */
         case '(':
         {
             if (!escaped && !false_par)
@@ -385,6 +388,7 @@ Array *tokenize(const char *string)
             }
             is_escapable = 1;
         }
+        /* fall through */
         case ')':
         {
             if (!escaped)
@@ -397,6 +401,7 @@ Array *tokenize(const char *string)
                 list_free(last_scope_node);
             }
         }
+        /* fall through */
         case '+':
         case '?':
         case '*':
@@ -407,6 +412,7 @@ Array *tokenize(const char *string)
                 break;
             }
             is_escapable = 1;
+            /* fall through */
         case '[':
             if (!escaped)
             {
@@ -425,10 +431,12 @@ Array *tokenize(const char *string)
                 break;
             }
             is_escapable = 1;
+            /* fall through */
         case ']':
             if (!escaped)
                 errx(EXIT_FAILURE, "unbalanced brackets");
             is_escapable = 1;
+            /* fall through */
         case '.':
             if (!escaped)
             {
@@ -446,17 +454,19 @@ Array *tokenize(const char *string)
                 goto char_switch;
             }
             is_escapable = 1;
-        case '{':
+            /* fall through */
+            case '{':
             if (!escaped && tokens->size != 0)
             {
-                size_t upper = tokens->size - 1;
-                size_t lower = upper;
+                ssize_t upper = tokens->size - 1;
+                ssize_t lower = upper;
                 if (last_scope.end_index == upper)
                     lower = last_scope.start_index;
                 if (tokenize_repetition(&string, tokens, lower, upper))
                     continue;
             }
             is_escapable = 1;
+            /* fall through */
         default:
             if (escaped && !is_escapable)
                 errx(EXIT_FAILURE, "Can't escape character '%c'", c);

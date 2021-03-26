@@ -31,7 +31,7 @@ int list_push_back(LinkedList *list, void *data)
     return 1;
 }
 
-LinkedList *list_pop_at(LinkedList *list, int position)
+LinkedList *list_pop_at(LinkedList *list, ssize_t position)
 {
     if (position < -1 || list == NULL)
         return NULL;
@@ -46,7 +46,7 @@ LinkedList *list_pop_at(LinkedList *list, int position)
         return curr;
     }
     curr = curr->next;
-    for (size_t curr_pos = 0; curr->next != NULL && curr_pos < position;
+    for (ssize_t curr_pos = 0; curr->next != NULL && curr_pos < position;
          curr = curr->next, curr_pos++)
         ;
     curr->previous->next = curr->next;
@@ -65,7 +65,7 @@ LinkedList *list_pop_front(LinkedList *list)
     return list_pop_at(list, 0);
 }
 
-LinkedList *list_get(LinkedList *list, int position)
+LinkedList *list_get(LinkedList *list, ssize_t position)
 {
     if (position < -1)
         return NULL;

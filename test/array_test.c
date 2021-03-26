@@ -71,7 +71,7 @@ Test(array, array_append)
 {
     Array *array = Array(int);
 
-    int i;
+    size_t i;
     for (i = 0; i < ARR_BASE_CAPACITY; i++)
         array_append(array, &i);
     cr_assert_eq(array->capacity, ARR_BASE_CAPACITY);

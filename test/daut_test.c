@@ -6,7 +6,6 @@
 #define TEST_PATH STRINGIZE_(test/daut_files/)
 #define ASSERT_AUTOMATON_EQ(a1, a2) assert_automaton_eq(__LINE__, a1, a2)
 
-
 void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
 {
     // Test starting states

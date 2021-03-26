@@ -17,13 +17,13 @@ Test(parse_union_and_concatenation, ab_or_c)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     |
-    //    / \
-    //   .   c
-    //  /\
-    // a  b
-
+    /*   EXPECTED :
+           |
+          / \
+         .   c
+        /\
+       a  b
+    */
 
     // data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
@@ -68,13 +68,13 @@ Test(parse_union_and_concatenation, a_or_bc)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //   |
-    //  / \
-    // a   .
-    //     /\
-    //    b  c
-
+    /*   EXPECTED :
+         |
+        / \
+       a   .
+           /\
+          b  c
+    */
 
     // data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
@@ -119,15 +119,15 @@ Test(parse_union_and_concatenation, a_or_bc_or_d)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     |
-    //    / \
-    //   |   d
-    //  / \
-    // a   .
-    //    / \
-    //   b   c
-
+    /*   EXPECTED :
+           |
+          / \
+         |   d
+        / \
+       a   .
+          / \
+         b   c
+    */
     // data in b == UNION ?
     symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, OPERATOR);
@@ -182,13 +182,14 @@ Test(parse_union_and_concatenation, ab_or_cd)
     array_free(arr);
     Symbol symbol;
 
-    //   EXPECTED :
-    //     |
-    //    / \
-    //   .   .
-    //  /\   /\
-    // a  b c  d
-
+    /*
+        EXPECTED :
+           |
+          / \
+         .   .
+        /\   /\
+       a  b c  d
+    */
 
     // data in b == UNION ?
     symbol = (*(Symbol *)(b->data));

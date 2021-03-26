@@ -19,12 +19,13 @@ Test(parse_paranthesis_combinaison, left_ab_right_star)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //      *
-    //     /
-    //    .
-    //   / \
-    //  a   b
+    /*   EXPECTED :
+            *
+           /
+          .
+         / \
+        a   b
+    */
 
     //data in b == KLEENE_STAR ?
     symbol = (*(Symbol *)(b->data));
@@ -55,12 +56,13 @@ Test(parse_paranthesis_combinaison, left_a_or_b_right_star)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //      *
-    //     /
-    //    |
-    //   / \
-    //  a   b
+    /*   EXPECTED :
+            *
+           /
+          |
+         / \
+        a   b
+    */
 
     //data in b == KLEENE_STAR ?
     symbol = (*(Symbol *)(b->data));
@@ -91,14 +93,15 @@ Test(parse_paranthesis_combinaison, left_a_star_b_right_star)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //       *
-    //      /
-    //     .
-    //    / \
-    //   *   b
-    //  /
-    // a
+    /*   EXPECTED :
+             *
+            /
+           .
+          / \
+         *   b
+        /
+       a
+    */
 
     //data in b == KLEENE_STAR ?
     symbol = (*(Symbol *)(b->data));
@@ -142,14 +145,15 @@ Test(parse_paranthesis_combinaison, a_left_b_or_c_right_star)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   a   *
-    //      /
-    //      |
-    //     / \
-    //    b   c
+    /*   EXPECTED :
+           .
+          / \
+         a   *
+            /
+           |
+          / \
+         b   c
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -199,14 +203,15 @@ Test(parse_paranthesis_combinaison, a_left_left_b_or_c_right_star_right)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   a   *
-    //      /
-    //      |
-    //     / \
-    //    b   c
+    /*   EXPECTED :
+           .
+          / \
+         a   *
+            /
+            |
+           / \
+          b   c
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));
@@ -256,14 +261,15 @@ Test(parse_paranthesis_combinaison, a_maybe_left_bc_right_star)
 
     array_free(arr);
 
-    //   EXPECTED :
-    //     .
-    //    / \
-    //   ?   *
-    //  /   /
-    // a    .
-    //     / \
-    //    b   c
+    /*   EXPECTED :
+           .
+          / \
+         ?   *
+        /   /
+       a    .
+           / \
+          b   c
+    */
 
     //data in b == CONCATENATION ?
     symbol = (*(Symbol *)(b->data));

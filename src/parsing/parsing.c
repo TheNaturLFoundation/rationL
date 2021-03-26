@@ -221,7 +221,9 @@ BinTree *parse_symbols(Array *arr)
 
     size_t pos = 0;
     size_t size = arr->size;
-    Symbol symbol = array_element_to_symbol(arr, pos);
+    // This value is unused, I don't know what it's for
+    // but I have commented it because it produces a warning.
+    //Symbol symbol = array_element_to_symbol(arr, pos);
     BinTree *b = parse_sub(arr, &pos);
 
     while (pos < size)
