@@ -16,15 +16,16 @@ int is_state_entry(Automaton *aut, State *state)
 
 // Connects two automatons and returns a correspondance
 // table between ids of b and the new state in a
-Array *connect_automatons(Automaton *a, Automaton *b)
+Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
 {
-    Array *states_b_tab = Array(State *);
+    Array *states_b_htab = Array(State *);
     arr_foreach(State *, state_b, b->states)
     {
         State *state = State(state_b->terminal);
         state->id = a->size;
-        array_append(states_b_tab, &state);
-        automaton_add_state(a, state, 0);
+        array_append(states_b_htab, &state);
+        automaton_add_state(a, state,
+                            remap_entries ? 0 : is_state_entry(b, state_b));
     }
     size_t index = 0;
     arr_foreach(LinkedList *, transition_b, b->adj_lists)
@@ -33,16 +34,16 @@ Array *connect_automatons(Automaton *a, Automaton *b)
         while (transition_b != NULL)
         {
             Transition *transition = transition_b->data;
-            State *src = *(State **)array_get(states_b_tab, index);
+            State *src = *(State **)array_get(states_b_htab, index);
             State *dst =
-                *(State **)array_get(states_b_tab, transition->target->id);
+                *(State **)array_get(states_b_htab, transition->target->id);
             automaton_add_transition(a, src, dst, transition->value,
                                      transition->is_epsilon);
             index += 1;
             transition_b = transition_b->next;
         }
     }
-    return states_b_tab;
+    return states_b_htab;
 }
 
 void concatenate(Automaton *a, Automaton *b)
@@ -56,19 +57,32 @@ void concatenate(Automaton *a, Automaton *b)
             state_a->terminal = 0;
         }
     }
-    Array *states_b_tab = connect_automatons(a, b);
+    Array *states_b_htab = connect_automatons(a, b, 1);
     arr_foreach(State *, a_states, terminal_states)
     {
         arr_foreach(State *, entry_state, b->starting_states)
         {
-            State *dst = *(State **)array_get(states_b_tab, entry_state->id);
+            State *dst = *(State **)array_get(states_b_htab, entry_state->id);
             automaton_add_transition(a, a_states, dst, 'e', 1);
         }
     }
     array_free(terminal_states);
-    array_free(states_b_tab);
+    array_free(states_b_htab);
 }
 
+void unite(Automaton *a, Automaton *b)
+{
+    Array *states_b_htab = connect_automatons(a, b, 0);
+    State *new_entry = State(0);
+    automaton_add_state(a, new_entry, 0);
+    arr_foreach(State*, entry, a->starting_states)
+    {
+        automaton_add_transition(a, new_entry, entry, 'e', 1);
+    }
+    array_clear(a->starting_states);
+    array_append(a->starting_states, &new_entry);
+    array_free(states_b_htab);
+}
 
 Automaton *thompson(BinTree *tree)
 {
@@ -94,6 +108,13 @@ Automaton *thompson(BinTree *tree)
         Automaton *left = thompson(tree->left);
         Automaton *right = thompson(tree->right);
         concatenate(left, right);
+        automaton_free(right);
+        return left;
+    }
+    case UNION: {
+        Automaton *left = thompson(tree->left);
+        Automaton *right = thompson(tree->right);
+        unite(left, right);
         automaton_free(right);
         return left;
     }
