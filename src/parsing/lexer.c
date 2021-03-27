@@ -219,7 +219,6 @@ Array *tokenize(const char *string)
     {
         int curr_concat = 0;
         int is_escapable = 0;
-        int false_par = 0;
         Token token;
         Token par_token = { .type = PUNCTUATION, .value = '(' };
 
@@ -373,7 +372,7 @@ Array *tokenize(const char *string)
         /* fall through */
         case '(':
         {
-            if (!escaped && !false_par)
+            if (!escaped)
             {
                 struct scope scope = {
                     .start_char = '[',

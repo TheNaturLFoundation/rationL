@@ -454,6 +454,24 @@ Test(lexer, space_special)
     array_free(tokens);
 }
 
+Test(lexer, special_concat)
+{
+    char *regexp = "a\\d\\w\\s.";
+    Array *tokens = tokenize(regexp);
+
+    // Only test the size, trust actual values according to previous tests
+    size_t expected = ('9' - '0' + 1) * 2 + 2
+        + ('z' - 'a' + 2 + 'Z' - 'A' + 2 + '9' - '0' + 1) * 2 + 2
+        + (ASCII_LAST_CONTROL - ASCII_FIRST_CONTROL + 1) * 2 + 2
+        + (ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1 + ASCII_LAST_CONTROL
+           - ASCII_FIRST_CONTROL + 1)
+            * 2 + 1
+        + 2;
+    cr_assert_eq(tokens->size, expected, "expected %zu, got %zu", expected, tokens->size);
+
+    array_free(tokens);
+}
+
 Test(lexer, braces_repeat)
 {
     char *regexp = "a{2}[ab]{1,3}(ab){2,}";
@@ -530,6 +548,43 @@ Test(lexer, braces_no_repeat)
     };
 
     cr_assert_eq(tokens->size, 11);
+
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+
+    array_free(tokens);
+}
+
+Test(lexer, braces_fake_repeat)
+{
+    char *regexp = "a{aa{1,2a";
+    Array *tokens = tokenize(regexp);
+
+    Token expected_tokens[] = {
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '{' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'a' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '{' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '1' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = ',' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = '2' },
+        { .type = PUNCTUATION, .value = '.' },
+        { .type = LITERAL, .value = 'a' },
+    };
+
+    cr_assert_eq(tokens->size, 17);
 
     for (size_t i = 0; i < tokens->size; i++)
     {

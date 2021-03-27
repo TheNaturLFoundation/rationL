@@ -218,7 +218,7 @@ static void parse_line(Automaton *automaton, const char *line,
     if (!is_entry && source == 0 && strcmp(source_symbol, "0") != 0)
         errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
-             source_symbol);
+             source_symbol); //LCOV_EXCL_LINE
     free(source_symbol);
 
     // Get the middle arrow
@@ -238,7 +238,7 @@ static void parse_line(Automaton *automaton, const char *line,
     if (!is_terminal && target == 0 && strcmp(target_symbol, "0") != 0)
         errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
-             target_symbol);
+             target_symbol); //LCOV_EXCL_LINE
     free(target_symbol);
 
     // Get the value of the transition
