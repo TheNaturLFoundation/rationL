@@ -160,3 +160,6 @@ void automaton_free(Automaton * automaton);
  * @filename: path to the .daut file.
  */
 Automaton *automaton_from_daut(const char *filename);
+
+
+void print_automaton(Automaton* aut);

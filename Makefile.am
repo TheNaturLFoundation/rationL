@@ -16,7 +16,8 @@ librationl_la_SOURCES = \
 	src/datatypes/bin_tree.c \
 	src/parsing/lexer.c \
 	src/parsing/parsing.c \
-	src/matching/matching.c
+	src/matching/matching.c \
+	src/automaton/thompson.c
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
             $(top_srcdir)/tap-driver.sh
@@ -55,7 +56,8 @@ criterion_tests_SOURCES = \
 			test/parsing_test_paranthesis_combinaision.c \
 			test/parsing_test_escaped_characters.c \
 			test/daut_test.c \
-			test/matching_test.c
+			test/matching_test.c \
+			test/thompson_test.c
 
 criterion_tests_LDADD = $(lib_LTLIBRARIES)
 

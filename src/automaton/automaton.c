@@ -310,3 +310,40 @@ Automaton *automaton_from_daut(const char *filename)
     array_free(mapping);
     return automaton;
 }
+
+
+void print_automaton(Automaton *aut)
+{
+    printf("Automaton: \n\nStates:\n\n");
+    arr_foreach(State *, state, aut->states)
+    {
+        printf("%zu : terminal: %s\n", state->id,
+               state->terminal ? "true" : "false");
+    }
+    printf("\nStarting states:\n\n");
+    arr_foreach(State *, starting_state, aut->starting_states)
+    {
+        printf("%zu\n", starting_state->id);
+    }
+    printf("\nTransitions :\n\n");
+    size_t index = 0;
+    arr_foreach(LinkedList *, transitions, aut->adj_lists)
+    {
+        transitions = transitions->next;
+        while (transitions != NULL)
+        {
+            Transition *transition = transitions->data;
+            char transition_str[5] = {0};
+            if(transition->is_epsilon)
+                memcpy(transition_str, "ε", 4);
+            else
+                transition_str[0] = transition->value;
+            printf("%zu - %s -> %zu\n", index, transition_str,
+                   transition->target->id);
+            transitions = transitions->next;
+        }
+
+        index += 1;
+    }
+    printf("\n");
+}
