@@ -25,7 +25,7 @@ Test(thompson, automaton_a_b)
     BinTree *tree_b = BinTree(Symbol, &b, .right = NULL, .left = NULL);
     BinTree *tree = BinTree(Symbol, &concat, .right = tree_b, .left = tree_a);
     Automaton *aut = thompson(tree);
-    print_automaton(aut);
+    //print_automaton(aut);
     cr_assert_eq(aut->size, 4);
     automaton_free(aut);
     bintree_free(tree);

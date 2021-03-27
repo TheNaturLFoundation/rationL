@@ -14,18 +14,11 @@ int is_state_entry(Automaton *aut, State *state)
     return 0;
 }
 
-void concatenate(Automaton *a, Automaton *b)
+// Connects two automatons and returns a correspondance
+// table between ids of b and the new state in a
+Array *connect_automatons(Automaton *a, Automaton *b)
 {
     Array *states_b_tab = Array(State *);
-    Array *terminal_states = Array(State *);
-    arr_foreach(State *, state_a, a->states)
-    {
-        if (state_a->terminal)
-        {
-            array_append(terminal_states, &state_a);
-            state_a->terminal = 0;
-        }
-    }
     arr_foreach(State *, state_b, b->states)
     {
         State *state = State(state_b->terminal);
@@ -49,6 +42,21 @@ void concatenate(Automaton *a, Automaton *b)
             transition_b = transition_b->next;
         }
     }
+    return states_b_tab;
+}
+
+void concatenate(Automaton *a, Automaton *b)
+{
+    Array *terminal_states = Array(State *);
+    arr_foreach(State *, state_a, a->states)
+    {
+        if (state_a->terminal)
+        {
+            array_append(terminal_states, &state_a);
+            state_a->terminal = 0;
+        }
+    }
+    Array *states_b_tab = connect_automatons(a, b);
     arr_foreach(State *, a_states, terminal_states)
     {
         arr_foreach(State *, entry_state, b->starting_states)
@@ -61,7 +69,8 @@ void concatenate(Automaton *a, Automaton *b)
     array_free(states_b_tab);
 }
 
-Automaton *recur_thompson(BinTree *tree)
+
+Automaton *thompson(BinTree *tree)
 {
     if (tree->left == NULL && tree->right == NULL)
     {
@@ -82,8 +91,8 @@ Automaton *recur_thompson(BinTree *tree)
     switch (operator)
     {
     case CONCATENATION: {
-        Automaton *left = recur_thompson(tree->left);
-        Automaton *right = recur_thompson(tree->right);
+        Automaton *left = thompson(tree->left);
+        Automaton *right = thompson(tree->right);
         concatenate(left, right);
         automaton_free(right);
         return left;
@@ -93,9 +102,4 @@ Automaton *recur_thompson(BinTree *tree)
     }
 
     return NULL;
-}
-
-Automaton *thompson(BinTree *tree)
-{
-    return recur_thompson(tree);
 }
