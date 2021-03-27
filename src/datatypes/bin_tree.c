@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "parsing/parsing.h"
 #include "utils/memory_utils.h"
 
 BinTree *create_node(BinTree *macro_tree_data)
@@ -24,6 +25,34 @@ void bintree_free(BinTree *tree)
         bintree_free(tree->right);
         free(tree);
     }
+}
+char get_val(Symbol *symbol)
+{
+    return symbol->type == OPERATOR ? symbol->value.operator== CONCATENATION
+        ? '.'
+        : '|' : symbol->value.letter;
+}
+
+void __tree_to_dot(BinTree *tree, size_t current)
+{
+    printf("  node%zu [label=\"%c\"];\n", current, get_val(tree->data));
+    if (tree->left != NULL)
+    {
+        printf("  node%zu -> node%zu;\n", current, 2 * current);
+        __tree_to_dot(tree->left, 2 * current);
+    }
+    if (tree->right != NULL)
+    {
+        printf("  node%zu -> node%zu;\n", current, 2 * current + 1);
+        __tree_to_dot(tree->right, 2 * current + 1);
+    }
+}
+
+void tree_to_dot(BinTree *tree)
+{
+    printf("digraph {\n");
+    __tree_to_dot(tree, 1);
+    printf("}\n");
 }
 
 /*

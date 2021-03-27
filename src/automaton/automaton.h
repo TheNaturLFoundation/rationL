@@ -163,3 +163,5 @@ Automaton *automaton_from_daut(const char *filename);
 
 
 void print_automaton(Automaton* aut);
+
+void automaton_to_dot(Automaton* aut);

@@ -41,8 +41,23 @@ Test(thompson, automaton_a_or_b)
     BinTree *tree_b = BinTree(Symbol, &b, .right = NULL, .left = NULL);
     BinTree *tree = BinTree(Symbol, &concat, .right = tree_b, .left = tree_a);
     Automaton *aut = thompson(tree);
-    print_automaton(aut);
-    //cr_assert_eq(aut->size, 4);
+    //print_automaton(aut);
+     //cr_assert_eq(aut->size, 4);
     automaton_free(aut);
     bintree_free(tree);
 }
+
+/*Test(thompson, automaton_a_or_b_c)
+{
+
+    Array *arr = tokenize("(aabb|bbaa)c");
+    BinTree *b = parse_symbols(arr);
+    tree_to_dot(b);
+    array_free(arr);
+    Automaton *aut = thompson(b);
+    automaton_to_dot(aut);
+     //cr_assert_eq(aut->size, 4);
+    automaton_free(aut);
+    bintree_free(b);
+}
+*/

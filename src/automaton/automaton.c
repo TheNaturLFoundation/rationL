@@ -1,15 +1,16 @@
+#include "automaton.h"
+
 #include <err.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include "datatypes/bin_tree.h"
-#include "automaton.h"
 #include "utils/memory_utils.h"
 
-Automaton * automaton_create()
+Automaton *automaton_create()
 {
-    Automaton * autom = SAFEMALLOC(sizeof(Automaton));
+    Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
     autom->adj_lists = Array(LinkedList *);
     autom->starting_states = Array(State *);
@@ -18,16 +19,16 @@ Automaton * automaton_create()
     return autom;
 }
 
-void automaton_free(Automaton * automaton)
+void automaton_free(Automaton *automaton)
 {
     arr_foreach(State *, s, automaton->states)
     {
-        //Frees the states.
+        // Frees the states.
         free(s);
     }
     arr_foreach(LinkedList *, list, automaton->adj_lists)
     {
-        //Frees the transition list
+        // Frees the transition list
         list_free(list);
     }
     array_free(automaton->states);
@@ -36,51 +37,53 @@ void automaton_free(Automaton * automaton)
     free(automaton);
 }
 
-State * state_create(int is_terminal)
+State *state_create(int is_terminal)
 {
-    State * s = SAFEMALLOC(sizeof(State));
+    State *s = SAFEMALLOC(sizeof(State));
     s->terminal = is_terminal;
     return s;
 }
 
-void automaton_add_state(Automaton * automaton, State * state, int is_entry)
+void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
-    LinkedList * new_state_list = LinkedList(Transition);
+    LinkedList *new_state_list = LinkedList(Transition);
     array_append(automaton->adj_lists, &new_state_list);
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
-    if(is_entry == 1)
+    if (is_entry == 1)
     {
         array_append(automaton->starting_states, &state);
     }
 }
 
-void automaton_add_transition(Automaton * automaton, State * src,
-    State *dst, Letter value, int epsilon)
+void automaton_add_transition(Automaton *automaton, State *src, State *dst,
+                              Letter value, int epsilon)
 {
-    LinkedList ** adj_list = array_get(automaton->adj_lists, src->id);
+    LinkedList **adj_list = array_get(automaton->adj_lists, src->id);
     Transition tr;
     tr.target = dst;
     tr.value = value;
     tr.is_epsilon = epsilon;
-    if(list_push_back(*adj_list, &tr) == 0)
+    if (list_push_back(*adj_list, &tr) == 0)
     {
-        errx(1, "Unable to append to the list at address %p", (void*) adj_list); //LCOV_EXCL_LINE
+        errx(1, "Unable to append to the list at address %p",
+             (void *)adj_list); // LCOV_EXCL_LINE
     }
 }
 
-int automaton_remove_transition(Automaton * automaton, State * src,
-    State * dst, Letter value, int epsilon)
+int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
+                                Letter value, int epsilon)
 {
-    LinkedList * list = *(LinkedList **)array_get(automaton->adj_lists, src->id);
-    LinkedList * cpy = list;
-    Transition * tr;
+    LinkedList *list = *(LinkedList **)array_get(automaton->adj_lists, src->id);
+    LinkedList *cpy = list;
+    Transition *tr;
     size_t i = 0;
-    while(list->next != NULL)
+    while (list->next != NULL)
     {
         tr = list->next->data;
-        if(tr->target == dst && ((epsilon == 1 && tr->is_epsilon == 1) || tr->value == value))
+        if (tr->target == dst
+            && ((epsilon == 1 && tr->is_epsilon == 1) || tr->value == value))
         {
             list_free(list_pop_at(cpy, i));
             return 0;
@@ -91,24 +94,24 @@ int automaton_remove_transition(Automaton * automaton, State * src,
     return 1;
 }
 
-void automaton_remove_state(Automaton * automaton, State * state)
+void automaton_remove_state(Automaton *automaton, State *state)
 {
-    Transition * tr;
+    Transition *tr;
     size_t antoine;
-    LinkedList * cpy;
-    State * another_state;
-    //Remove from adj_lists
+    LinkedList *cpy;
+    State *another_state;
+    // Remove from adj_lists
     list_free(*(LinkedList **)array_get(automaton->adj_lists, state->id));
     array_remove(automaton->adj_lists, state->id);
     arr_foreach(LinkedList *, list, automaton->adj_lists)
     {
         antoine = 0;
         cpy = list;
-        while(list->next != NULL)
+        while (list->next != NULL)
         {
             tr = list->next->data;
             list = list->next;
-            if(tr->target == state)
+            if (tr->target == state)
             {
                 list_free(list_pop_at(cpy, antoine));
             }
@@ -117,21 +120,20 @@ void automaton_remove_state(Automaton * automaton, State * state)
                 antoine++;
             }
         }
-
     }
-    //Remove from starting_states
+    // Remove from starting_states
     antoine = 0;
     arr_foreach(State *, s, automaton->starting_states)
     {
-        if(s == state)
+        if (s == state)
         {
             array_remove(automaton->starting_states, antoine);
             break;
         }
         antoine++;
     }
-    //Remove from states array
-    for(size_t k = state->id + 1; k < automaton->states->size; k++)
+    // Remove from states array
+    for (size_t k = state->id + 1; k < automaton->states->size; k++)
     {
         another_state = *(State **)array_get(automaton->states, k);
         another_state->id -= 1;
@@ -170,8 +172,7 @@ static char *get_symbol(const char **string)
     // Turn the array into a string
     char *symbol = calloc(symbol_array->size + 1, sizeof(char));
     size_t i = 0;
-    arr_foreach(char, c, symbol_array)
-        symbol[i++] = c;
+    arr_foreach(char, c, symbol_array) symbol[i++] = c;
 
     array_free(symbol_array);
     return symbol;
@@ -205,40 +206,39 @@ static int map_state(Array *mapping, size_t alias, size_t real)
  * @param mapping An array allowing mapping from states in the .daut file
  * to the actual state numbers in the automaton
  */
-static void parse_line(Automaton *automaton, const char *line,
-                       Array *mapping)
+static void parse_line(Automaton *automaton, const char *line, Array *mapping)
 {
     // Get the source state
     if (!move_to_next(&line))
-        return;  // Ignore if empty
+        return; // Ignore if empty
 
     char *source_symbol = get_symbol(&line);
     size_t source = atol(source_symbol);
     int is_entry = strcmp(source_symbol, "$") == 0;
     if (!is_entry && source == 0 && strcmp(source_symbol, "0") != 0)
-        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
+        errx(EXIT_FAILURE, // LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
-             source_symbol); //LCOV_EXCL_LINE
+             source_symbol); // LCOV_EXCL_LINE
     free(source_symbol);
 
     // Get the middle arrow
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected '->' after state"); //LCOV_EXCL_LINE
+        errx(EXIT_FAILURE, "Expected '->' after state"); // LCOV_EXCL_LINE
     char *arrow_symbol = get_symbol(&line);
     if (strcmp(arrow_symbol, "->") != 0)
-        errx(EXIT_FAILURE, "Expected '->' after state"); //LCOV_EXCL_LINE
+        errx(EXIT_FAILURE, "Expected '->' after state"); // LCOV_EXCL_LINE
     free(arrow_symbol);
 
     // Get the target state
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected a target state"); //LCOV_EXCL_LINE
+        errx(EXIT_FAILURE, "Expected a target state"); // LCOV_EXCL_LINE
     char *target_symbol = get_symbol(&line);
     size_t target = atol(target_symbol);
     int is_terminal = strcmp(target_symbol, "$") == 0;
     if (!is_terminal && target == 0 && strcmp(target_symbol, "0") != 0)
-        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
+        errx(EXIT_FAILURE, // LCOV_EXCL_LINE
              "Invalid state: %s: only integers are supported for now",
-             target_symbol); //LCOV_EXCL_LINE
+             target_symbol); // LCOV_EXCL_LINE
     free(target_symbol);
 
     // Get the value of the transition
@@ -273,19 +273,20 @@ static void parse_line(Automaton *automaton, const char *line,
         if (is_entry)
         {
             int is_dst_entry = 0;
-            arr_foreach(State *, curr, automaton->starting_states)
-                if (curr->id == *index)
-                {
-                    is_dst_entry = 1;
-                    break;
-                }
+            arr_foreach(State *, curr,
+                        automaton->starting_states) if (curr->id == *index)
+            {
+                is_dst_entry = 1;
+                break;
+            }
             if (!is_dst_entry)
                 array_append(automaton->starting_states, &dst_state);
         }
     }
 
     if (!is_terminal && !is_entry)
-        automaton_add_transition(automaton, src_state, dst_state, value, is_epsilon);
+        automaton_add_transition(automaton, src_state, dst_state, value,
+                                 is_epsilon);
 }
 
 /*Automaton *thompson(BinTree *tree)
@@ -297,7 +298,7 @@ Automaton *automaton_from_daut(const char *filename)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
-        err(EXIT_FAILURE, "Couldn't open %s", filename);//LCOV_EXCL_LINE
+        err(EXIT_FAILURE, "Couldn't open %s", filename); // LCOV_EXCL_LINE
     Automaton *automaton = Automaton();
 
     char *line = NULL;
@@ -310,7 +311,6 @@ Automaton *automaton_from_daut(const char *filename)
     array_free(mapping);
     return automaton;
 }
-
 
 void print_automaton(Automaton *aut)
 {
@@ -333,8 +333,8 @@ void print_automaton(Automaton *aut)
         while (transitions != NULL)
         {
             Transition *transition = transitions->data;
-            char transition_str[5] = {0};
-            if(transition->is_epsilon)
+            char transition_str[5] = { 0 };
+            if (transition->is_epsilon)
                 memcpy(transition_str, "ε", 4);
             else
                 transition_str[0] = transition->value;
@@ -346,4 +346,37 @@ void print_automaton(Automaton *aut)
         index += 1;
     }
     printf("\n");
+}
+
+void automaton_to_dot(Automaton *aut)
+{
+    size_t index = 0;
+    printf("digraph{\n  rankdir=LR;\n");
+    printf("  node [shape = doublecircle]; ");
+
+    arr_foreach(State*, state, aut->states)
+    {
+        if(state->terminal)
+            printf("%zu ", state->id);
+    }
+    printf(";\n  node [shape = circle];\n");
+    arr_foreach(LinkedList *, transitions, aut->adj_lists)
+    {
+        transitions = transitions->next;
+        while (transitions != NULL)
+        {
+            Transition *transition = transitions->data;
+            char transition_str[5] = { 0 };
+            if (transition->is_epsilon)
+                memcpy(transition_str, "ε", 4);
+            else
+                transition_str[0] = transition->value;
+            printf("  %zu -> %zu[label=\"%s\"]\n", index, transition->target->id,
+                   transition_str);
+            transitions = transitions->next;
+        }
+
+        index += 1;
+    }
+    printf("}\n");
 }
