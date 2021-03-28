@@ -110,10 +110,28 @@ BinTree *parse_unary_operator(BinTree *left, Array *arr, size_t *pos)
 BinTree *parse_binary_operator(BinTree *left, Array *arr, size_t *pos)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
+    Token *token = (Token *)(array_get(arr, *pos));
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
 
     b->left = left;
     *pos += 1;
+
+    // JUST ADDED
+    // Handle CONCATENATION priority
+
+    if (token->type == PUNCTUATION && token->value == '.' && *pos + 1 < arr->size)
+    {
+        Token *token = (Token *)(array_get(arr, *pos + 1));
+        if (token->type == PUNCTUATION && token->value == '.')
+        {
+            Symbol symbol = array_element_to_symbol(arr, *pos);
+            b->right = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
+            *pos += 1;
+            return parse_binary_operator(b, arr, pos);
+        }
+    }
+    // JUST ADDED
+
 
     // Handle unary priority
     if (*pos + 2 < arr->size)
@@ -125,13 +143,10 @@ BinTree *parse_binary_operator(BinTree *left, Array *arr, size_t *pos)
             Symbol symbol = array_element_to_symbol(arr, *pos);
             b->right = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
             *pos += 2;
-            b = parse_unary_operator(b, arr, pos);
+            return parse_unary_operator(b, arr, pos);
         }
-        else
-            b->right = parse_sub(arr, pos);
     }
-    else
-        b->right = parse_sub(arr, pos);
+    b->right = parse_sub(arr, pos);
 
     return b;
 }
@@ -165,6 +180,17 @@ BinTree *parse_sub(Array *arr, size_t *pos)
         return b;
     token = array_get(arr, *pos);
 
+
+    // JUST ADDED
+    /*
+    if (token->type == PUNCTUATION && token->value == '.')
+    {
+        return parse_binary_operator(b, arr, pos);
+    }
+    */
+    // JUST ADDED
+
+
     // Handle closing paranthesis
     if (*pos < arr->size && token->type == PUNCTUATION && token->value == ')')
     {
@@ -183,34 +209,34 @@ BinTree *parse_sub(Array *arr, size_t *pos)
     else
         return b;
 
-    // If old_token is a paranthesis, we don't car about operator priorities
+    // If old_token is a paranthesis, we don't care about operator priorities
     if (old_token->type == PUNCTUATION && old_token->value == '(')
-        if (is_unary(token))
-            b = parse_unary_operator(b, arr, pos);
-        else
-            b = parse_binary_operator(b, arr, pos);
-    else
     {
-        // The previous punctuation was a concatenation
-        if (old_token->type == PUNCTUATION && old_token->value == '.')
-        {
-            // Only unary operators have priority
-            if (is_unary(token))
-                b = parse_unary_operator(b, arr, pos);
-        }
+        if (is_unary(token))
+            return parse_unary_operator(b, arr, pos);
         else
-        {
-            // The previous punctuation was an union
-            if (old_token->type == PUNCTUATION && old_token->value == '|')
-            {
-                // Both unary and binary have priority (except the union)
-                if (token->type == PUNCTUATION && token->value == '.')
-                    b = parse_binary_operator(b, arr, pos);
-                else if (is_unary(token))
-                    b = parse_unary_operator(b, arr, pos);
-            }
-        }
+            return parse_binary_operator(b, arr, pos);
     }
+
+    // The previous punctuation was a concatenation
+    if (old_token->type == PUNCTUATION && old_token->value == '.')
+    {
+        // Only unary operators have priority
+        if (is_unary(token))
+            return parse_unary_operator(b, arr, pos);
+    }
+
+    // The previous punctuation was an union
+    if (old_token->type == PUNCTUATION && old_token->value == '|')
+    {
+        // Both unary and binary have priority (except the union)
+        if (token->type == PUNCTUATION && token->value == '.')
+            b = parse_binary_operator(b, arr, pos);
+        else if (is_unary(token))
+            b = parse_unary_operator(b, arr, pos);
+    }
+
+
     return b;
 }
 

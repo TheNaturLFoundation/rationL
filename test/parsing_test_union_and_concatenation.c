@@ -1,4 +1,5 @@
 #include <criterion/criterion.h>
+#include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
 /*
@@ -7,6 +8,7 @@
     - "a|bc"
     - "a|bc|d"
     - "ab|cd"
+    - "(aa|bbb)c"
 */
 
 
@@ -233,6 +235,71 @@ Test(parse_union_and_concatenation, ab_or_cd)
     cr_assert_eq(symbol.value.letter, 'd');
     cr_assert_eq(b->right->right->left, NULL);
     cr_assert_eq(b->right->right->right, NULL);
+
+    bintree_free(b);
+}
+
+Test(parse_union_and_concatenation, aa_or_bbb)
+{
+    Array *arr = tokenize("aa|bbb");
+    BinTree *b = parse_symbols(arr);
+    array_free(arr);
+    Symbol symbol;
+
+    /*
+        EXPECTED :
+
+                   |
+                  / \
+                 /   \
+                /     \
+               .       .
+              / \     / \
+             a   a   .   b
+                    / \
+                   b   b
+    */
+
+    // data in b == CONCATENATION ?
+    symbol = (*(Symbol *)(b->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+
+    // data in b.left == UNION ?
+    symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    // data in b.left.left == 'a' ?
+    symbol = (*(Symbol *)(b->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    // data in b.left.right == 'a' ?
+    symbol = (*(Symbol *)(b->left->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+
+    // data in b.right.left == CONCATENATION ?
+    symbol = (*(Symbol *)(b->right->left->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
+
+    // data in b.right.left.left == 'b' ?
+    symbol = (*(Symbol *)(b->right->left->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+
+    // data in b.right.left.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->left->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
+
+    // data in b.right.right == 'b' ?
+    symbol = (*(Symbol *)(b->right->right->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'b');
 
     bintree_free(b);
 }
