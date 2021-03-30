@@ -316,3 +316,26 @@ Test(parse_paranthesis_combinaison, a_maybe_left_bc_right_star)
 
     bintree_free(b);
 }
+
+Test(parse_paranthesis_combinaison, tmp)
+{
+    Array *arr = tokenize("(aa|bb)*");
+    BinTree *b = parse_symbols(arr);
+    Symbol symbol;
+
+    array_free(arr);
+
+    /*   EXPECTED :
+           .
+          / \
+         ?   *
+        /   /
+       a    .
+           / \
+          b   c
+    */
+
+    //tree_to_dot(b);
+
+    bintree_free(b);
+}
