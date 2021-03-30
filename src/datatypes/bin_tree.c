@@ -28,9 +28,22 @@ void bintree_free(BinTree *tree)
 }
 char get_val(Symbol *symbol)
 {
-    return symbol->type == OPERATOR ? symbol->value.operator== CONCATENATION
-        ? '.'
-        : '|' : symbol->value.letter;
+    if (symbol->type == OPERATOR)
+        switch (symbol->value.operator)
+        {
+        case KLEENE_STAR:
+            return '*';
+        case UNION:
+            return '|';
+        case CONCATENATION:
+            return '.';
+        case EXISTS:
+            return '?';
+        case MAYBE:
+            return '+';
+        }
+    else
+        return symbol->value.letter;
 }
 
 void __tree_to_dot(BinTree *tree, size_t current)

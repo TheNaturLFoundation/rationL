@@ -51,4 +51,6 @@ Frees the binary tree.
 
 void bintree_free(BinTree *tree);
 
+void tree_to_dot(BinTree *t);
+
 #endif
