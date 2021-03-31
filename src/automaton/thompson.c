@@ -39,9 +39,9 @@ Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
                 *(State **)array_get(states_b_htab, transition->target->id);
             automaton_add_transition(a, src, dst, transition->value,
                                      transition->is_epsilon);
-            index += 1;
             transition_b = transition_b->next;
         }
+        index += 1;
     }
     return states_b_htab;
 }

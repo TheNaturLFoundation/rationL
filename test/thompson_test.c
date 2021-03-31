@@ -113,9 +113,21 @@ Test(thompson, automaton_a_b_exists)
 {
     Array *arr = tokenize("(ab)+");
     BinTree *b = parse_symbols(arr);
-    tree_to_dot(b);
+    //tree_to_dot(b);
     Automaton *aut = thompson(b);
-    automaton_to_dot(aut);
+    //automaton_to_dot(aut);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+Test(thompson, aa_star)
+{
+    Array *arr = tokenize("aa*");
+    BinTree *b = parse_symbols(arr);
+    //tree_to_dot(b);
+    Automaton *aut = thompson(b);
+    //automaton_to_dot(aut);
     automaton_free(aut);
     array_free(arr);
     bintree_free(b);
