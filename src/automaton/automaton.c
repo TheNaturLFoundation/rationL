@@ -352,14 +352,22 @@ void automaton_to_dot(Automaton *aut)
 {
     size_t index = 0;
     printf("digraph{\n  rankdir=LR;\n");
-    printf("  node [shape = doublecircle]; ");
-
-    arr_foreach(State*, state, aut->states)
+    arr_foreach(State *, start, aut->starting_states)
     {
-        if(state->terminal)
-            printf("%zu ", state->id);
+        printf("  node [shape = point ]; q%zu\n", start->id);
     }
-    printf(";\n  node [shape = circle];\n");
+
+    printf("  node [shape = doublecircle]; \n");
+    arr_foreach(State *, state, aut->states)
+    {
+        if (state->terminal)
+            printf("  %zu;\n", state->id);
+    }
+    printf("  node [shape = circle];\n");
+    arr_foreach(State *, start_2, aut->starting_states)
+    {
+        printf("  q%zu -> %zu\n", start->id, start->id);
+    }
     arr_foreach(LinkedList *, transitions, aut->adj_lists)
     {
         transitions = transitions->next;
@@ -371,8 +379,8 @@ void automaton_to_dot(Automaton *aut)
                 memcpy(transition_str, "ε", 4);
             else
                 transition_str[0] = transition->value;
-            printf("  %zu -> %zu[label=\"%s\"]\n", index, transition->target->id,
-                   transition_str);
+            printf("  %zu -> %zu[label=\"%s\"]\n", index,
+                   transition->target->id, transition_str);
             transitions = transitions->next;
         }
 

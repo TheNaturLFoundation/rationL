@@ -70,18 +70,52 @@ void concatenate(Automaton *a, Automaton *b)
     array_free(states_b_htab);
 }
 
-void unite(Automaton *a, Automaton *b)
+State *add_new_entry(Automaton *a)
 {
-    Array *states_b_htab = connect_automatons(a, b, 0);
     State *new_entry = State(0);
     automaton_add_state(a, new_entry, 0);
-    arr_foreach(State*, entry, a->starting_states)
+    arr_foreach(State *, entry, a->starting_states)
     {
         automaton_add_transition(a, new_entry, entry, 'e', 1);
     }
     array_clear(a->starting_states);
     array_append(a->starting_states, &new_entry);
+    return new_entry;
+}
+
+void unite(Automaton *a, Automaton *b)
+{
+    Array *states_b_htab = connect_automatons(a, b, 0);
+    add_new_entry(a);
     array_free(states_b_htab);
+}
+
+void kleene(Automaton *a)
+{
+    State *new_end = State(0);
+    State *new_entry = State(0);
+    automaton_add_state(a, new_entry, 0);
+    automaton_add_state(a, new_end, 0);
+    automaton_add_transition(a, new_entry, new_end, 'e', 1);
+    arr_foreach(State*, state, a->states)
+    {
+        if(state->terminal)
+        {
+            arr_foreach(State *, entry, a->starting_states)
+            {
+                automaton_add_transition(a, state, entry, 'e', 1);
+            }
+            automaton_add_transition(a, state, new_end, 'e', 1);
+            state->terminal = 0;
+        }
+    }
+    arr_foreach(State *, entries, a->starting_states)
+    {
+        automaton_add_transition(a, new_entry, entries, 'e', 1);
+    }
+    array_clear(a->starting_states);
+    array_append(a->starting_states, &new_entry);
+    new_end->terminal = 1;
 }
 
 Automaton *thompson(BinTree *tree)
@@ -117,6 +151,11 @@ Automaton *thompson(BinTree *tree)
         unite(left, right);
         automaton_free(right);
         return left;
+    }
+    case KLEENE_STAR: {
+        Automaton *child = thompson(tree->left);
+        kleene(child);
+        return child;
     }
     default:
         break;

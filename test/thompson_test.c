@@ -41,3 +41,57 @@ Test(thompson, automaton_a_or_b)
     array_free(arr);
     bintree_free(b);
 }
+
+Test(thompson, automaton_aabb_or_bbaa_c)
+{
+    Array *arr = tokenize("(aabb|bbaa)c");
+    BinTree *b = parse_symbols(arr);
+    Automaton *aut = thompson(b);
+    // print_automaton(aut);
+    //automaton_to_dot(aut);
+    // cr_assert_eq(aut->size, 4);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+Test(thompson, automaton_a_star)
+{
+    Array *arr = tokenize("a*");
+    BinTree *b = parse_symbols(arr);
+    Automaton *aut = thompson(b);
+    // print_automaton(aut);
+    //automaton_to_dot(aut);
+    // cr_assert_eq(aut->size, 4);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+Test(thompson, automaton_aa_or_bb_star)
+{
+    Array *arr = tokenize("(aa|bb)*");
+    BinTree *b = parse_symbols(arr);
+    //tree_to_dot(b);
+    Automaton *aut = thompson(b);
+    // print_automaton(aut);
+    automaton_to_dot(aut);
+    // cr_assert_eq(aut->size, 4);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+Test(thompson, automaton_aa_or_bb_star_a_star_b_star_c)
+{
+    Array *arr = tokenize("((aa|b)*c)*|c");
+    BinTree *b = parse_symbols(arr);
+    //tree_to_dot(b);
+    Automaton *aut = thompson(b);
+    // print_automaton(aut);
+    //automaton_to_dot(aut);
+    // cr_assert_eq(aut->size, 4);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
