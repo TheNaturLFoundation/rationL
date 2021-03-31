@@ -37,9 +37,9 @@ char get_val(Symbol *symbol)
             return '|';
         case CONCATENATION:
             return '.';
-        case EXISTS:
-            return '?';
         case MAYBE:
+            return '?';
+        case EXISTS:
             return '+';
         }
     else

@@ -75,7 +75,7 @@ Test(thompson, automaton_aa_or_bb_star)
     //tree_to_dot(b);
     Automaton *aut = thompson(b);
     // print_automaton(aut);
-    automaton_to_dot(aut);
+    //automaton_to_dot(aut);
     // cr_assert_eq(aut->size, 4);
     automaton_free(aut);
     array_free(arr);
@@ -91,6 +91,18 @@ Test(thompson, automaton_aa_or_bb_star_a_star_b_star_c)
     // print_automaton(aut);
     //automaton_to_dot(aut);
     // cr_assert_eq(aut->size, 4);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+Test(thompson, automaton_a_b_exists)
+{
+    Array *arr = tokenize("(ab)?");
+    BinTree *b = parse_symbols(arr);
+    tree_to_dot(b);
+    Automaton *aut = thompson(b);
+    automaton_to_dot(aut);
     automaton_free(aut);
     array_free(arr);
     bintree_free(b);

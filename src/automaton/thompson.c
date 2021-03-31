@@ -118,6 +118,23 @@ void kleene(Automaton *a)
     new_end->terminal = 1;
 }
 
+void exists(Automaton* aut)
+{
+    State* new_entry = add_new_entry(aut);
+    State* new_end = State(0);
+    automaton_add_state(aut, new_end, 0);
+    arr_foreach(State*, state, aut->states)
+    {
+        if(state->terminal)
+        {
+            automaton_add_transition(aut, state, new_end, 'e', 1);
+            state->terminal = 0;
+        }
+    }
+    new_end->terminal = 1;
+    automaton_add_transition(aut, new_entry, new_end, 'e', 1);
+}
+
 Automaton *thompson(BinTree *tree)
 {
     if (tree->left == NULL && tree->right == NULL)
@@ -155,6 +172,11 @@ Automaton *thompson(BinTree *tree)
     case KLEENE_STAR: {
         Automaton *child = thompson(tree->left);
         kleene(child);
+        return child;
+    }
+    case MAYBE: {
+        Automaton *child = thompson(tree->left);
+        exists(child);
         return child;
     }
     default:
