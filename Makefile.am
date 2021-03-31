@@ -49,8 +49,6 @@ criterion_tests_SOURCES = \
 			test/parsing_test_union_or_concatenation.c \
 			test/parsing_test_union_and_concatenation.c \
 			test/parsing_test_kleene_star.c \
-			test/parsing_test_exists.c \
-			test/parsing_test_maybe.c \
 			test/parsing_test_paranthesis_simple.c \
 			test/parsing_test_paranthesis_nested.c \
 			test/parsing_test_paranthesis_combinaision.c \

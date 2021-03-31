@@ -85,44 +85,43 @@ Test(parsing_union_or_concatenation, abc)
     array_free(arr);
 
     /*   EXPECTED :
-            .
-           / \
-          .   c
+          .
          / \
-        a   b
+        a   .
+           / \
+          b   c
     */
-
 
     // data in b == CONCATENATION ?
     Symbol symbol = (*(Symbol *)(b->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, CONCATENATION);
 
-    // data in b.left == CONCATENATION ?
+    // data in b.left == 'a' ?
     symbol = (*(Symbol *)(b->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'a');
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
+
+    //data in b.right == CONCATENATION ?
+    symbol = (*(Symbol *)(b->right->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, CONCATENATION);
 
-    //data in b.left.left == 'a' ?
-    symbol = (*(Symbol *)(b->left->left->data));
-    cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.letter, 'a');
-    cr_assert_eq(b->left->left->left, NULL);
-    cr_assert_eq(b->left->left->right, NULL);
-
-    //data in b.left.right == 'b' ?
-    symbol = (*(Symbol *)(b->left->right->data));
+    //data in b.right.left == 'b' ?
+    symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'b');
-    cr_assert_eq(b->left->right->left, NULL);
-    cr_assert_eq(b->left->right->right, NULL);
+    cr_assert_eq(b->right->left->left, NULL);
+    cr_assert_eq(b->right->left->right, NULL);
 
-    //data in b.right == 'c' ?
-    symbol = (*(Symbol *)(b->right->data));
+    //data in b.right.right == 'c' ?
+    symbol = (*(Symbol *)(b->right->right->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'c');
-    cr_assert_eq(b->right->left, NULL);
-    cr_assert_eq(b->right->right, NULL);
+    cr_assert_eq(b->right->right->left, NULL);
+    cr_assert_eq(b->right->right->right, NULL);
 
     bintree_free(b);
 }

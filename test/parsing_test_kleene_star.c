@@ -224,9 +224,11 @@ Test(parse_symbol, abc_star)
     /*   EXPECTED :
             .
            / \
-          .   *
-         / \  /
-        a   b c
+          a   .
+             / \
+            b   *
+               /
+              c
     */
 
     //data in b == CONCATENATION ?
@@ -234,37 +236,37 @@ Test(parse_symbol, abc_star)
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, CONCATENATION);
 
-    //data in b.left == CONCATENATION ?
+    //data in b.left == 'a' ?
     symbol = (*(Symbol *)(b->left->data));
-    cr_assert_eq(symbol.type, OPERATOR);
-    cr_assert_eq(symbol.value.letter, CONCATENATION);
-
-    //data in b.left.left == 'a' ?
-    symbol = (*(Symbol *)(b->left->left->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'a');
-    cr_assert_eq(b->left->left->left, NULL);
-    cr_assert_eq(b->left->left->right, NULL);
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
 
-    //data in b.leftLeft == 'b' ?
-    symbol = (*(Symbol *)(b->left->right->data));
-    cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.letter, 'b');
-    cr_assert_eq(b->left->right->left, NULL);
-    cr_assert_eq(b->left->right->right, NULL);
-
-    //data in b.right == KLEENE_STAR ?
+    //data in b.right == CONCATENATION ?
     symbol = (*(Symbol *)(b->right->data));
     cr_assert_eq(symbol.type, OPERATOR);
-    cr_assert_eq(symbol.value.operator, KLEENE_STAR);
-    cr_assert_eq(b->right->right, NULL);
+    cr_assert_eq(symbol.value.operator, CONCATENATION);
 
-    //data in b.right.left == 'c' ?
+    //data in b.right.left == 'b' ?
     symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, LETTER);
-    cr_assert_eq(symbol.value.letter, 'c');
+    cr_assert_eq(symbol.value.letter, 'b');
     cr_assert_eq(b->right->left->left, NULL);
     cr_assert_eq(b->right->left->right, NULL);
+
+    //data in b.right.right == KLEENE_STAR ?
+    symbol = (*(Symbol *)(b->right->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, KLEENE_STAR);
+    cr_assert_eq(b->right->right->right, NULL);
+
+    //data in b.right.rightleft == 'c' ?
+    symbol = (*(Symbol *)(b->right->right->left->data));
+    cr_assert_eq(symbol.type, LETTER);
+    cr_assert_eq(symbol.value.letter, 'c');
+    cr_assert_eq(b->right->right->left->left, NULL);
+    cr_assert_eq(b->right->right->left->right, NULL);
 
     bintree_free(b);
 }

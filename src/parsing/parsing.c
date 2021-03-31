@@ -2,13 +2,14 @@
 
 #include <stdio.h>
 
+#include "datatypes/array.h"
 #include "datatypes/bin_tree.h"
 #include "lexer.h"
 
-BinTree *parse_paranthesis(Array *arr, size_t *pos);
+BinTree *parse_paranthesis(BinTree *left, Array *arr, size_t *pos);
 BinTree *parse_sub(Array *arr, size_t *pos);
-BinTree *parse_unary_operator(BinTree *left, Array *arr, size_t *pos);
-BinTree *parse_binary_operator(BinTree *left, Array *arr, size_t *pos);
+BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos);
+BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos);
 
 /**
  * Turn a token into a symbol
@@ -95,150 +96,129 @@ int is_unary(Token *token)
 }
 
 //   * + and ?    (KLEENE_STAR EXISTS and MAYBE)
-BinTree *parse_unary_operator(BinTree *left, Array *arr, size_t *pos)
+BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
+    Token *prev_token = array_get(arr, *pos);
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
-
     b->left = left;
-    *pos += 1;
 
+    *pos += 1;
     return b;
 }
 
 //   . and |    (CONCATENATION and UNION)
-BinTree *parse_binary_operator(BinTree *left, Array *arr, size_t *pos)
+BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
-    Token *token = (Token *)(array_get(arr, *pos));
+    Token *prev_token = array_get(arr, *pos);
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
-
     b->left = left;
+
+    // There is always something after a binary operator
+    // No need to check the validity of the position
     *pos += 1;
+    Token *current_token = array_get(arr, *pos);
 
-    // Handle CONCATENATION priority
-    if (token->type == PUNCTUATION && token->value == '|' && *pos + 1 < arr->size)
+    // After a binary operator, there is either a letter or an opening paranthesis
+    if (current_token->type == LITERAL)
     {
-        Token *tok = (Token *)(array_get(arr, *pos + 1));
-        if (tok->type == PUNCTUATION && tok->value == '.')
+        // Handle priorities/closing paranthesis
+        if (*pos + 1 < arr->size)
         {
-            Symbol symbol = array_element_to_symbol(arr, *pos);
-            BinTree *tmp = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
-            *pos += 1;
-
-            b->right = parse_binary_operator(tmp, arr, pos);
-            return b;
+            Token *next_token = array_get(arr, *pos+1);
+            // Binary priorities
+            if ( next_token->value == '.' &&
+                 (prev_token->value == '|' || prev_token->value == '.'))
+            {
+                b->right = parse_sub(arr, pos);
+                // Check for unary operator
+                if (*pos < arr->size)
+                {
+                    Token *tok = array_get(arr, *pos);
+                    if (is_unary(tok))
+                        return parse_unary(b, arr, pos);
+                }
+                return b;
+            }
+            // Unary priorities
+            if (is_unary(next_token))
+            {
+                Symbol s = array_element_to_symbol(arr, *pos);
+                BinTree *tmp = BinTree(Symbol, &s, .left = NULL, .right = NULL);
+                *pos += 1;
+                b->right = parse_unary(tmp, arr, pos);
+                return b;
+            }
+            if (next_token->value == ')')
+            {
+                Symbol s = array_element_to_symbol(arr, *pos);
+                b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
+                *pos += 1;
+                return b;
+            }
         }
+        // No particular priority
+        Symbol s = array_element_to_symbol(arr, *pos);
+        b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
+        *pos += 1;
+        return b;
+    }
+    else // Opening paranthesis
+    {
+        b->right = parse_sub(arr, pos);
+        return b;
     }
 
-    if (token->type == PUNCTUATION && token->value == '.' && *pos + 1 < arr->size)
-    {
-        Token *tok = (Token *)(array_get(arr, *pos + 1));
-        if (tok->type == PUNCTUATION && (tok->value == '.' || tok->value == '|'))
-        {
-            Symbol symbol = array_element_to_symbol(arr, *pos);
-            b->right = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
-            *pos += 1;
-            return parse_binary_operator(b, arr, pos);
-        }
-    }
+    return NULL;
+}
 
-
-    // Handle unary priority
-    if (*pos + 2 < arr->size)
-    {
-        Token *token = (Token *)(array_get(arr, *pos + 2));
-
-        if (is_unary(token))
-        {
-            Symbol symbol = array_element_to_symbol(arr, *pos);
-            b->right = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
-            *pos += 2;
-            return parse_unary_operator(b, arr, pos);
-        }
-    }
-    b->right = parse_sub(arr, pos);
-
-    return b;
+BinTree *parse_paranthesis(BinTree *left, Array *arr, size_t *pos)
+{
+    return NULL;
 }
 
 
 BinTree *parse_sub(Array *arr, size_t *pos)
 {
     Token *token = array_get(arr, *pos);
-    Token *old_token = NULL;
-    BinTree *b = NULL;
-
-    // Handle opening paranthesis
-    if (token->type == PUNCTUATION && token->value == '(' && *pos < arr->size)
+    // token is an operator
+    if(token->value == '(')
     {
         *pos += 1;
-        return parse_sub(arr, pos);
-    }
-
-    // Initialise the binay tree
-    Symbol symbol = array_element_to_symbol(arr, *pos);
-    b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
-
-    // Increment the position
-    *pos += 1;
-    if (*pos >= arr->size)
-        return b;
-    token = array_get(arr, *pos);
-
-
-    // Handle closing paranthesis
-    if (token->type == PUNCTUATION && token->value == ')')
-    {
-        *pos += 1;
-        if (*pos < arr->size)
+        BinTree *tree = parse_sub(arr, pos);
+        if (*pos+1 < arr->size)
         {
-            Token *token = array_get(arr, *pos);
+            token = array_get(arr, *pos+1);
             if (is_unary(token))
             {
-                Symbol symbol = array_element_to_symbol(arr, *pos);
                 *pos += 1;
-                return BinTree(Symbol, &symbol, .left = b, .right = NULL);
+                return parse_unary(tree, arr, pos);
             }
         }
+        return tree;
+
+    }
+
+    Symbol symbol = array_element_to_symbol(arr, *pos);
+    BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
+    *pos += 1;
+
+    // Check the validity of the position
+    if (*pos >= arr->size)
+        return b;
+
+    token = array_get(arr, *pos);
+    if (token->value == ')')
+    {
+        *pos += 1;
+        // Check binary unary closing paranthesis
         return b;
     }
-
-    // Get previous operator (for priorities)
-    if (*pos > 1)
-        old_token = array_get(arr, *pos - 2);
-    else
-        return b;
-
-    // If old_token is a paranthesis, we don't care about operator priorities
-    if (old_token->type == PUNCTUATION && old_token->value == '(')
-    {
-        if (is_unary(token))
-            return parse_unary_operator(b, arr, pos);
-        else
-            return parse_binary_operator(b, arr, pos);
-    }
-
-    // The previous punctuation was a concatenation
-    if (old_token->type == PUNCTUATION && old_token->value == '.')
-    {
-        // Only unary operators have priority
-        if (is_unary(token))
-            return parse_unary_operator(b, arr, pos);
-    }
-
-    // The previous punctuation was an union
-    if (old_token->type == PUNCTUATION && old_token->value == '|')
-    {
-        // Both unary and binary have priority (except the union)
-        if (token->type == PUNCTUATION && token->value == '.')
-            b = parse_binary_operator(b, arr, pos);
-        else if (is_unary(token))
-            b = parse_unary_operator(b, arr, pos);
-    }
-
-
-    return b;
+    if (is_binary(token))
+        return parse_binary(b, arr, pos);
+    if (is_unary(token))
+        return parse_unary(b, arr, pos);
 }
 
 BinTree *parse_symbols(Array *arr)
@@ -250,21 +230,19 @@ BinTree *parse_symbols(Array *arr)
     size_t size = arr->size;
     BinTree *b = parse_sub(arr, &pos);
 
-    while (pos < size)
+    while (pos < arr->size)
     {
         Token *token = array_get(arr, pos);
-        if (token->type == PUNCTUATION)
+        if (is_binary(token))
+            b = parse_binary(b, arr, &pos);
+        else
         {
-            if (is_binary(token))
-                b = parse_binary_operator(b, arr, &pos);
+            if (is_unary(token))
+                b = parse_unary(b, arr, &pos);
             else
-            {
-                if (is_unary(token))
-                    b = parse_unary_operator(b, arr, &pos);
-                else if (token->type == PUNCTUATION && token->value == ')')
-                    pos += 1;
-            }
+                pos += 1;
         }
     }
+
     return b;
 }
