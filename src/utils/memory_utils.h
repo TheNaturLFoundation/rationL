@@ -3,9 +3,15 @@
 #include <stdlib.h>
 #include <err.h>
 
-#define SAFEMALLOC(n) safe_malloc(n, __LINE__)
-#define SAFECALLOC(n, m) safe_calloc(n, m, __LINE__)
-#define SAFEREALLOC(p, n) safe_realloc(p, n, __LINE__)
+#ifndef DEBUG
+  #define SAFEMALLOC(n) safe_malloc(n, __LINE__)
+  #define SAFECALLOC(n, m) safe_calloc(n, m, __LINE__)
+  #define SAFEREALLOC(p, n) safe_realloc(p, n, __LINE__)
+#else
+  #define SAFEMALLOC(n) malloc(n)
+  #define SAFECALLOC(n, m) calloc(n, m)
+  #define SAFEREALLOC(p, m) realloc(n, m)
+#endif
 
 void* safe_malloc(size_t n, unsigned long line);
 

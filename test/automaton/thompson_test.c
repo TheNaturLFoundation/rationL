@@ -5,9 +5,6 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
-#define STRINGIZE_(x) #x
-#define TEST_PATH STRINGIZE_(test/daut_files/)
-
 Test(thompson, automaton_a)
 {
     Array *arr = tokenize("a");

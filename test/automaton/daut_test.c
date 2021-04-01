@@ -2,8 +2,6 @@
 #include <criterion/internal/assert.h>
 #include "automaton/automaton.h"
 
-#define STRINGIZE_(x) #x
-#define TEST_PATH STRINGIZE_(test/daut_files/)
 #define ASSERT_AUTOMATON_EQ(a1, a2) assert_automaton_eq(__LINE__, a1, a2)
 
 void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
@@ -103,7 +101,7 @@ Test(daut, a_or_b)
     automaton_add_transition(expected, q0, q1, 'a', 0);
     automaton_add_transition(expected, q0, q2, 'b', 0);
 
-    Automaton *a_or_b = automaton_from_daut(TEST_PATH "a+b.daut");
+    Automaton *a_or_b = automaton_from_daut(TEST_PATH "/automaton/a+b.daut");
     ASSERT_AUTOMATON_EQ(a_or_b, expected);
 
     automaton_free(expected);
@@ -135,7 +133,7 @@ Test(daut, abba)
     automaton_add_transition(expected, q3, q4, 'b', 0);
     automaton_add_transition(expected, q4, q5, 'a', 0);
 
-    Automaton *abba = automaton_from_daut(TEST_PATH "abba.daut");
+    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
     ASSERT_AUTOMATON_EQ(abba, expected);
 
     automaton_free(expected);

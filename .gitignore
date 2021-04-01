@@ -28,7 +28,7 @@ reports/
 *.gcno
 *.gcda
 *.info
-
+*_tests
 #Autoheader files
 stamp-h1
 include/config.h
