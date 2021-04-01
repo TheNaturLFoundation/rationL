@@ -124,9 +124,9 @@ Test(parse_union_and_concatenation, a_or_bc_or_d)
     /*   EXPECTED:
            |
           / \
-         |   d
-        / \
-       a   .
+         a   |
+            / \
+           .   d
           / \
          b   c
     */
@@ -136,43 +136,43 @@ Test(parse_union_and_concatenation, a_or_bc_or_d)
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, UNION);
 
-    // data in b.left == UNION ?
+    // data in b.left == 'a' ?
     symbol = (*(Symbol *)(b->left->data));
-    cr_assert_eq(symbol.type, OPERATOR);
-    cr_assert_eq(symbol.value.letter, UNION);
-
-    //data in b.right == 'a' ?
-    symbol = (*(Symbol *)(b->left->left->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'a');
-    cr_assert_eq(b->left->left->left, NULL);
-    cr_assert_eq(b->left->left->right, NULL);
+    cr_assert_eq(b->left->left, NULL);
+    cr_assert_eq(b->left->right, NULL);
 
-    //data in b.left.right == CONCATENATION ?
-    symbol = (*(Symbol *)(b->left->right->data));
+    //data in b.right == UNION ?
+    symbol = (*(Symbol *)(b->right->data));
+    cr_assert_eq(symbol.type, OPERATOR);
+    cr_assert_eq(symbol.value.operator, UNION);
+
+    //data in b.right.left == CONCATENATION ?
+    symbol = (*(Symbol *)(b->right->left->data));
     cr_assert_eq(symbol.type, OPERATOR);
     cr_assert_eq(symbol.value.operator, CONCATENATION);
 
-    //data in bleft.right.left == 'b' ?
-    symbol = (*(Symbol *)(b->left->right->left->data));
+    //data in b.right.left.left == 'b' ?
+    symbol = (*(Symbol *)(b->right->left->left->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'b');
-    cr_assert_eq(b->left->right->left->left, NULL);
-    cr_assert_eq(b->left->right->left->right, NULL);
+    cr_assert_eq(b->right->left->left->left, NULL);
+    cr_assert_eq(b->right->left->left->right, NULL);
 
-    //data in b.left.right.right == 'c'
-    symbol = (*(Symbol *)(b->left->right->right->data));
+    //data in b.right.left.right == 'c'
+    symbol = (*(Symbol *)(b->right->left->right->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'c');
-    cr_assert_eq(b->left->right->right->left, NULL);
-    cr_assert_eq(b->left->right->right->right, NULL);
+    cr_assert_eq(b->right->left->right->left, NULL);
+    cr_assert_eq(b->right->left->right->right, NULL);
 
-    //data in b.right. == 'd'
-    symbol = (*(Symbol *)(b->right->data));
+    //data in b.right.right == 'd'
+    symbol = (*(Symbol *)(b->right->right->data));
     cr_assert_eq(symbol.type, LETTER);
     cr_assert_eq(symbol.value.letter, 'd');
-    cr_assert_eq(b->right->left, NULL);
-    cr_assert_eq(b->right->right, NULL);
+    cr_assert_eq(b->right->right->left, NULL);
+    cr_assert_eq(b->right->right->right, NULL);
 
     bintree_free(b);
 }
