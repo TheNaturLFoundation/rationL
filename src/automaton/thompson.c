@@ -87,6 +87,17 @@ void unite(Automaton *a, Automaton *b)
 {
     Array *states_b_htab = connect_automatons(a, b, 0);
     add_new_entry(a);
+    State *new_end = State(0);
+    automaton_add_state(a, new_end, 0);
+    arr_foreach(State*, state, a->states)
+    {
+        if(state->terminal)
+        {
+            automaton_add_transition(a, state, new_end, 'e', 1);
+            state->terminal = 0;
+        }
+    }
+    new_end->terminal = 1;
     array_free(states_b_htab);
 }
 

@@ -5,6 +5,9 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
+#define STRINGIZE_(x) #x
+#define TEST_PATH STRINGIZE_(test/daut_files/)
+
 Test(thompson, automaton_a)
 {
     Array *arr = tokenize("a");
@@ -22,7 +25,7 @@ Test(thompson, automaton_a_b)
     Array *arr = tokenize("ab");
     BinTree *b = parse_symbols(arr);
     Automaton *aut = thompson(b);
-    // print_automaton(aut);
+    //automaton_to_dot(aut);
     cr_assert_eq(aut->size, 4);
     automaton_free(aut);
     array_free(arr);
@@ -124,6 +127,18 @@ Test(thompson, automaton_a_b_exists)
 Test(thompson, aa_star)
 {
     Array *arr = tokenize("aa*");
+    BinTree *b = parse_symbols(arr);
+    //tree_to_dot(b);
+    Automaton *aut = thompson(b);
+    //automaton_to_dot(aut);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+Test(thompson, identifier)
+{
+    Array *arr = tokenize("a{15,}");
     BinTree *b = parse_symbols(arr);
     //tree_to_dot(b);
     Automaton *aut = thompson(b);
