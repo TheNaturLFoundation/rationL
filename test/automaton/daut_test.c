@@ -101,7 +101,7 @@ Test(daut, a_or_b)
     automaton_add_transition(expected, q0, q1, 'a', 0);
     automaton_add_transition(expected, q0, q2, 'b', 0);
 
-    Automaton *a_or_b = automaton_from_daut("automaton/a+b.daut");
+    Automaton *a_or_b = automaton_from_daut(TEST_PATH "automaton/a+b.daut");
     ASSERT_AUTOMATON_EQ(a_or_b, expected);
 
     automaton_free(expected);
@@ -133,7 +133,7 @@ Test(daut, abba)
     automaton_add_transition(expected, q3, q4, 'b', 0);
     automaton_add_transition(expected, q4, q5, 'a', 0);
 
-    Automaton *abba = automaton_from_daut("automaton/abba.daut");
+    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
     ASSERT_AUTOMATON_EQ(abba, expected);
 
     automaton_free(expected);

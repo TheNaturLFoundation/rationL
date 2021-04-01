@@ -1,5 +1,5 @@
 SUBDIRS = include . test
-EXTRA_DIST = docs
+EXTRA_DIST = docs test
 AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
 AM_LDFLAGS = -shared -O3
 

@@ -1,9 +1,8 @@
 #Setup linking
-AM_CPPFLAGS = -I$(top_srcdir)/src/
+AM_CPPFLAGS = -I$(top_srcdir)/src/  -DTEST_PATH=\"$(top_srcdir)/test/\"
 AM_LDFLAGS  = $(CRITERION_LIBS)
 AM_CFLAGS 	= $(CRITERION_CFLAGS)
-
-LDADD = $(top_srcdir)/librationl.la
+LDADD = $(top_builddir)/librationl.la
 
 TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
             $(top_srcdir)/tap-driver.sh
@@ -13,6 +12,7 @@ TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 AM_TESTS_ENVIRONMENT = \
    CRITERION_OUTPUTS='tap:-'; \
    export CRITERION_OUTPUTS;
+
 
 
 AUTOMAKE_OPTIONS = serial-tests

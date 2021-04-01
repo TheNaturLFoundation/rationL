@@ -9,7 +9,7 @@
 
 Test(matching, abba)
 {
-    Automaton *abba = automaton_from_daut("automaton/abba.daut");
+    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
     cr_assert(match_nfa(abba, "abba"));
     cr_assert(!match_nfa(abba, "abb"));
     cr_assert(!match_nfa(abba, "abbaa"));
@@ -20,7 +20,7 @@ Test(matching, abba)
 
 Test(matching, a_or_b)
 {
-    Automaton *a_or_b = automaton_from_daut("automaton/a+b.daut");
+    Automaton *a_or_b = automaton_from_daut(TEST_PATH "automaton/a+b.daut");
     cr_assert(match_nfa(a_or_b, "a"));
     cr_assert(match_nfa(a_or_b, "b"));
     cr_assert(!match_nfa(a_or_b, "c"));
@@ -33,7 +33,7 @@ Test(matching, a_or_b)
 
 Test(matching, ab_or_cstar)
 {
-    Automaton *ab_or_cstar = automaton_from_daut("automaton/ab+cstar.daut");
+    Automaton *ab_or_cstar = automaton_from_daut(TEST_PATH "automaton/ab+cstar.daut");
     cr_assert(match_nfa(ab_or_cstar, "c"));
     cr_assert(match_nfa(ab_or_cstar, "ab"));
     cr_assert(match_nfa(ab_or_cstar, ""));
