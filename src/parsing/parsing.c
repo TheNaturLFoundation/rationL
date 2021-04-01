@@ -138,6 +138,13 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
                 }
                 return b;
             }
+            if (is_binary(next_token))
+            {
+                Symbol s = array_element_to_symbol(arr, *pos);
+                b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
+                *pos += 1;
+                return parse_binary(b, arr, pos);
+            }
             // Unary priorities
             if (is_unary(next_token))
             {
