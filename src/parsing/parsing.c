@@ -65,9 +65,6 @@ Symbol array_element_to_symbol(Array *arr, size_t pos)
 
 int is_binary(Token *token)
 {
-
-
-
     switch (token->value)
     {
         case '.':
@@ -187,13 +184,18 @@ BinTree *parse_sub(Array *arr, size_t *pos)
     {
         *pos += 1;
         BinTree *tree = parse_sub(arr, pos);
-        if (*pos+1 < arr->size)
+        if (*pos < arr->size)
         {
-            token = array_get(arr, *pos+1);
-            if (is_unary(token))
-            {
+            token = array_get(arr, *pos);
+            if (token->value == ')')
                 *pos += 1;
-                return parse_unary(tree, arr, pos);
+            if (*pos < arr->size)
+            {
+                token = array_get(arr, *pos);
+                if (is_unary(token))
+                {
+                    return parse_unary(tree, arr, pos);
+                }
             }
         }
         return tree;
