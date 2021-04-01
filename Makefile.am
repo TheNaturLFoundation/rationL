@@ -16,7 +16,7 @@ librationl_la_SOURCES = \
 	src/datatypes/array.c \
 	src/datatypes/array.h \
 	src/utils/memory_utils.c \
-	src/utils/memory_tils.h \
+	src/utils/memory_utils.h \
 	src/datatypes/bin_tree.c \
 	src/datatypes/bin_tree.h \
 	src/parsing/lexer.c \

@@ -1,10 +1,9 @@
-#include "automaton.h"
-
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
+#include "automaton/automaton.h"
 #include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
@@ -289,10 +288,6 @@ static void parse_line(Automaton *automaton, const char *line, Array *mapping)
                                  is_epsilon);
 }
 
-/*Automaton *thompson(BinTree *tree)
-{
-
-}*/
 
 Automaton *automaton_from_daut(const char *filename)
 {
@@ -335,7 +330,7 @@ void print_automaton(Automaton *aut)
             Transition *transition = transitions->data;
             char transition_str[5] = { 0 };
             if (transition->is_epsilon)
-                memcpy(transition_str, "ε", 4);
+                memcpy(transition_str, "ε", 3);
             else
                 transition_str[0] = transition->value;
             printf("%zu - %s -> %zu\n", index, transition_str,
@@ -376,7 +371,7 @@ void automaton_to_dot(Automaton *aut)
             Transition *transition = transitions->data;
             char transition_str[5] = { 0 };
             if (transition->is_epsilon)
-                memcpy(transition_str, "ε", 4);
+                memcpy(transition_str, "ε", 3);
             else
                 transition_str[0] = transition->value;
             printf("  %zu -> %zu[label=\"%s\"]\n", index,
