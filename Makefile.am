@@ -31,7 +31,7 @@ librationl_la_SOURCES = \
 
 COVERAGE_INFO_FILE = $(top_builddir)/coverage.info
 COVERAGE_REPORT_DIR = $(top_builddir)/reports/coverage
-COVERAGE_REPORT_FILES_GCNO = $(librationl_la_SOURCES:.c=.gcno)
+COVERAGE_REPORT_FILES_GCNO = $(librationl_la_SOURCES:.c|.h=.gcno)
 CODE_QUALITY_DIR = $(top_builddir)/reports/scan
 
 COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
