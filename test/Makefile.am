@@ -1,5 +1,5 @@
 #Setup linking
-AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
+AM_CPPFLAGS = -I$(top_srcdir)/src/
 AM_LDFLAGS  = $(CRITERION_LIBS)
 AM_CFLAGS 	= $(CRITERION_CFLAGS)
 
