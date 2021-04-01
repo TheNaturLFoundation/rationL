@@ -1,6 +1,10 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
 #include "automaton/automaton.h"
+#include "automaton/thompson.h"
+#include "datatypes/bin_tree.h"
+#include "datatypes/array.h"
+#include "parsing/parsing.h"
 #include "matching/matching.h"
 
 #define STRINGIZE_(x) #x
@@ -41,4 +45,22 @@ Test(matching, ab_or_cstar)
     cr_assert(!match_nfa(ab_or_cstar, "ac"));
 
     automaton_free(ab_or_cstar);
+}
+
+Test(matching, email)
+{
+    Array *email_tokens = tokenize("\\w+(\\.\\w+)?@\\w+(\\.[a-z]{2,})+");
+    BinTree *b = parse_symbols(email_tokens);
+    Automaton *email = thompson(b);
+
+    cr_assert(match_nfa(email, "rostan.tabet@gmail.com"));
+    cr_assert(match_nfa(email, "rostan.tabet@gmail.fr.edu"));
+    cr_assert(!match_nfa(email, ".tabet@gmail.com"));
+    cr_assert(!match_nfa(email, "rostan.tabet@gmail.c"));
+    cr_assert(!match_nfa(email, "rostan.tabet.gmail.com"));
+    cr_assert(!match_nfa(email, ""));
+
+    automaton_free(email);
+    array_free(email_tokens);
+    bintree_free(b);
 }
