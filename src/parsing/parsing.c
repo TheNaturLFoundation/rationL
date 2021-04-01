@@ -199,6 +199,10 @@ BinTree *parse_sub(Array *arr, size_t *pos)
             if (*pos < arr->size)
             {
                 token = array_get(arr, *pos);
+                if (is_binary(token))
+                {
+                    return parse_binary(tree, arr, pos);
+                }
                 if (is_unary(token))
                 {
                     return parse_unary(tree, arr, pos);
@@ -221,6 +225,13 @@ BinTree *parse_sub(Array *arr, size_t *pos)
     if (token->value == ')')
     {
         *pos += 1;
+        if (*pos < arr->size)
+        {
+            if (is_binary(token))
+                return parse_binary(b, arr, pos);
+            if (is_unary(token))
+                return parse_unary(b, arr, pos);
+        }
         // Check binary unary closing paranthesis
         return b;
     }
