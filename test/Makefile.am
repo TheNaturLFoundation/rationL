@@ -17,12 +17,13 @@ AM_TESTS_ENVIRONMENT = \
 
 AUTOMAKE_OPTIONS = serial-tests
 
-check_PROGRAMS = array_tests \
-				 bin_tree_tests \
-				 linked_list_tests \
-				 lexer_tests \
-				 automaton_tests \
-				 parsing_tests
+check_PROGRAMS = \
+			array_tests \
+			bin_tree_tests \
+			linked_list_tests \
+			lexer_tests \
+			automaton_tests \
+			parsing_tests
 
 
 array_tests_SOURCES = array/array_test.c

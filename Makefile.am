@@ -1,4 +1,5 @@
 SUBDIRS = include . test
+EXTRA_DIST = docs
 AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
 AM_LDFLAGS = -shared -O3
 
@@ -9,14 +10,23 @@ lib_LTLIBRARIES = librationl.la
 librationl_la_SOURCES = \
 	src/rationl.c \
 	src/automaton/automaton.c \
+	src/automaton/automaton.h \
 	src/datatypes/linked_list.c \
+	src/datatypes/linked_list.h \
 	src/datatypes/array.c \
+	src/datatypes/array.h \
 	src/utils/memory_utils.c \
+	src/utils/memory_tils.h \
 	src/datatypes/bin_tree.c \
+	src/datatypes/bin_tree.h \
 	src/parsing/lexer.c \
+	src/parsing/lexer.h \
 	src/parsing/parsing.c \
+	src/parsing/parsing.h \
 	src/matching/matching.c \
-	src/automaton/thompson.c
+	src/matching/matching.h \
+	src/automaton/thompson.c \
+	src/automaton/thompson.h
 
 
 COVERAGE_INFO_FILE = $(top_builddir)/coverage.info
