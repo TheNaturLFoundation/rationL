@@ -7,31 +7,34 @@ lib_LTLIBRARIES = librationl.la
 # Put here all the source files
 # that need to be compiled with
 # the dynamic library.
-librationl_la_SOURCES = \
+source_files = \
 	src/rationl.c \
 	src/automaton/automaton.c \
-	src/automaton/automaton.h \
 	src/datatypes/linked_list.c \
-	src/datatypes/linked_list.h \
 	src/datatypes/array.c \
-	src/datatypes/array.h \
 	src/utils/memory_utils.c \
-	src/utils/memory_utils.h \
 	src/datatypes/bin_tree.c \
-	src/datatypes/bin_tree.h \
 	src/parsing/lexer.c \
-	src/parsing/lexer.h \
 	src/parsing/parsing.c \
-	src/parsing/parsing.h \
 	src/matching/matching.c \
+	src/automaton/thompson.c
+
+header_files = \
+	src/automaton/automaton.h \
+	src/datatypes/linked_list.h \
+	src/datatypes/array.h \
+	src/utils/memory_utils.h \
+	src/datatypes/bin_tree.h \
+	src/parsing/lexer.h \
+	src/parsing/parsing.h \
 	src/matching/matching.h \
-	src/automaton/thompson.c \
 	src/automaton/thompson.h
 
+librationl_la_SOURCES = $(source_files) $(header_files)
 
 COVERAGE_INFO_FILE = $(top_builddir)/coverage.info
 COVERAGE_REPORT_DIR = $(top_builddir)/reports/coverage
-COVERAGE_REPORT_FILES_GCNO = $(librationl_la_SOURCES:.c|.h=.gcno)
+COVERAGE_REPORT_FILES_GCNO = $(source_files:.c=.gcno)
 CODE_QUALITY_DIR = $(top_builddir)/reports/scan
 
 COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
