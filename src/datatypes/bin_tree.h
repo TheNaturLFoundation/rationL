@@ -2,6 +2,7 @@
 #define BIN_TREE_H
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -51,6 +52,7 @@ Frees the binary tree.
 
 void bintree_free(BinTree *tree);
 
-void tree_to_dot(BinTree *t);
+
+void bin_tree_to_dot(BinTree *t, FILE* file);
 
 #endif

@@ -1,7 +1,7 @@
-#include "bin_tree.h"
-
 #include <stdio.h>
 
+#include "bin_tree.h"
+#include "linked_list.h"
 #include "parsing/parsing.h"
 #include "utils/memory_utils.h"
 
@@ -26,7 +26,8 @@ void bintree_free(BinTree *tree)
         free(tree);
     }
 }
-char get_val(Symbol *symbol)
+
+char __get_symbol_value(Symbol *symbol)
 {
     if (symbol->type == OPERATOR)
         switch (symbol->value.operator)
@@ -46,26 +47,36 @@ char get_val(Symbol *symbol)
         return symbol->value.letter;
 }
 
-void __tree_to_dot(BinTree *tree, size_t current)
-{
-    printf("  node%zu [label=\"%c\"];\n", current, get_val(tree->data));
-    if (tree->left != NULL)
-    {
-        printf("  node%zu -> node%zu;\n", current, 2 * current);
-        __tree_to_dot(tree->left, 2 * current);
-    }
-    if (tree->right != NULL)
-    {
-        printf("  node%zu -> node%zu;\n", current, 2 * current + 1);
-        __tree_to_dot(tree->right, 2 * current + 1);
-    }
-}
 
-void tree_to_dot(BinTree *tree)
+void bin_tree_to_dot(BinTree *tree, FILE* file)
 {
-    printf("digraph {\n");
-    __tree_to_dot(tree, 1);
-    printf("}\n");
+    fprintf(file, "digraph {\n");
+    LinkedList *queue = LinkedList(BinTree*);
+    if (tree)
+    {
+        list_push_back(queue, &tree);
+        fprintf(file, "  %zu [label=\"%c\"]\n", (size_t) tree, __get_symbol_value(tree->data));
+    }
+    while(queue->next)
+    {
+        LinkedList* node_list = list_pop_front(queue);
+        BinTree *node = *(BinTree**)(node_list->data);
+        if(node->left)
+        {
+            fprintf(file, "  %zu[label=\"%c\"]\n", (size_t) node->left, __get_symbol_value(node->left->data));
+            fprintf(file, "  %zu  ->  %zu\n", (size_t) node, (size_t) node->left);
+            list_push_back(queue, &node->left);
+        }
+        if(node->right)
+        {
+            fprintf(file, "  %zu[label=\"%c\"]\n", (size_t) node->right, __get_symbol_value(node->right->data));
+            fprintf(file, "  %zu  ->  %zu\n", (size_t) node, (size_t) node->right);
+            list_push_back(queue, &node->right);
+        }
+        list_free(node_list);
+    }
+    list_free(queue);
+    fprintf(file, "}\n");
 }
 
 /*
