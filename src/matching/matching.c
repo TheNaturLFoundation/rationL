@@ -79,5 +79,9 @@ int match_nfa_from_state(const Automaton *automaton, const char *string,
 
 int match_nfa(const Automaton *automaton, const char *string)
 {
+    arr_foreach(
+        State *, start,
+        automaton->starting_states) if (match_nfa_from_state(automaton, string,
+                                                             start)) return 1;
     return 0;
 }
