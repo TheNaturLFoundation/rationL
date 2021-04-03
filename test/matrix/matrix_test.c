@@ -18,4 +18,5 @@ Test(matrix, matrix_init_h_w)
     Matrix * mat = Matrix(10, 5, 0);
     cr_assert_eq(mat->height, 10);
     cr_assert_eq(mat->width, 5);
+    matrix_free(mat);
 }

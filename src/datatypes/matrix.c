@@ -23,7 +23,8 @@ void matrix_free(Matrix *mat)
 {
     size_t len = mat->height*mat->width;
     for (size_t i = 0; i < len; i++)
-        mat->mat[i] = LinkedList(long);
+        list_free(mat->mat[i]);
+    free(mat->mat);
     free(mat);
 }
 
