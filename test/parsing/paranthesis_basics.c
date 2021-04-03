@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
-
+#include "test_utils.h"
 /*
 Test(l, l, .disabled=0)
 {

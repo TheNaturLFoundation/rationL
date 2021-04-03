@@ -347,9 +347,9 @@ void automaton_to_dot(Automaton *aut)
             printf("  %zu;\n", state->id);
     }
     printf("  node [shape = circle];\n");
-    arr_foreach(State *, start_2, aut->starting_states)
+    arr_foreach(State *, state_2, aut->starting_states)
     {
-        printf("  q%zu -> %zu\n", start->id, start->id);
+        printf("  q%zu -> %zu\n", state_2->id, state_2->id);
     }
     arr_foreach(LinkedList *, transitions, aut->adj_lists)
     {

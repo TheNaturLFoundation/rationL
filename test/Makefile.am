@@ -1,5 +1,5 @@
 #Setup linking
-AM_CPPFLAGS = -I$(top_srcdir)/src/  -DTEST_PATH=\"$(top_srcdir)/test/\"
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/test/  -DTEST_PATH=\"$(top_srcdir)/test/\"
 AM_LDFLAGS  = $(CRITERION_LIBS)
 AM_CFLAGS 	= $(CRITERION_CFLAGS)
 LDADD = $(top_builddir)/librationl.la
@@ -43,6 +43,7 @@ automaton_tests_SOURCES = \
 parsing_tests_SOURCES = \
 			parsing/binary_basics.c \
 			parsing/binary_more.c \
-			parsing/paranthesis_basics.c
+			parsing/paranthesis_basics.c \
+			test_utils.c
 
 TESTS = $(check_PROGRAMS)

@@ -46,8 +46,7 @@ char __get_symbol_value(Symbol *symbol)
         case EXISTS:
             return '+';
         }
-    else
-        return symbol->value.letter;
+    return symbol->value.letter;
 }
 
 struct TreeSerializeData
@@ -72,9 +71,10 @@ Operator __parse_op(char c)
     case '?':
         return MAYBE;
     }
+    return KLEENE_STAR;
 }
 
-BinTree *dot_to_bin_tree(char *path)
+BinTree *dot_to_bin_tree(const char *path)
 {
     FILE *file = fopen(path, "r");
     if (file == NULL)
@@ -101,7 +101,6 @@ BinTree *dot_to_bin_tree(char *path)
         array_append(corresp_table, &d);
         size_t from, to;
         fscanf(file, "  %zu  ->  %zu\n", &from, &to);
-        size_t index = 0;
         arr_foreach(struct TreeSerializeData, data, corresp_table)
         {
             if (data.index == from)

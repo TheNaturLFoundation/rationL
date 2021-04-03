@@ -55,7 +55,7 @@ void bintree_free(BinTree *tree);
 void bin_tree_to_dot(BinTree *t, FILE* file);
 
 
-BinTree *dot_to_bin_tree(char* path);
+BinTree *dot_to_bin_tree(const char* path);
 
 /**
  * @brief Check if 2 bintrees filled with Symbols are the same
