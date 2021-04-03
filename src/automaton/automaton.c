@@ -1,9 +1,11 @@
+#include "automaton/automaton.h"
+
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
-#include "automaton/automaton.h"
+#include "datatypes/array.h"
 #include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
@@ -141,6 +143,27 @@ void automaton_remove_state(Automaton *automaton, State *state)
     array_remove(automaton->states, state->id);
     automaton->size -= 1;
     free(state);
+}
+
+char *build_adjacency_matrix(Automaton *aut)
+{
+    char *mat = SAFECALLOC(aut->size * aut->size, sizeof(char));
+    size_t index = 0;
+    arr_foreach(LinkedList *, transitions, aut->adj_lists)
+    {
+        transitions = transitions->next;
+        while (transitions != NULL)
+        {
+            Transition *transition = transitions->data;
+            if (transition->is_epsilon)
+                mat[index*aut->size + transition->target->id] = -1;
+            else
+                mat[index*aut->size + transition->target->id] = transition->value;
+            transitions = transitions->next;
+        }
+        index += 1;
+    }
+    return mat;
 }
 
 static int is_blank(char c)
@@ -288,7 +311,6 @@ static void parse_line(Automaton *automaton, const char *line, Array *mapping)
         automaton_add_transition(automaton, src_state, dst_state, value,
                                  is_epsilon);
 }
-
 
 Automaton *automaton_from_daut(const char *filename)
 {
