@@ -21,6 +21,7 @@ check_PROGRAMS = \
 			array_tests \
 			bin_tree_tests \
 			linked_list_tests \
+			matrix_tests \
 			lexer_tests \
 			automaton_tests \
 			parsing_tests
@@ -31,6 +32,8 @@ array_tests_SOURCES = array/array_test.c
 bin_tree_tests_SOURCES = bin_tree/bin_tree_test.c
 
 linked_list_tests_SOURCES = linked_list/linked_list_test.c
+
+matrix_tests_SOURCES = matrix/matrix_test.c
 
 lexer_tests_SOURCES = lexer/lexer_test.c
 
