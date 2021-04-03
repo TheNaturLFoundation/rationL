@@ -10,7 +10,7 @@
 #else
   #define SAFEMALLOC(n) malloc(n)
   #define SAFECALLOC(n, m) calloc(n, m)
-  #define SAFEREALLOC(p, m) realloc(n, m)
+  #define SAFEREALLOC(p, m) realloc(p, m)
 #endif
 
 void* safe_malloc(size_t n, unsigned long line);

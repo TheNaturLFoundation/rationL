@@ -50,6 +50,8 @@ LinkedList *list_pop_at(LinkedList *list, ssize_t position)
          curr = curr->next, curr_pos++)
         ;
     curr->previous->next = curr->next;
+    if(curr->next)
+        curr->next->previous = curr->previous;
     curr->next = NULL;
     curr->previous = NULL;
     return curr;
@@ -62,7 +64,7 @@ LinkedList *list_pop(LinkedList *list)
 
 LinkedList *list_pop_front(LinkedList *list)
 {
-    return list_pop_at(list, 0);
+    list_pop_at(list, 0);
 }
 
 LinkedList *list_get(LinkedList *list, ssize_t position)

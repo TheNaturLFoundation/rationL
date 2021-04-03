@@ -106,12 +106,13 @@ void automaton_remove_state(Automaton *automaton, State *state)
     {
         antoine = 0;
         cpy = list;
-        while (list->next != NULL)
+        while (list && list->next != NULL)
         {
             tr = list->next->data;
             list = list->next;
             if (tr->target == state)
             {
+                list = list->next;
                 list_free(list_pop_at(cpy, antoine));
             }
             else

@@ -28,7 +28,7 @@ int match_nfa_from_state_rec(const Automaton *automaton, const char *string,
  */
 
 int match_nfa_from_state(const Automaton *automaton, const char *string,
-                                 State *start)
+                         State *start)
 {
     struct LinkedList *state_queue = LinkedList(size_t);
     struct LinkedList *str_queue = LinkedList(char *);
@@ -37,24 +37,20 @@ int match_nfa_from_state(const Automaton *automaton, const char *string,
     while (state_queue->next != NULL)
     {
         // Get the current id
-        // The three following lines pop the first element of the list since list_pop_front crashes
-        LinkedList *curr_state_list = state_queue->next;
-        state_queue->next = curr_state_list->next;
-        curr_state_list->next = NULL;
-        // LinkedList *curr_state_list = list_pop_front(state_queue); (crashes :/)
+        LinkedList *curr_state_list = list_pop_front(state_queue);
         State *curr_state = *(State **)curr_state_list->data;
-        list_free(curr_state_list);
         // Get the current string
-        // same probleme here
-        LinkedList *curr_str_list = str_queue->next;
-        str_queue->next = curr_str_list->next;
-        curr_str_list->next = NULL;
-        // LinkedList *curr_str_list = list_pop_front(str_queue);
+        LinkedList *curr_str_list = list_pop_front(str_queue);
         char *curr_str = *(char **)curr_str_list->data;
-        list_free(curr_str_list);
 
         if (curr_state->terminal && *curr_str == 0)
+        {
+            list_free(state_queue);
+            list_free(str_queue);
+            list_free(curr_state_list);
+            list_free(curr_str_list);
             return 1;
+        }
 
         LinkedList **sentinel = array_get(automaton->adj_lists, curr_state->id);
         for (struct LinkedList *succ = (*sentinel)->next; succ != NULL;
@@ -73,14 +69,15 @@ int match_nfa_from_state(const Automaton *automaton, const char *string,
                 list_push_back(str_queue, &next_str);
             }
         }
+        list_free(curr_state_list);
+        list_free(curr_str_list);
     }
+    list_free(state_queue);
+    list_free(str_queue);
     return 0;
 }
 
 int match_nfa(const Automaton *automaton, const char *string)
 {
-    arr_foreach(State *, start, automaton->starting_states)
-        if (match_nfa_from_state(automaton, string, start))
-            return 1;
     return 0;
 }

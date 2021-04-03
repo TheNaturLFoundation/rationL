@@ -53,8 +53,14 @@ Test(linked_list, pop_at_first)
     list_push_back(list, &a);
     LinkedList *head = list_pop_front(list);
     cr_assert_eq(*(int *)head->data, 1);
-    list_free(list);
+    cr_assert_eq(head->next, NULL);
+    cr_assert_eq(head->previous, NULL);
     list_free(head);
+    list_push_back(list, &a);
+    LinkedList *head2 = list_pop_front(list);
+    cr_assert_eq(*(int *)head2->data, 1);
+    list_free(head2);
+    list_free(list);
 }
 
 Test(linked_list, pop_at_second)
