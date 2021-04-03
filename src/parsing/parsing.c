@@ -96,7 +96,8 @@ int is_unary(Token *token)
 BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
-    Token *prev_token = array_get(arr, *pos);
+    // Unused variable ?
+    //Token *prev_token = array_get(arr, *pos);
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
     b->left = left;
 
@@ -177,10 +178,13 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
     return NULL;
 }
 
+/*
+ * Unused function?
 BinTree *parse_paranthesis(BinTree *left, Array *arr, size_t *pos)
 {
     return NULL;
 }
+*/
 
 
 BinTree *parse_sub(Array *arr, size_t *pos)
@@ -239,6 +243,7 @@ BinTree *parse_sub(Array *arr, size_t *pos)
         return parse_binary(b, arr, pos);
     if (is_unary(token))
         return parse_unary(b, arr, pos);
+    return NULL;
 }
 
 BinTree *parse_symbols(Array *arr)
@@ -247,7 +252,8 @@ BinTree *parse_symbols(Array *arr)
         return NULL;
 
     size_t pos = 0;
-    size_t size = arr->size;
+    // Unused variable?
+    //size_t size = arr->size;
     BinTree *b = parse_sub(arr, &pos);
 
     while (pos < arr->size)
