@@ -41,12 +41,8 @@ automaton_tests_SOURCES = \
 			automaton/thompson_test.c
 
 parsing_tests_SOURCES = \
-			parsing/parsing_test_union_or_concatenation.c \
-			parsing/parsing_test_union_and_concatenation.c \
-			parsing/parsing_test_kleene_star.c \
-			parsing/parsing_test_paranthesis_simple.c \
-			parsing/parsing_test_paranthesis_nested.c \
-			parsing/parsing_test_paranthesis_combinaision.c \
-			parsing/parsing_test_escaped_characters.c
+			parsing/binary_basics.c \
+			parsing/binary_more.c \
+			parsing/paranthesis_basics.c
 
 TESTS = $(check_PROGRAMS)

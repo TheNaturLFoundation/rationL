@@ -2,6 +2,7 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
+/*
 Test(l, l, .disabled=0)
 {
     Array *arr = tokenize("(a|b)|c");
@@ -11,7 +12,7 @@ Test(l, l, .disabled=0)
     bin_tree_to_dot(got, file);
     fclose(file);
     bintree_free(got);
-}
+}*/
 
 Test(binary_more, left_a_right)
 {
