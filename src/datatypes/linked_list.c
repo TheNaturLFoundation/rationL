@@ -64,7 +64,7 @@ LinkedList *list_pop(LinkedList *list)
 
 LinkedList *list_pop_front(LinkedList *list)
 {
-    list_pop_at(list, 0);
+    return list_pop_at(list, 0);
 }
 
 LinkedList *list_get(LinkedList *list, ssize_t position)
