@@ -15,7 +15,7 @@
     create_node(&(BinTree){ .size = sizeof(T),                                 \
                             .data = &(T){ value },                             \
                             __VA_ARGS__ })
-/*
+/**
  * @struct BinTree
  * @debrief Basic generic binary tree implementation
  * @author Vlad Argatu
@@ -29,7 +29,7 @@ typedef struct BinTree
     struct BinTree *right;
 } BinTree;
 
-/*
+/**
  * @author Antoine Sicard
  * @date 03/03/2020 11H42
  * @param data_size: The size of the data stored in the array.
@@ -42,19 +42,29 @@ typedef struct BinTree
 BinTree *create_node(BinTree *macro_defined_tree);
 // use memcopy to copy the data and not ugly cast
 
-/*
+/**
  * @author Antoine Sicard
  * @date 03/03/2020 11h42
  * @param tree: Binary tree that will be freed.
 
 Frees the binary tree.
 */
-
 void bintree_free(BinTree *tree);
 
 
 void bin_tree_to_dot(BinTree *t, FILE* file);
 
+
 BinTree *dot_to_bin_tree(char* path);
+
+/**
+ * @brief Check if 2 bintrees filled with Symbols are the same
+ * @author Antoine Sicard
+ * @date 2/04/2021
+ * @param a : first BinTree
+ * @param b : second BinTree
+ * @return 1 if the bintrees are the same. 0 otherwise
+ * */
+int bintree_compare(BinTree *a, BinTree *b);
 
 #endif

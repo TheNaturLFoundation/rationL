@@ -79,6 +79,8 @@ BinTree *dot_to_bin_tree(char *path)
     FILE *file = fopen(path, "r");
     if (file == NULL)
         return NULL;
+
+    // TODO secure scanf calls
     fscanf(file, "%*[^\n]");
     Array *corresp_table = Array(struct TreeSerializeData);
     struct TreeSerializeData top_data;
@@ -114,7 +116,7 @@ BinTree *dot_to_bin_tree(char *path)
             }
         }
     }
-    bin_tree_to_dot(top_node, stdout);
+    //bin_tree_to_dot(top_node, stdout);
     array_free(corresp_table);
     fclose(file);
     return top_node;
@@ -155,14 +157,27 @@ void bin_tree_to_dot(BinTree *tree, FILE *file)
     fprintf(file, "}\n");
 }
 
-/*
-int main()
+int bintree_compare(BinTree *a, BinTree *b)
 {
-  int x = 3;
-  BinTree *t = create_node(sizeof(int), &x);
+    if (a == NULL && b == NULL)
+        return 1;
 
-  printf("tree->data = %d\n", *((int *)(t->data)));
+    if((a == NULL && b != NULL) || (a != NULL && b == NULL))
+        return 0;
 
-  free_bintree(t);
+    Symbol s_a = *(Symbol *)(a->data);
+    Symbol s_b = *(Symbol *)(b->data);
+    if(s_a.type == s_b.type)
+    {
+        if (s_a.type == LETTER && s_a.value.letter == s_b.value.letter)
+        {
+            return (bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right));
+        }
+        if (s_a.value.operator == s_b.value.operator)
+        {
+            return (bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right));
+        }
+    }
+    return 0;
+
 }
-*/

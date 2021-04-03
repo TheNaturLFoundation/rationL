@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "datatypes/bin_tree.h"
+#include "parsing/parsing.h"
 
 Test(bin_tree, create_tree_single_node)
 {
@@ -37,4 +38,115 @@ Test(bin_tree, create_tree_left_right_node)
     cr_assert_eq(*(int *)parent->left->data, 2);
     cr_assert_eq(*(int *)parent->data, 0);
     bintree_free(parent);
+}
+
+Test(bin_tree_compare, null)
+{
+    cr_assert_eq(bintree_compare(NULL, NULL), 1);
+}
+
+
+Test(bin_tree_compare, null_and_node)
+{
+    Symbol s;
+    s.type = LETTER;
+    s.value.letter = 'a';
+    BinTree *b = BinTree(Symbol, &s, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(b, NULL), 0);
+    bintree_free(b);
+}
+
+
+Test(bin_tree_compare, node_and_null)
+{
+    Symbol s;
+    s.type = LETTER;
+    s.value.letter = 'a';
+    BinTree *b = BinTree(Symbol, &s, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(NULL, b), 0);
+    bintree_free(b);
+}
+
+Test(bin_tree_compare, node_and_node_letter_eq)
+{
+    Symbol s_a, s_b;
+    s_a.type = LETTER;
+    s_a.value.letter = 'a';
+    s_b.type = LETTER;
+    s_b.value.letter = 'a';
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 1);
+}
+
+Test(bin_tree_compare, node_and_node_letter_neq)
+{
+    Symbol s_a, s_b;
+    s_a.type = LETTER;
+    s_a.value.letter = 'a';
+    s_b.type = LETTER;
+    s_b.value.letter = 'b';
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 0);
+}
+
+Test(bin_tree_compare, node_and_node_operator_eq)
+{
+    Symbol s_a, s_b;
+    s_a.type = OPERATOR;
+    s_a.value.letter = CONCATENATION;
+    s_b.type = OPERATOR;
+    s_b.value.operator = CONCATENATION;
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 1);
+}
+
+Test(bin_tree_compare, node_and_node_operator_neq)
+{
+    Symbol s_a, s_b;
+    s_a.type = OPERATOR;
+    s_a.value.letter = CONCATENATION;
+    s_b.type = OPERATOR;
+    s_b.value.operator = UNION;
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 0);
+}
+
+Test(bin_tree_compare, node_and_node_type_neq)
+{
+    Symbol s_a, s_b;
+    s_a.type = LETTER;
+    s_a.value.letter = 'a';
+    s_b.type = OPERATOR;
+    s_b.value.operator = CONCATENATION;
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 0);
+}
+
+Test(bin_tree_compare, children_eq)
+{
+    Symbol s_a, s_b;
+    s_a.type = LETTER;
+    s_a.value.letter = 'a';
+    s_b.type = LETTER;
+    s_b.value.operator ='a';
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 1);
+}
+
+Test(bin_tree_compare, children_neq)
+{
+    Symbol s_a, s_b;
+    s_a.type = LETTER;
+    s_a.value.letter = 'a';
+    s_b.type = LETTER;
+    s_b.value.operator ='b';
+    BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
+    BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
+    cr_assert_eq(bintree_compare(a, b), 0);
 }
