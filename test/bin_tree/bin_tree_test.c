@@ -77,6 +77,8 @@ Test(bin_tree_compare, node_and_node_letter_eq)
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 1);
+    bintree_free(a);
+    bintree_free(b);
 }
 
 Test(bin_tree_compare, node_and_node_letter_neq)
@@ -89,30 +91,36 @@ Test(bin_tree_compare, node_and_node_letter_neq)
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 0);
+    bintree_free(a);
+    bintree_free(b);
 }
 
 Test(bin_tree_compare, node_and_node_operator_eq)
 {
     Symbol s_a, s_b;
     s_a.type = OPERATOR;
-    s_a.value.letter = CONCATENATION;
+    s_a.value.operator = CONCATENATION;
     s_b.type = OPERATOR;
     s_b.value.operator = CONCATENATION;
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 1);
+    bintree_free(a);
+    bintree_free(b);
 }
 
 Test(bin_tree_compare, node_and_node_operator_neq)
 {
     Symbol s_a, s_b;
     s_a.type = OPERATOR;
-    s_a.value.letter = CONCATENATION;
+    s_a.value.operator = CONCATENATION;
     s_b.type = OPERATOR;
     s_b.value.operator = UNION;
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 0);
+    bintree_free(a);
+    bintree_free(b);
 }
 
 Test(bin_tree_compare, node_and_node_type_neq)
@@ -125,6 +133,8 @@ Test(bin_tree_compare, node_and_node_type_neq)
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 0);
+    bintree_free(a);
+    bintree_free(b);
 }
 
 Test(bin_tree_compare, children_eq)
@@ -133,10 +143,12 @@ Test(bin_tree_compare, children_eq)
     s_a.type = LETTER;
     s_a.value.letter = 'a';
     s_b.type = LETTER;
-    s_b.value.operator ='a';
+    s_b.value.letter='a';
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 1);
+    bintree_free(a);
+    bintree_free(b);
 }
 
 Test(bin_tree_compare, children_neq)
@@ -145,8 +157,10 @@ Test(bin_tree_compare, children_neq)
     s_a.type = LETTER;
     s_a.value.letter = 'a';
     s_b.type = LETTER;
-    s_b.value.operator ='b';
+    s_b.value.letter ='b';
     BinTree *a = BinTree(Symbol, &s_a, .left = NULL, .right = NULL);
     BinTree *b = BinTree(Symbol, &s_b, .left = NULL, .right = NULL);
     cr_assert_eq(bintree_compare(a, b), 0);
+    bintree_free(a);
+    bintree_free(b);
 }

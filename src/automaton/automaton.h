@@ -162,8 +162,23 @@ void automaton_free(Automaton * automaton);
 Automaton *automaton_from_daut(const char *filename);
 
 
-void print_automaton(Automaton* aut);
 
+/**
+ * @author Simon Scatton
+ * @date 27/03/2021
+ * @param aut The automaton to build the dot of.
+ * Prints the dot reprensentation of the automaton in the
+ * stdout. */
 void automaton_to_dot(Automaton* aut);
 
+/**
+ * @author Simon Scatton
+ * @date 03/04/2021
+ * @param aut The automaton to build the list from
+ * Builds the adjacency matrix from an automaton. The values filled
+ * in are :
+ *   -1 if the transition is epsilon
+ *   0  if there is no transition
+ *   ord The ascii value of the caracter representing the transition
+ * */
 char *build_adjacency_matrix(Automaton *aut);
