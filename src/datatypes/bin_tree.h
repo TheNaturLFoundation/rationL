@@ -55,4 +55,6 @@ void bintree_free(BinTree *tree);
 
 void bin_tree_to_dot(BinTree *t, FILE* file);
 
+BinTree *dot_to_bin_tree(char* path);
+
 #endif
