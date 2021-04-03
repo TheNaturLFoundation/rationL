@@ -1,7 +1,6 @@
-#include "datatypes/linked_list.h"
-
 #include <stdlib.h>
 #include <string.h>
+#include "linked_list.h"
 #include "utils/memory_utils.h"
 
 
@@ -98,4 +97,34 @@ int list_free(LinkedList *list)
         list = next;
     }
     return 1;
+}
+
+void *list_pop_value(LinkedList* list)
+{
+    LinkedList *popped = list_pop(list);
+    void *data = popped->data;
+    free(popped);
+    return data;
+}
+
+void *list_pop_front_value(LinkedList* list)
+{
+    LinkedList *popped = list_pop_front(list);
+    void *data = popped->data;
+    free(popped);
+    return data;
+}
+
+void *list_pop_at_value(LinkedList* list, ssize_t position)
+{
+    LinkedList *popped = list_pop_at(list, position);
+    void *data = popped->data;
+    free(popped);
+    return data;
+}
+
+void *list_get_value(LinkedList* list, ssize_t position)
+{
+    LinkedList *l = list_get(list, position);
+    return l->data;
 }

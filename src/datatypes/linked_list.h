@@ -4,6 +4,15 @@
 #include <sys/types.h>
 
 #define LinkedList(type) list_create(sizeof(type))
+
+#define list_foreach(T, var, sentinel)                                         \
+    T var;                                                                     \
+    if (sentinel->next != NULL)                                                \
+        var = *(T *)sentinel->next->data;                                      \
+    for (LinkedList *_l = sentinel->next; _l != NULL;                          \
+         var = _l->next == NULL ? *(T *)_l->data : *(T*)_l->next->data,             \
+                    _l = _l->next)
+
 /**
  * @struct LinkedList
  * @brief Basic single linked list.
@@ -107,3 +116,41 @@ LinkedList *list_get(LinkedList *list, ssize_t position);
  * */
 
 int list_free(LinkedList *list);
+
+/**
+ * Pops the list at the end and returns a pointer to the value
+ * stored in the list. This pointer will need to be freed manually
+ * @author Simon Scatton
+ * @version 1.0.0
+ * @date 04/04/2021
+ **/
+void *list_pop_value(LinkedList *list);
+
+/**
+ * Pops the list at the front and returns a pointer to the value
+ * stored in the list. This pointer will need to be freed manually
+ * @author Simon Scatton
+ * @version 1.0.0
+ * @date 04/04/2021
+ **/
+void *list_pop_front_value(LinkedList *list);
+
+/**
+ * Pops the list at position position and returns a pointer to the value
+ * stored in the list. This pointer will need to be freed manually
+ * If the position passed is -1 it will pop at the end.
+ * @author Simon Scatton
+ * @version 1.0.0
+ * @date 04/04/2021
+ **/
+void *list_pop_at_value(LinkedList *list, ssize_t position);
+
+
+/**
+ * Returns a copy of the data pointer contained at position
+ * position in the linked list.
+ * @author Simon Scatton
+ * @version 1.0.0
+ * @date 04/04/2021
+ **/
+void *list_get_value(LinkedList *list, ssize_t position);
