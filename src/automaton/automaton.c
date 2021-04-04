@@ -77,12 +77,11 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
     LinkedList *trans = start->next;
     for (size_t i = 0; trans != NULL; trans = trans->next, i++)
     {
-        State *curr_dst = trans->data;
+        State *curr_dst = *(State **)trans->data;
         if (curr_dst->id == dst->id)
         {
             trans->previous->next = trans->next;
             trans->next = NULL;
-            start->size--;
             list_free(trans);
             return 0;
         }
@@ -101,12 +100,11 @@ void automaton_remove_state(Automaton *automaton, State *state)
             for (LinkedList *trans = start->next; trans != NULL;
                  trans = trans->next)
             {
-                State *curr = trans->data;
+                State *curr = *(State **)trans->data;
                 if (curr->id == state->id)
                 {
                     trans->previous->next = trans->next;
                     trans->next = NULL;
-                    start->size--;
                     list_free(trans);
                     break;  // Assume there aren't duplicates
                 }
@@ -117,7 +115,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
     size_t antoine = 0;
     arr_foreach(State *, s, automaton->starting_states)
     {
-        if (s == state)
+        if (s->id == state->id)
         {
             array_remove(automaton->starting_states, antoine);
             break;
@@ -131,6 +129,18 @@ void automaton_remove_state(Automaton *automaton, State *state)
         State *another_state = *(State **)array_get(automaton->states, k);
         another_state->id -= 1;
     }
+    for (size_t k = state->id; k < automaton->states->size - 1; k++)
+    {
+        for (size_t x = 0; x < automaton->transition_table->width; x++)
+        {
+            LinkedList *list = matrix_get(automaton->transition_table, x, k + 1);
+            matrix_set(automaton->transition_table, x, k, list);
+        }
+    }
+    for (size_t x = 0; x < automaton->transition_table->width; x++)
+        matrix_set(automaton->transition_table, x, automaton->states->size - 1,
+                   LinkedList(State *));
+
     array_remove(automaton->states, state->id);
     automaton->size -= 1;
 
@@ -291,7 +301,7 @@ Automaton *automaton_from_daut(const char *filename)
     FILE *file = fopen(filename, "r");
     if (file == NULL)
         err(EXIT_FAILURE, "Couldn't open %s", filename); // LCOV_EXCL_LINE
-    Automaton *automaton = Automaton(100);
+    Automaton *automaton = Automaton(1);
 
     char *line = NULL;
     size_t linecap = 0;

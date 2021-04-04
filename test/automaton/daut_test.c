@@ -62,13 +62,9 @@ void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
                  "First table has width %zu, second has width %zu (line %zu)",
                  a1->transition_table->width, a2->transition_table->width, line);
 
-    cr_assert_eq(a1->transition_table->height, a2->transition_table->height,
-                 "First table has height %zu, second has height %zu (line %zu)",
-                 a1->transition_table->height, a2->transition_table->height, line);
-
     // Check if the two transition tables are equal
-    for (size_t y = 0; y < a1->transition_table->width; y++)
-        for (size_t x = 0; x < a1->size; x++)
+    for (size_t x = 0; x < a1->transition_table->width; x++)
+        for (size_t y = 0; y < a1->size; y++)
         {
             LinkedList *list1 = matrix_get(a1->transition_table, x, y)->next;
             LinkedList *list2 = matrix_get(a2->transition_table, x, y)->next;
@@ -95,7 +91,7 @@ Test(daut, a_or_b)
      *     \  b
      *      \--- 2->
      */
-    Automaton *expected = automaton_create();
+    Automaton *expected = Automaton(3);
     State *q0 = State(0);
     State *q1 = State(1);
     State *q2 = State(1);
@@ -118,7 +114,7 @@ Test(daut, abba)
      *       a    b    b    a
      *  -> 0 -> 1 -> 2 -> 3 -> 4 ->
      */
-    Automaton *expected = automaton_create();
+    Automaton *expected = Automaton(6);
     State *q0 = State(0);
     State *q1 = State(0);
     State *q2 = State(0);
