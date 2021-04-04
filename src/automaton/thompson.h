@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "automaton/automaton.h"
+#include "rationl/automaton.h"
 #include "datatypes/bin_tree.h"
 
 /**

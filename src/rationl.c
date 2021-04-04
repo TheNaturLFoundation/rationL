@@ -1,6 +1,23 @@
-//LCOV_EXCL_START
-int main()
+#include <string.h>
+#include "automaton/thompson.h"
+#include "rationl/automaton.h"
+#include "parsing/parsing.h"
+#include "rationl.h"
+
+regex_t compile(char* pattern)
 {
-    return 0;
+    Array *arr = tokenize(pattern);
+    BinTree *tree = parse_symbols(arr);
+    Automaton *aut = thompson(tree);
+    regex_t re;
+    re.aut = aut;
+    re.pattern = malloc((strlen(pattern) + 1) *sizeof(char));
+    strcpy(re.pattern, pattern);
+    return re;
 }
-//LCOV_EXCL_STOP
+
+void regex_free(regex_t re)
+{
+    automaton_free(re.aut);
+    free(re.pattern);
+}
