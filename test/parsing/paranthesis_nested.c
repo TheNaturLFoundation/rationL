@@ -1,6 +1,7 @@
 #include <criterion/criterion.h>
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
+#include "test_utils.h"
 
 Test(paranthesis_more, left_left_a_right_right)
 {

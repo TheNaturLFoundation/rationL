@@ -1,5 +1,5 @@
 #Setup linking
-AM_CPPFLAGS = -I$(top_srcdir)/src/  -DTEST_PATH=\"$(top_srcdir)/test/\"
+AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/test/  -DTEST_PATH=\"$(top_srcdir)/test/\"
 AM_LDFLAGS  = $(CRITERION_LIBS)
 AM_CFLAGS 	= $(CRITERION_CFLAGS)
 LDADD = $(top_builddir)/librationl.la
@@ -21,6 +21,7 @@ check_PROGRAMS = \
 			array_tests \
 			bin_tree_tests \
 			linked_list_tests \
+			matrix_tests \
 			lexer_tests \
 			automaton_tests \
 			parsing_tests
@@ -32,13 +33,17 @@ bin_tree_tests_SOURCES = bin_tree/bin_tree_test.c
 
 linked_list_tests_SOURCES = linked_list/linked_list_test.c
 
+matrix_tests_SOURCES = matrix/matrix_test.c
+
 lexer_tests_SOURCES = lexer/lexer_test.c
 
 automaton_tests_SOURCES = \
-			automaton/automaton_test.c \
-			automaton/daut_test.c \
-			automaton/matching_test.c \
-			automaton/thompson_test.c
+			automaton/thompson_test.c \
+			automaton/matching_test.c
+
+#			automaton/automaton_test.c \
+			automaton/daut_test.c
+
 
 parsing_tests_SOURCES = \
 			parsing/binary_basics.c \
@@ -47,6 +52,7 @@ parsing_tests_SOURCES = \
 			parsing/paranthesis_more.c \
 			parsing/paranthesis_unary.c \
 			parsing/paranthesis_unary_more.c \
-			parsing/paranthesis_nested.c
+			parsing/paranthesis_nested.c \
+			test_utils.c
 
 TESTS = $(check_PROGRAMS)

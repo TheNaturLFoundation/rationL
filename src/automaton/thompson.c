@@ -2,6 +2,7 @@
 
 #include "automaton/automaton.h"
 #include "datatypes/array.h"
+#include "datatypes/linked_list.h"
 #include "parsing/parsing.h"
 
 int is_state_entry(Automaton *aut, State *state)
@@ -27,22 +28,20 @@ Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
         automaton_add_state(a, state,
                             remap_entries ? 0 : is_state_entry(b, state_b));
     }
-    size_t index = 0;
-    arr_foreach(LinkedList *, transition_b, b->adj_lists)
-    {
-        transition_b = transition_b->next;
-        while (transition_b != NULL)
+    for(size_t i = 0; i < b->size; i++)
+        for (size_t j = 0; j < b->transition_table->width; j++)
         {
-            Transition *transition = transition_b->data;
-            State *src = *(State **)array_get(states_b_htab, index);
-            State *dst =
-                *(State **)array_get(states_b_htab, transition->target->id);
-            automaton_add_transition(a, src, dst, transition->value,
-                                     transition->is_epsilon);
-            transition_b = transition_b->next;
+            LinkedList *targets = matrix_get(b->transition_table, j, i);
+            if(!list_empty(targets))
+            {
+                State *src = *(State **)array_get(states_b_htab, i);
+                list_foreach(State*, dst, targets)
+                {
+                    State* real_dst = *(State **)array_get(states_b_htab, dst->id);
+                    automaton_add_transition(a, src, real_dst, j, j==0);
+                }
+            }
         }
-        index += 1;
-    }
     return states_b_htab;
 }
 
@@ -173,7 +172,7 @@ Automaton *thompson(BinTree *tree)
         entry_state->id = 0;
         State *letter_state = State(1);
         letter_state->id = 1;
-        Automaton *aut = Automaton();
+        Automaton *aut = Automaton(2);
         automaton_add_state(aut, entry_state, 1);
         automaton_add_state(aut, letter_state, 0);
         automaton_add_transition(aut, entry_state, letter_state,

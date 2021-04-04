@@ -1,6 +1,7 @@
 #include <criterion/criterion.h>
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
+#include "test_utils.h"
 
 Test(binary_more, left_a_right_star)
 {

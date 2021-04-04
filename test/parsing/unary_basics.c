@@ -1,6 +1,7 @@
 #include <criterion/criterion.h>
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
+#include "test_utils.h"
 
 Test(unary_basics, a_star)
 {

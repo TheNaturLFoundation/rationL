@@ -143,3 +143,100 @@ Test(linked_list, get_last)
     cr_assert_eq(*(int*)(last->data), b);
     list_free(list);
 }
+
+Test(linked_list, list_pop_value)
+{
+    LinkedList *list = LinkedList(int);
+    list_push_back(list, &(int){4});
+    list_push_back(list, &(int){2});
+    list_push_back(list, &(int){0});
+    int* a = list_pop_value(list);
+    cr_assert_eq(*a, 0);
+    free(a);
+    int* b = list_pop_value(list);
+    cr_assert_eq(*b, 2);
+    free(b);
+    int* c = list_pop_value(list);
+    cr_assert_eq(*c, 4);
+    free(c);
+    list_free(list);
+}
+
+Test(linked_list, list_pop_front_value)
+{
+    LinkedList *list = LinkedList(int);
+    list_push_back(list, &(int){4});
+    list_push_back(list, &(int){2});
+    list_push_back(list, &(int){0});
+    int* a = list_pop_front_value(list);
+    cr_assert_eq(*a, 4);
+    free(a);
+    int* b = list_pop_front_value(list);
+    cr_assert_eq(*b, 2);
+    free(b);
+    int* c = list_pop_front_value(list);
+    cr_assert_eq(*c, 0);
+    free(c);
+    list_free(list);
+}
+
+Test(linked_list, list_pop_at_value)
+{
+    LinkedList *list = LinkedList(int);
+    list_push_back(list, &(int){4});
+    list_push_back(list, &(int){2});
+    list_push_back(list, &(int){0});
+    int* a = list_pop_at_value(list, 1);
+    cr_assert_eq(*a, 2);
+    free(a);
+    int* b = list_pop_at_value(list, 1);
+    cr_assert_eq(*b, 0);
+    free(b);
+    int* c = list_pop_at_value(list, 0);
+    cr_assert_eq(*c, 4);
+    free(c);
+    list_free(list);
+}
+
+Test(linked_list, list_get_at_value)
+{
+    LinkedList *list = LinkedList(int);
+    list_push_back(list, &(int){4});
+    list_push_back(list, &(int){2});
+    list_push_back(list, &(int){0});
+    int* a = list_get_value(list, 1);
+    cr_assert_eq(*a, 2);
+    int* b = list_get_value(list, 1);
+    cr_assert_eq(*b, 2);
+    int* c = list_get_value(list, 0);
+    cr_assert_eq(*c, 4);
+    int* d = list_get_value(list, 2);
+    cr_assert_eq(*d, 0);
+    list_free(list);
+}
+
+Test(linked_list, foreach)
+{
+    LinkedList *list = LinkedList(int);
+    list_push_back(list, &(int){4});
+    list_push_back(list, &(int){2});
+    list_push_back(list, &(int){0});
+    size_t i = 0;
+    list_foreach(int, value, list)
+    {
+        switch(i)
+        {
+            case 0:
+                cr_assert_eq(value, 4);
+                break;
+            case 1:
+                cr_assert_eq(value, 2);
+                break;
+            case 2:
+                cr_assert_eq(value, 0);
+                break;
+        }
+        i++;
+    }
+    list_free(list);
+}
