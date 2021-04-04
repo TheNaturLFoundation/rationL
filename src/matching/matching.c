@@ -43,34 +43,36 @@ int match_nfa_from_state(const Automaton *automaton, const char *string,
         LinkedList *curr_str_list = list_pop_front(str_queue);
         char *curr_str = *(char **)curr_str_list->data;
 
+        list_free(curr_state_list);
+        list_free(curr_str_list);
+
         if (curr_state->terminal && *curr_str == 0)
         {
             list_free(state_queue);
             list_free(str_queue);
-            list_free(curr_state_list);
-            list_free(curr_str_list);
             return 1;
         }
 
-        LinkedList **sentinel = array_get(automaton->adj_lists, curr_state->id);
-        for (struct LinkedList *succ = (*sentinel)->next; succ != NULL;
-             succ = succ->next)
+        // Test transition transitions
+        LinkedList *transition =
+            matrix_get(automaton->transition_table, 0, curr_state->id)->next;
+        for (; transition != NULL; transition = transition->next)
         {
-            Transition *transition = succ->data;
-            if (transition->is_epsilon)
-            {
-                list_push_back(state_queue, &transition->target);
-                list_push_back(str_queue, &curr_str);
-            }
-            else if (transition->value == *curr_str)
-            {
-                list_push_back(state_queue, &transition->target);
-                char *next_str = curr_str + 1;
-                list_push_back(str_queue, &next_str);
-            }
+            State *state = transition->data;
+            list_push_back(state_queue, &state);
+            // An epsilon-transition doesn't increment the pointer on the string
+            list_push_back(str_queue, &curr_str);
         }
-        list_free(curr_state_list);
-        list_free(curr_str_list);
+        // Test the current letter
+        transition = matrix_get(automaton->transition_table,
+                                *curr_str, curr_state->id)->next;
+        for (; transition != NULL; transition = transition->next)
+        {
+            State *state = transition->data;
+            list_push_back(state_queue, &state);
+            char *next_str = curr_str + 1;
+            list_push_back(str_queue, &next_str);
+        }
     }
     list_free(state_queue);
     list_free(str_queue);

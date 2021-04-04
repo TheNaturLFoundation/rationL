@@ -9,11 +9,11 @@
 #include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
-Automaton *automaton_create()
+Automaton *automaton_create(size_t size)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
-    autom->adj_lists = Array(LinkedList *);
+    autom->transition_table = Matrix(256, size);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
     autom->is_determined = 0;
@@ -22,18 +22,11 @@ Automaton *automaton_create()
 
 void automaton_free(Automaton *automaton)
 {
+    // Frees the states.
     arr_foreach(State *, s, automaton->states)
-    {
-        // Frees the states.
         free(s);
-    }
-    arr_foreach(LinkedList *, list, automaton->adj_lists)
-    {
-        // Frees the transition list
-        list_free(list);
-    }
     array_free(automaton->states);
-    array_free(automaton->adj_lists);
+    matrix_free(automaton->transition_table);
     array_free(automaton->starting_states);
     free(automaton);
 }
@@ -47,84 +40,73 @@ State *state_create(int is_terminal)
 
 void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
-    LinkedList *new_state_list = LinkedList(Transition);
-    array_append(automaton->adj_lists, &new_state_list);
+
+    if (automaton->size >= automaton->transition_table->height)
+        ; // TODO: Expand matrix if not enough space
+    // Else, the row is already initialized with empty lists
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
     if (is_entry == 1)
-    {
         array_append(automaton->starting_states, &state);
-    }
 }
 
 void automaton_add_transition(Automaton *automaton, State *src, State *dst,
                               Letter value, int epsilon)
 {
-    LinkedList **adj_list = array_get(automaton->adj_lists, src->id);
-    Transition tr;
-    tr.target = dst;
-    tr.value = value;
-    tr.is_epsilon = epsilon;
-    if (list_push_back(*adj_list, &tr) == 0)
-    {
-        errx(1, "Unable to append to the list at address %p",
-             (void *)adj_list); // LCOV_EXCL_LINE
-    }
+    LinkedList *trans = matrix_get(automaton->transition_table,
+                                   epsilon ? 0 : value, src->id);
+
+    if (!list_push_back(trans, &dst))
+        errx(EXIT_FAILURE, "Unable to append to the list at address %p",
+             (void *)trans);  // LCOV_EXCL_LINE
 }
 
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-    LinkedList *list = *(LinkedList **)array_get(automaton->adj_lists, src->id);
-    LinkedList *cpy = list;
-    Transition *tr;
-    size_t i = 0;
-    while (list->next != NULL)
+    LinkedList *trans = matrix_get(automaton->transition_table,
+                                   epsilon ? 0 : value, src->id);
+
+    // Skip the sentinel
+    trans = trans->next;
+    for (size_t i = 0; trans != NULL; trans = trans->next, i++)
     {
-        tr = list->next->data;
-        if (tr->target == dst
-            && ((epsilon == 1 && tr->is_epsilon == 1) || tr->value == value))
+        State *curr_dst = trans->data;
+        if (curr_dst->id == dst->id)
         {
-            list_free(list_pop_at(cpy, i));
+            trans->previous->next = trans->next;
+            trans->next = NULL;
+            list_free(trans);
             return 0;
         }
-        i++;
-        list = list->next;
     }
+
     return 1;
 }
 
 void automaton_remove_state(Automaton *automaton, State *state)
 {
-    Transition *tr;
-    size_t antoine;
-    LinkedList *cpy;
-    State *another_state;
-    // Remove from adj_lists
-    list_free(*(LinkedList **)array_get(automaton->adj_lists, state->id));
-    array_remove(automaton->adj_lists, state->id);
-    arr_foreach(LinkedList *, list, automaton->adj_lists)
-    {
-        antoine = 0;
-        cpy = list;
-        while (list && list->next != NULL)
+    // Remove all transitions pointing to it
+    for (size_t y = 0; y < automaton->size; y++)
+        for (size_t x = 0; x < automaton->transition_table->width; x++)
         {
-            tr = list->next->data;
-            list = list->next;
-            if (tr->target == state)
+            LinkedList *trans = matrix_get(automaton->transition_table, x, y);
+            for (; trans->next != NULL; trans = trans->next)
             {
-                list = list->next;
-                list_free(list_pop_at(cpy, antoine));
-            }
-            else
-            {
-                antoine++;
+                State *curr = trans->next->data;
+                if (curr->id == state->id)
+                {
+                    trans->previous->next = trans->next;
+                    trans->next = NULL;
+                    list_free(trans);
+                    break;  // Assume there aren't duplicates
+                }
             }
         }
-    }
+
     // Remove from starting_states
-    antoine = 0;
+    size_t antoine = 0;
     arr_foreach(State *, s, automaton->starting_states)
     {
         if (s == state)
@@ -134,10 +116,11 @@ void automaton_remove_state(Automaton *automaton, State *state)
         }
         antoine++;
     }
+
     // Remove from states array
     for (size_t k = state->id + 1; k < automaton->states->size; k++)
     {
-        another_state = *(State **)array_get(automaton->states, k);
+        State *another_state = *(State **)array_get(automaton->states, k);
         another_state->id -= 1;
     }
     array_remove(automaton->states, state->id);
@@ -145,26 +128,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
     free(state);
 }
 
-char *build_adjacency_matrix(Automaton *aut)
-{
-    char *mat = SAFECALLOC(aut->size * aut->size, sizeof(char));
-    size_t index = 0;
-    arr_foreach(LinkedList *, transitions, aut->adj_lists)
-    {
-        transitions = transitions->next;
-        while (transitions != NULL)
-        {
-            Transition *transition = transitions->data;
-            if (transition->is_epsilon)
-                mat[index*aut->size + transition->target->id] = -1;
-            else
-                mat[index*aut->size + transition->target->id] = transition->value;
-            transitions = transitions->next;
-        }
-        index += 1;
-    }
-    return mat;
-}
+// Helpers for daut conversion
 
 static int is_blank(char c)
 {
@@ -229,7 +193,7 @@ static int map_state(Array *mapping, size_t alias, size_t real)
  * @param mapping An array allowing mapping from states in the .daut file
  * to the actual state numbers in the automaton
  */
-static void parse_line(Automaton *automaton, const char *line, Array *mapping)
+static void parse_daut_line(Automaton *automaton, const char *line, Array *mapping)
 {
     // Get the source state
     if (!move_to_next(&line))
@@ -317,13 +281,13 @@ Automaton *automaton_from_daut(const char *filename)
     FILE *file = fopen(filename, "r");
     if (file == NULL)
         err(EXIT_FAILURE, "Couldn't open %s", filename); // LCOV_EXCL_LINE
-    Automaton *automaton = Automaton();
+    Automaton *automaton = Automaton(100);
 
     char *line = NULL;
     size_t linecap = 0;
     Array *mapping = Array(size_t);
     while (getline(&line, &linecap, file) > 0)
-        parse_line(automaton, line, mapping);
+        parse_daut_line(automaton, line, mapping);
     free(line);
     fclose(file);
     array_free(mapping);

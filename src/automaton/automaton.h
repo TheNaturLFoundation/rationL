@@ -1,11 +1,11 @@
 #pragma once
 
-
 #include "datatypes/array.h"
 #include "datatypes/linked_list.h"
+#include "datatypes/matrix.h"
 #include "parsing/lexer.h"
 
-#define Automaton() automaton_create();
+#define Automaton(size) automaton_create(size);
 #define State(term) state_create(term);
 
 /**
@@ -23,13 +23,25 @@ typedef struct
      * This order of the graph i.e. the number of states in the automaton.
      */
     size_t size;
+
     /**
-     * The array `adj_lists` contains automaton transitions.
-     * For the ith state, its transitions is the linked list adj_Lists[i]
-     * where i is an integer from 0 to size - 1.
-     * The size of the array is the order of the graph.
+     * Transition table of the automaton.
+     * Lines are states, columns are transitions.
+     * Each cell contains a linked list of states.
+     * The first column corresponds to epsilon transitions.
+     *
+     * Example:</br>
+     *   | e | ... | A | B | C | ... |</br>
+     * --|---|-----|---|---|---|-----|</br>
+     * 0 | N | ... | 2 | 0 | 2 | ... |</br>
+     * --|---|-----|---|---|---|-----|</br>
+     * 1 | N | ... | 1 | 1 | 1 | ... |</br>
+     * --|---|-----|---|---|---|-----|</br>
+     * 2 | N | ... | 1 | 0 | 2 | ... |</br>
+     * --|---|-----|---|---|---|-----|
      */
-    Array *adj_lists;
+    Matrix *transition_table;
+
     /**
      * An array containing pointers on all of the entry points of the automaton.
      */
@@ -62,24 +74,6 @@ typedef struct State
      */
     int terminal;
 } State;
-
-/**
- * @struct Transition
- * @brief Representation of an automaton transition.
- * Contains the target state and the value of the transition itself.
- * @author Rostan Tabet
- * @date 04/03/2021
- */
-typedef struct Transition
-{
-    State * target;
-    /**
-     * Value of the transition if it is not an epsilon transition.
-     * If the field `is_epsilon` is set to 1, the value can be anything.
-     */
-    Letter value;
-    int is_epsilon;
-} Transition;
 
 /**
  * @author Vlad Argatu
@@ -170,15 +164,3 @@ Automaton *automaton_from_daut(const char *filename);
  * Prints the dot reprensentation of the automaton in the
  * stdout. */
 void automaton_to_dot(Automaton* aut);
-
-/**
- * @author Simon Scatton
- * @date 03/04/2021
- * @param aut The automaton to build the list from
- * Builds the adjacency matrix from an automaton. The values filled
- * in are :
- *   -1 if the transition is epsilon
- *   0  if there is no transition
- *   ord The ascii value of the caracter representing the transition
- * */
-char *build_adjacency_matrix(Automaton *aut);

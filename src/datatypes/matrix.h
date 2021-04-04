@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "linked_list.h"
 
-#define Matrix(height, width, default_value)                                   \
+#define Matrix(height, width) \
     matrix_create(height, width)
 
 typedef struct Matrix
