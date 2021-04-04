@@ -28,17 +28,17 @@ Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
         automaton_add_state(a, state,
                             remap_entries ? 0 : is_state_entry(b, state_b));
     }
-    for(size_t i = 0; i < b->transition_table->height; i++)
+    for(size_t i = 0; i < b->size; i++)
         for (size_t j = 0; j < b->transition_table->width; j++)
         {
-            LinkedList *targets = matrix_get(b->transition_table, i, j);
+            LinkedList *targets = matrix_get(b->transition_table, j, i);
             if(!list_empty(targets))
             {
-                State *src = *(State **)array_get(states_b_htab, j);
+                State *src = *(State **)array_get(states_b_htab, i);
                 list_foreach(State*, dst, targets)
                 {
                     State* real_dst = *(State **)array_get(states_b_htab, dst->id);
-                    automaton_add_transition(a, src, real_dst, i, i==0);
+                    automaton_add_transition(a, src, real_dst, j, j==0);
                 }
             }
         }

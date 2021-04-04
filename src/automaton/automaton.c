@@ -13,7 +13,7 @@ Automaton *automaton_create(size_t size)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
-    autom->transition_table = Matrix(256, size);
+    autom->transition_table = Matrix(size, 256);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
     autom->is_determined = 0;
@@ -23,8 +23,7 @@ Automaton *automaton_create(size_t size)
 void automaton_free(Automaton *automaton)
 {
     // Frees the states.
-    arr_foreach(State *, s, automaton->states)
-        free(s);
+    arr_foreach(State *, s, automaton->states) free(s);
     array_free(automaton->states);
     matrix_free(automaton->transition_table);
     array_free(automaton->starting_states);
@@ -40,10 +39,16 @@ State *state_create(int is_terminal)
 
 void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
-
     if (automaton->size >= automaton->transition_table->height)
-        ; // TODO: Expand matrix if not enough space
-    // Else, the row is already initialized with empty lists
+    {
+        Matrix *mat = automaton->transition_table;
+        size_t new_len = mat->height * mat->width + mat->width;
+        automaton->transition_table->mat =
+            SAFEREALLOC(automaton->transition_table->mat, new_len * sizeof(LinkedList*));
+        for(size_t i = mat->height * mat->width; i < new_len; i++)
+            automaton->transition_table->mat[i] = LinkedList(State*);
+        mat->height += 1;
+    }
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
@@ -54,19 +59,19 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 void automaton_add_transition(Automaton *automaton, State *src, State *dst,
                               Letter value, int epsilon)
 {
-    LinkedList *trans = matrix_get(automaton->transition_table,
-                                   epsilon ? 0 : value, src->id);
+    LinkedList *trans =
+        matrix_get(automaton->transition_table, epsilon ? 0 : value, src->id);
 
     if (!list_push_back(trans, &dst))
         errx(EXIT_FAILURE, "Unable to append to the list at address %p",
-             (void *)trans);  // LCOV_EXCL_LINE
+             (void *)trans); // LCOV_EXCL_LINE
 }
 
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-    LinkedList *trans = matrix_get(automaton->transition_table,
-                                   epsilon ? 0 : value, src->id);
+    LinkedList *trans =
+        matrix_get(automaton->transition_table, epsilon ? 0 : value, src->id);
 
     // Skip the sentinel
     trans = trans->next;
@@ -100,7 +105,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
                     trans->previous->next = trans->next;
                     trans->next = NULL;
                     list_free(trans);
-                    break;  // Assume there aren't duplicates
+                    break; // Assume there aren't duplicates
                 }
             }
         }
@@ -193,7 +198,8 @@ static int map_state(Array *mapping, size_t alias, size_t real)
  * @param mapping An array allowing mapping from states in the .daut file
  * to the actual state numbers in the automaton
  */
-static void parse_daut_line(Automaton *automaton, const char *line, Array *mapping)
+static void parse_daut_line(Automaton *automaton, const char *line,
+                            Array *mapping)
 {
     // Get the source state
     if (!move_to_next(&line))
@@ -294,7 +300,6 @@ Automaton *automaton_from_daut(const char *filename)
     return automaton;
 }
 
-
 void automaton_to_dot(Automaton *aut)
 {
     puts("digraph{\n  rankdir=LR;");
@@ -302,9 +307,8 @@ void automaton_to_dot(Automaton *aut)
         printf("  node [shape = point ]; q%zu\n", start->id);
 
     puts("  node [shape = doublecircle]; ");
-    arr_foreach(State *, state, aut->states)
-        if (state->terminal)
-            printf("  %zu;\n", state->id);
+    arr_foreach(State *, state, aut->states) if (state->terminal)
+        printf("  %zu;\n", state->id);
     puts("  node [shape = circle];");
     arr_foreach(State *, state_2, aut->starting_states)
         printf("  q%zu -> %zu\n", state_2->id, state_2->id);
@@ -313,15 +317,15 @@ void automaton_to_dot(Automaton *aut)
         for (size_t c = 0; c < aut->transition_table->width; c++)
         {
             LinkedList *list = matrix_get(aut->transition_table, c, src);
-            list_foreach(State*, target, list)
+            list_foreach(State *, target, list)
             {
                 char transition_str[5] = { 0 };
                 if (c == 0)
                     memcpy(transition_str, "ε", 3);
                 else
                     transition_str[0] = c;
-                printf("  %zu -> %zu[label=\"%s\"]\n", src,
-                       target->id, transition_str);
+                printf("  %zu -> %zu[label=\"%s\"]\n", src, target->id,
+                       transition_str);
             }
         }
     puts("}");
