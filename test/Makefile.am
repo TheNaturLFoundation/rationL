@@ -26,7 +26,6 @@ check_PROGRAMS = \
 			automaton_tests \
 			parsing_tests
 
-
 array_tests_SOURCES = array/array_test.c
 
 bin_tree_tests_SOURCES = bin_tree/bin_tree_test.c
@@ -52,6 +51,7 @@ parsing_tests_SOURCES = \
 			parsing/paranthesis_unary.c \
 			parsing/paranthesis_unary_more.c \
 			parsing/paranthesis_nested.c \
+			parsing/escaped_characters.c \
 			test_utils.c
 
 TESTS = $(check_PROGRAMS)
