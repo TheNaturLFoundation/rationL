@@ -21,9 +21,9 @@ check_PROGRAMS = \
 			array_tests \
 			bin_tree_tests \
 			linked_list_tests \
+			automaton_tests \
 			matrix_tests \
 			lexer_tests \
-			automaton_tests \
 			parsing_tests
 
 
@@ -38,10 +38,11 @@ matrix_tests_SOURCES = matrix/matrix_test.c
 lexer_tests_SOURCES = lexer/lexer_test.c
 
 automaton_tests_SOURCES = \
-			automaton/automaton_test.c \
-			automaton/daut_test.c \
-			automaton/matching_test.c \
 			automaton/thompson_test.c
+
+#			automaton/automaton_test.c \
+			automaton/daut_test.c \
+			automaton/matching_test.c
 
 parsing_tests_SOURCES = \
 			parsing/binary_basics.c \

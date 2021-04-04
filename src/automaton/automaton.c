@@ -13,7 +13,7 @@ Automaton *automaton_create(size_t size)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
-    autom->transition_table = Matrix(256, size);
+    autom->transition_table = Matrix(size, 256);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
     autom->is_determined = 0;
@@ -57,7 +57,7 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
     LinkedList *trans = matrix_get(automaton->transition_table,
                                    epsilon ? 0 : value, src->id);
 
-    if (!list_push_back(trans, &dst))
+    if (!list_push_back(trans, dst))
         errx(EXIT_FAILURE, "Unable to append to the list at address %p",
              (void *)trans);  // LCOV_EXCL_LINE
 }
@@ -294,7 +294,7 @@ Automaton *automaton_from_daut(const char *filename)
     return automaton;
 }
 
-
+/*
 void automaton_to_dot(Automaton *aut)
 {
     size_t index = 0;
@@ -335,3 +335,4 @@ void automaton_to_dot(Automaton *aut)
     }
     printf("}\n");
 }
+*/
