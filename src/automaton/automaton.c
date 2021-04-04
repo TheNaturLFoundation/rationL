@@ -13,7 +13,7 @@ Automaton *automaton_create(size_t size)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
-    autom->transition_table = Matrix(256, size);
+    autom->transition_table = Matrix(size, 256);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
     autom->is_determined = 0;
@@ -65,11 +65,11 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-    LinkedList *trans = matrix_get(automaton->transition_table,
+    LinkedList *start = matrix_get(automaton->transition_table,
                                    epsilon ? 0 : value, src->id);
 
     // Skip the sentinel
-    trans = trans->next;
+    LinkedList *trans = start->next;
     for (size_t i = 0; trans != NULL; trans = trans->next, i++)
     {
         State *curr_dst = trans->data;
@@ -77,6 +77,7 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
         {
             trans->previous->next = trans->next;
             trans->next = NULL;
+            start->size--;
             list_free(trans);
             return 0;
         }
@@ -91,14 +92,16 @@ void automaton_remove_state(Automaton *automaton, State *state)
     for (size_t y = 0; y < automaton->size; y++)
         for (size_t x = 0; x < automaton->transition_table->width; x++)
         {
-            LinkedList *trans = matrix_get(automaton->transition_table, x, y);
-            for (; trans->next != NULL; trans = trans->next)
+            LinkedList *start = matrix_get(automaton->transition_table, x, y);
+            for (LinkedList *trans = start->next; trans != NULL;
+                 trans = trans->next)
             {
-                State *curr = trans->next->data;
+                State *curr = trans->data;
                 if (curr->id == state->id)
                 {
                     trans->previous->next = trans->next;
                     trans->next = NULL;
+                    start->size--;
                     list_free(trans);
                     break;  // Assume there aren't duplicates
                 }
@@ -125,6 +128,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
     }
     array_remove(automaton->states, state->id);
     automaton->size -= 1;
+
     free(state);
 }
 

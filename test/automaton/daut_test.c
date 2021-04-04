@@ -58,28 +58,32 @@ void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
                  "First automaton has size %zu, second has size %zu (line %zu)",
                  a1->size, a2->size, line);
 
-    for (size_t i = 0; i < a1->size; i++)
-    {
-        LinkedList *adj1 = *(LinkedList **) array_get(a1->adj_lists, i);
-        LinkedList *adj2 = *(LinkedList **) array_get(a2->adj_lists, i);
-        while (adj1->next != NULL && adj2->next != NULL)
+    cr_assert_eq(a1->transition_table->width, a2->transition_table->width,
+                 "First table has width %zu, second has width %zu (line %zu)",
+                 a1->transition_table->width, a2->transition_table->width, line);
+
+    cr_assert_eq(a1->transition_table->height, a2->transition_table->height,
+                 "First table has height %zu, second has height %zu (line %zu)",
+                 a1->transition_table->height, a2->transition_table->height, line);
+
+    // Check if the two transition tables are equal
+    for (size_t y = 0; y < a1->transition_table->width; y++)
+        for (size_t x = 0; x < a1->size; x++)
         {
-            Transition *tr1 = adj1->next->data;
-            Transition *tr2 = adj2->next->data;
+            LinkedList *list1 = matrix_get(a1->transition_table, x, y)->next;
+            LinkedList *list2 = matrix_get(a2->transition_table, x, y)->next;
+            while (list1 != NULL && list2 != NULL)
+            {
+                State *s1 = *(State **)list1->data;
+                State *s2 = *(State **)list2->data;
+                cr_assert_eq(s1->id, s2->id);
+                cr_assert_eq(s1->terminal, s2->terminal);
 
-            cr_assert_eq(tr1->target->id, tr2->target->id,
-                         "First target: %zu, second target: %zu (line %zu)",
-                         tr1->target->id, tr2->target->id, line);
-            cr_assert_eq(tr1->value, tr2->value);
-            cr_assert_eq(tr1->is_epsilon, tr2->is_epsilon);
-
-            adj1 = adj1->next;
-            adj2 = adj2->next;
+                list1 = list1->next;
+                list2 = list2->next;
+            }
+            cr_assert_eq(list1, list2);
         }
-        cr_assert(adj1->next == NULL && adj2->next == NULL,
-                  "The two automata don't have the same transitions"
-                  " (line %zu)", line);
-    }
 }
 
 Test(daut, a_or_b)
