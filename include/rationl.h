@@ -9,3 +9,5 @@ typedef struct regex_t
 regex_t compile(char* pattern);
 
 int match(regex_t re, char* str);
+
+void regex_free(regex_t re);

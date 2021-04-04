@@ -21,16 +21,7 @@ source_files = \
 	src/automaton/thompson.c
 
 header_files = \
-	src/automaton/automaton.h \
-	src/datatypes/linked_list.h \
-	src/datatypes/array.h \
-	src/datatypes/matrix.h \
-	src/utils/memory_utils.h \
-	src/datatypes/bin_tree.h \
-	src/parsing/lexer.h \
-	src/parsing/parsing.h \
-	src/matching/matching.h \
-	src/automaton/thompson.h
+	src/utils/memory_utils.h
 
 librationl_la_SOURCES = $(source_files) $(header_files)
 
