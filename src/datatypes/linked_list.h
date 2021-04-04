@@ -154,3 +154,5 @@ void *list_pop_at_value(LinkedList *list, ssize_t position);
  * @date 04/04/2021
  **/
 void *list_get_value(LinkedList *list, ssize_t position);
+
+int list_empty(LinkedList *list);

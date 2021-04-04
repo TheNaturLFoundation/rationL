@@ -57,7 +57,7 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
     LinkedList *trans = matrix_get(automaton->transition_table,
                                    epsilon ? 0 : value, src->id);
 
-    if (!list_push_back(trans, dst))
+    if (!list_push_back(trans, &dst))
         errx(EXIT_FAILURE, "Unable to append to the list at address %p",
              (void *)trans);  // LCOV_EXCL_LINE
 }
@@ -313,7 +313,7 @@ void automaton_to_dot(Automaton *aut)
         for (size_t c = 0; c < aut->transition_table->width; c++)
         {
             LinkedList *list = matrix_get(aut->transition_table, c, src);
-            list_foreach(State, target, list)
+            list_foreach(State*, target, list)
             {
                 char transition_str[5] = { 0 };
                 if (c == 0)
@@ -321,7 +321,7 @@ void automaton_to_dot(Automaton *aut)
                 else
                     transition_str[0] = c;
                 printf("  %zu -> %zu[label=\"%s\"]\n", src,
-                       target.id, transition_str);
+                       target->id, transition_str);
             }
         }
     puts("}");

@@ -128,3 +128,8 @@ void *list_get_value(LinkedList* list, ssize_t position)
     LinkedList *l = list_get(list, position);
     return l->data;
 }
+
+int list_empty(LinkedList* list)
+{
+    return list->next == NULL;
+}

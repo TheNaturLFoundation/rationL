@@ -13,7 +13,7 @@ Matrix *matrix_create(size_t height, size_t width)
     size_t len = height*width;
     mat->mat = malloc(len * sizeof(LinkedList*));
     for (size_t i = 0; i < len; i++)
-        mat->mat[i] = LinkedList(State);
+        mat->mat[i] = LinkedList(State*);
     mat->height = height;
     mat->width = width;
     return mat;
