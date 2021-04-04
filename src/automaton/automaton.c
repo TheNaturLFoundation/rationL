@@ -57,7 +57,7 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
     LinkedList *trans = matrix_get(automaton->transition_table,
                                    epsilon ? 0 : value, src->id);
 
-    if (!list_push_back(trans, &dst))
+    if (!list_push_back(trans, dst))
         errx(EXIT_FAILURE, "Unable to append to the list at address %p",
              (void *)trans);  // LCOV_EXCL_LINE
 }
@@ -157,7 +157,7 @@ static char *get_symbol(const char **string)
         array_append(symbol_array, (*string)++);
 
     // Turn the array into a string
-    char *symbol = calloc(symbol_array->size + 1, sizeof(char));
+    char *symbol = SAFECALLOC(symbol_array->size + 1, sizeof(char));
     size_t i = 0;
     arr_foreach(char, c, symbol_array) symbol[i++] = c;
 
@@ -297,41 +297,32 @@ Automaton *automaton_from_daut(const char *filename)
 
 void automaton_to_dot(Automaton *aut)
 {
-    size_t index = 0;
-    printf("digraph{\n  rankdir=LR;\n");
+    puts("digraph{\n  rankdir=LR;");
     arr_foreach(State *, start, aut->starting_states)
-    {
         printf("  node [shape = point ]; q%zu\n", start->id);
-    }
 
-    printf("  node [shape = doublecircle]; \n");
+    puts("  node [shape = doublecircle]; ");
     arr_foreach(State *, state, aut->states)
-    {
         if (state->terminal)
             printf("  %zu;\n", state->id);
-    }
-    printf("  node [shape = circle];\n");
+    puts("  node [shape = circle];");
     arr_foreach(State *, state_2, aut->starting_states)
-    {
         printf("  q%zu -> %zu\n", state_2->id, state_2->id);
-    }
-    arr_foreach(LinkedList *, transitions, aut->adj_lists)
-    {
-        transitions = transitions->next;
-        while (transitions != NULL)
-        {
-            Transition *transition = transitions->data;
-            char transition_str[5] = { 0 };
-            if (transition->is_epsilon)
-                memcpy(transition_str, "ε", 3);
-            else
-                transition_str[0] = transition->value;
-            printf("  %zu -> %zu[label=\"%s\"]\n", index,
-                   transition->target->id, transition_str);
-            transitions = transitions->next;
-        }
 
-        index += 1;
-    }
-    printf("}\n");
+    for (size_t src = 0; src < aut->size; src++)
+        for (size_t c = 0; c < aut->transition_table->width; c++)
+        {
+            LinkedList *list = matrix_get(aut->transition_table, c, src);
+            list_foreach(State, target, list)
+            {
+                char transition_str[5] = { 0 };
+                if (c == 0)
+                    memcpy(transition_str, "ε", 3);
+                else
+                    transition_str[0] = c;
+                printf("  %zu -> %zu[label=\"%s\"]\n", src,
+                       target.id, transition_str);
+            }
+        }
+    puts("}");
 }
