@@ -77,19 +77,15 @@ int is_binary(Token *token)
 
 int is_unary(Token *token)
 {
-    if (token->type == PUNCTUATION)
+    switch (token->value)
     {
-        switch (token->value)
-        {
-            case '*':
-            case '+':
-            case '?':
-                return 1;
-            default:
-                return 0;
-        }
+        case '*':
+        case '+':
+        case '?':
+            return 1;
+        default:
+            return 0;
     }
-    return 0;
 }
 
 //   * + and ?    (KLEENE_STAR EXISTS and MAYBE)
@@ -269,6 +265,5 @@ BinTree *parse_symbols(Array *arr)
                 pos += 1;
         }
     }
-
     return b;
 }

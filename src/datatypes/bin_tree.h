@@ -19,7 +19,7 @@
  * @struct BinTree
  * @debrief Basic generic binary tree implementation
  * @author Vlad Argatu
- * @date 02/03/2020
+ * @date 02/03/2021
  */
 typedef struct BinTree
 {
@@ -31,7 +31,7 @@ typedef struct BinTree
 
 /**
  * @author Antoine Sicard
- * @date 03/03/2020 11H42
+ * @date 03/03/2021
  * @param data_size: The size of the data stored in the array.
  * @param data: Pointer to the data.
  * @return a new BinTree node
@@ -44,7 +44,7 @@ BinTree *create_node(BinTree *macro_defined_tree);
 
 /**
  * @author Antoine Sicard
- * @date 03/03/2020 11h42
+ * @date 03/03/2021
  * @param tree: Binary tree that will be freed.
 
 Frees the binary tree.
