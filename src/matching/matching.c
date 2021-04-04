@@ -1,6 +1,5 @@
 #include "rationl/matching.h"
 
-#include <printf.h>
 
 /*
  * Recursive function that has been replaced by an iterative one (see below)
