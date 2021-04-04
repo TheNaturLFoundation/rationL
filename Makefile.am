@@ -33,7 +33,7 @@ CODE_QUALITY_DIR = $(top_builddir)/reports/scan
 COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
 
 
-.PHONY: coverage scan-build analysis clean-local-coverage
+.PHONY: coverage clean-local-coverage uninstall-hook
 
 
 clean-local-coverage:
@@ -42,6 +42,7 @@ clean-local-coverage:
 	rm -rf test/*.gcno
 
 clean-local: clean-local-coverage
+
 
 coverage:
 	make clean

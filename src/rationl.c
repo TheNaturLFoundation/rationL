@@ -1,4 +1,5 @@
 #include <string.h>
+#include "rationl/matching.h"
 #include "rationl/thompson.h"
 #include "rationl/automaton.h"
 #include "rationl/parsing.h"
@@ -20,4 +21,9 @@ void regex_free(regex_t re)
 {
     automaton_free(re.aut);
     free(re.pattern);
+}
+
+int match(regex_t re, char* str)
+{
+    return match_nfa(re.aut, str);
 }
