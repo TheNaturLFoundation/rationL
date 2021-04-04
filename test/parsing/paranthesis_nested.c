@@ -65,3 +65,10 @@ Test(paranthesis_more, a_or_left_b_left_c_or_d_right_star_right)
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_left_b_left_c_or_d_right_star_right.dot");
     array_free(arr);
 }
+
+Test(paranthesis_more, left_a_or_left_bc_right_right_d)
+{
+    Array *arr = tokenize("(a|(bc))d");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_a_or_left_bc_right_right_d.dot");
+    array_free(arr);
+}

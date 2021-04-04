@@ -122,10 +122,12 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
         {
             Token *next_token = array_get(arr, *pos+1);
             // Binary priorities
+
             if ( next_token->value == '.' &&
                  (prev_token->value == '|' || prev_token->value == '.'))
             {
                 b->right = parse_sub(arr, pos);
+                /*
                 // Check for unary operator
                 if (*pos < arr->size)
                 {
@@ -133,6 +135,7 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
                     if (is_unary(tok))
                         return parse_unary(b, arr, pos);
                 }
+                */
                 return b;
             }
             if (is_binary(next_token))
@@ -173,14 +176,6 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
 
     return NULL;
 }
-
-/*
- * Unused function?
-BinTree *parse_paranthesis(BinTree *left, Array *arr, size_t *pos)
-{
-    return NULL;
-}
-*/
 
 
 BinTree *parse_sub(Array *arr, size_t *pos)
@@ -225,6 +220,7 @@ BinTree *parse_sub(Array *arr, size_t *pos)
     if (token->value == ')')
     {
         *pos += 1;
+        /*
         if (*pos < arr->size)
         {
             if (is_binary(token))
@@ -232,14 +228,15 @@ BinTree *parse_sub(Array *arr, size_t *pos)
             if (is_unary(token))
                 return parse_unary(b, arr, pos);
         }
+        */
         // Check binary unary closing paranthesis
         return b;
     }
     if (is_binary(token))
         return parse_binary(b, arr, pos);
-    if (is_unary(token))
+    //if (is_unary(token))
         return parse_unary(b, arr, pos);
-    return NULL;
+    //return NULL;
 }
 
 BinTree *parse_symbols(Array *arr)
