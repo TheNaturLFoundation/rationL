@@ -43,6 +43,10 @@ automaton_tests_SOURCES = \
 parsing_tests_SOURCES = \
 			parsing/binary_basics.c \
 			parsing/binary_more.c \
-			parsing/paranthesis_basics.c
+			parsing/paranthesis_basics.c \
+			parsing/paranthesis_more.c \
+			parsing/paranthesis_unary.c \
+			parsing/paranthesis_unary_more.c \
+			parsing/paranthesis_nested.c
 
 TESTS = $(check_PROGRAMS)

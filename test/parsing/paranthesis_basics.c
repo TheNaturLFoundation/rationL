@@ -2,18 +2,6 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
-/*
-Test(l, l, .disabled=0)
-{
-    Array *arr = tokenize("(a|b)|c");
-    BinTree *got = parse_symbols(arr);
-    array_free(arr);
-    FILE *file = fopen(TEST_PATH "parsing/dotfiles/left_a_or_b_right_or_c.dot", "w+");
-    bin_tree_to_dot(got, file);
-    fclose(file);
-    bintree_free(got);
-}*/
-
 Test(binary_more, left_a_right)
 {
     Array *arr = tokenize("(a)");

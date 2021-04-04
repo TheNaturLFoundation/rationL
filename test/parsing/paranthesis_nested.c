@@ -2,92 +2,65 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
-Test(paranthesis_nested, left_left_a_right_right)
+Test(paranthesis_more, left_left_a_right_right)
 {
-    Array *arr = tokenise("((a))");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("((a))");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_left_a_right_right.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/left_left_a_right_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, left_left_ab_right_right)
+Test(paranthesis_more, left_left_ab_right_right)
 {
-    Array *arr = tokenise("((ab))");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("((ab))");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_left_ab_right_right.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/left_left_ab_right_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, left_left_a_right_b_right)
+Test(paranthesis_more, left_left_a_right_b_right)
 {
-    Array *arr = tokenise("((a)b)");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("((a)b)");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_left_a_right_b_right.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/left_left_a_right_b_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, left_left_a_or_b_right_c_right_or_d)
+Test(paranthesis_more, left_left_a_or_b_right_c_right_or_d)
 {
-    Array *arr = tokenise("((a|b)c)|d");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("((a|b)c)|d");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_left_a_or_b_right_c_right_or_d.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/left_left_a_or_b_right_c_right_or_d.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, a_or_left_left_b_or_c_right_d_right)
+Test(paranthesis_more, a_or_left_left_b_or_c_right_d)
 {
-    Array *arr = tokenise("a|((b|c)d)");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a|((b|c)d)");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_left_left_b_or_c_right_d_right.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_or_left_left_b_or_c_right_d_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, left_left_a_star_right_or_b_right_c)
+Test(paranthesis_more, left_left_a_star_right_or_b_right_or_c)
 {
-    Array *arr = tokenise("((a*)|b)|c");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("((a*)|b)|c");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_left_a_star_right_or_b_right_or_c.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/left_left_a_star_right_or_b_right_c.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, a_or_left_left_b_star_right_or_c_right)
+Test(paranthesis_more, a_or_left_left_b_star_right_or_c_right)
 {
-    Array *arr = tokenise("a|((b*)|c)");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a|((b*)|c)");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_left_left_b_star_right_or_c_right.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_or_left_left_b_star_right_or_c_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, left_a_left_b_or_c_right_star_right_or_d_right)
+Test(paranthesis_more, left_a_left_b_or_c_right_star_right_or_d)
 {
-    Array *arr = tokenise("(a(b|c)*)|d");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("(a(b|c)*)|d");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_a_left_b_or_c_right_star_right_or_d.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/left_a_left_b_or_c_right_star_right_or_d_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
-Test(paranthesis_nested, a_or_left_c_or_d_right_star_right)
+Test(paranthesis_more, a_or_left_b_left_c_or_d_right_star_right)
 {
-    Array *arr = tokenise("a|(b(c|d)*)");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a|(b(c|d)*)");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_left_b_left_c_or_d_right_star_right.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_or_left_c_or_d_right_star_right.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
