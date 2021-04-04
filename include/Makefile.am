@@ -1,4 +1,6 @@
 include_HEADERS = rationl.h
 
 otherincludedir = $(includedir)/rationl
-otherinclude_HEADERS = rationl/automaton.h
+otherinclude_HEADERS = \
+	automaton.h \
+	rationl

@@ -1,7 +1,7 @@
 #include <string.h>
-#include "automaton/thompson.h"
+#include "rationl/thompson.h"
 #include "rationl/automaton.h"
-#include "parsing/parsing.h"
+#include "rationl/parsing.h"
 #include "rationl.h"
 
 regex_t compile(char* pattern)

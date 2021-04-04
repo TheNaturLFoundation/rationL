@@ -1,7 +1,7 @@
 #pragma once
 #include "lexer.h"
-#include "datatypes/array.h"
-#include "datatypes/bin_tree.h"
+#include "array.h"
+#include "bin_tree.h"
 
 /**
  * Used to distinguish between the two types of symbols contained in

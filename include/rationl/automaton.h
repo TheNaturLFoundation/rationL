@@ -1,9 +1,9 @@
 #pragma once
 
-#include "datatypes/array.h"
-#include "datatypes/linked_list.h"
-#include "datatypes/matrix.h"
-#include "parsing/lexer.h"
+#include "array.h"
+#include "linked_list.h"
+#include "matrix.h"
+#include "lexer.h"
 
 #define Automaton(size) automaton_create(size);
 #define State(term) state_create(term);

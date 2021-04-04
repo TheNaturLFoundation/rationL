@@ -2,8 +2,8 @@
 
 #include <criterion/criterion.h>
 
-#include "datatypes/bin_tree.h"
-#include "parsing/parsing.h"
+#include "rationl/bin_tree.h"
+#include "rationl/parsing.h"
 
 void check_ast_from_file(Array *arr, const char *path)
 {

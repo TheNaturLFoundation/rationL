@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 #include <criterion/redirect.h>
 #include <criterion/internal/assert.h>
-#include "datatypes/array.h"
+#include "rationl/array.h"
 
 Test(array, array_create)
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "datatypes/array.h"
+#include "array.h"
 
 #define ASCII_FIRST_PRINTABLE 32
 #define ASCII_LAST_PRINTABLE 126

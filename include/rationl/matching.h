@@ -1,6 +1,6 @@
 #pragma once
 
-#include "automaton/automaton.h"
+#include "automaton.h"
 
 /**
  * Test if a string is recognized by a non deterministic automaton.

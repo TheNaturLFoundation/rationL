@@ -1,10 +1,10 @@
-#include "parsing.h"
+#include "rationl/parsing.h"
 
 #include <stdio.h>
 
-#include "datatypes/array.h"
-#include "datatypes/bin_tree.h"
-#include "lexer.h"
+#include "rationl/array.h"
+#include "rationl/bin_tree.h"
+#include "rationl/lexer.h"
 
 BinTree *parse_paranthesis(BinTree *left, Array *arr, size_t *pos);
 BinTree *parse_sub(Array *arr, size_t *pos);

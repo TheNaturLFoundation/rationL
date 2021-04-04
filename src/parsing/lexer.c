@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#include "lexer.h"
-#include "datatypes/linked_list.h"
-#include "datatypes/array.h"
+#include "rationl/lexer.h"
+#include "rationl/linked_list.h"
+#include "rationl/array.h"
 struct scope
 {
     /**

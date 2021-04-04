@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
 #include <stdio.h>
-#include "automaton/automaton.h"
+#include "rationl/automaton.h"
 
 
 Test(automaton, empty_init_dimens)

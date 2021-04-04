@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "rationl/automaton.h"
-#include "datatypes/bin_tree.h"
+#include "automaton.h"
+#include "bin_tree.h"
 
 /**
  * @author Simon Scatton

@@ -1,8 +1,8 @@
 #include <criterion/criterion.h>
 #include <stdio.h>
 
-#include "datatypes/bin_tree.h"
-#include "parsing/parsing.h"
+#include "rationl/bin_tree.h"
+#include "rationl/parsing.h"
 
 Test(bin_tree, create_tree_single_node)
 {

@@ -1,9 +1,9 @@
 #include <criterion/criterion.h>
 
-#include "automaton/automaton.h"
-#include "automaton/thompson.h"
-#include "datatypes/bin_tree.h"
-#include "parsing/parsing.h"
+#include "rationl/automaton.h"
+#include "rationl/thompson.h"
+#include "rationl/bin_tree.h"
+#include "rationl/parsing.h"
 
 Test(thompson, automaton_a, .disabled = 0)
 {

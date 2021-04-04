@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
-#include "datatypes/bin_tree.h"
-#include "parsing/parsing.h"
+#include "rationl/bin_tree.h"
+#include "rationl/parsing.h"
 #include "test_utils.h"
 
 Test(binary_basics, null)

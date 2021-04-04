@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
-#include "parsing/lexer.h"
+#include "rationl/lexer.h"
 #include <stdio.h>
 
 void assert_eq_token(Token *actual, Token *expected)

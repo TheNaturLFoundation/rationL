@@ -1,9 +1,8 @@
-#include "automaton/thompson.h"
+#include "rationl/thompson.h"
 
-#include "automaton/automaton.h"
-#include "datatypes/array.h"
-#include "datatypes/linked_list.h"
-#include "parsing/parsing.h"
+#include "rationl/array.h"
+#include "rationl/linked_list.h"
+#include "rationl/parsing.h"
 
 int is_state_entry(Automaton *aut, State *state)
 {
