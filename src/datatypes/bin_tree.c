@@ -81,10 +81,12 @@ BinTree *dot_to_bin_tree(const char *path)
         return NULL;
 
     // TODO secure scanf calls
-    fscanf(file, "%*[^\n]");
+    if (fscanf(file, "%*[^\n]") == -1)
+        errx(1, "fscanf failed"); //LCOV_EXCL_LINE
     Array *corresp_table = Array(struct TreeSerializeData);
     struct TreeSerializeData top_data;
-    fscanf(file, "  %zu[label=\"%c\"]\n", &top_data.index, &top_data.content);
+    if (fscanf(file, "  %zu[label=\"%c\"]\n", &top_data.index, &top_data.content) == -1)
+        errx(1, "fscanf failed"); //LCOV_EXCL_LINE
     Symbol top = { .type = LETTER, .value = { .letter = top_data.content } };
     BinTree *top_node = BinTree(Symbol, &top, .left = NULL, .right = NULL);
     top_data.tree = top_node;
@@ -94,13 +96,15 @@ BinTree *dot_to_bin_tree(const char *path)
     {
         ungetc(result, file);
         struct TreeSerializeData d;
-        fscanf(file, " %zu[label=\"%c\"]\n", &d.index, &d.content);
+        if (fscanf(file, " %zu[label=\"%c\"]\n", &d.index, &d.content) == -1)
+            errx(1, "fscanf failed"); //LCOV_EXCL_LINE
         Symbol symbol = { .type = LETTER, .value = { .letter = d.content } };
         BinTree *node = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
         d.tree = node;
         array_append(corresp_table, &d);
         size_t from, to;
-        fscanf(file, "  %zu  ->  %zu\n", &from, &to);
+        if (fscanf(file, "  %zu  ->  %zu\n", &from, &to) == -1)
+            errx(1, "fscanf failed"); //LCOV_EXCL_LINE
         arr_foreach(struct TreeSerializeData, data, corresp_table)
         {
             if (data.index == from)
