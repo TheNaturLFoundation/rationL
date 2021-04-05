@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
-#include "rationl/automaton.h"
+#include "automaton/automaton.h"
 
 #define ASSERT_AUTOMATON_EQ(a1, a2) assert_automaton_eq(__LINE__, a1, a2)
 

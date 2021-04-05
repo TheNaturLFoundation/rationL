@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
-#include "rationl/bin_tree.h"
-#include "rationl/parsing.h"
+#include "datatypes/bin_tree.h"
+#include "parsing/parsing.h"
 #include "test_utils.h"
 
 Test(escaped_characters, a_dot_b)

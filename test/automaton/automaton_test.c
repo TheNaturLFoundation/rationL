@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
 #include <stdio.h>
-#include "rationl/automaton.h"
+#include "automaton/automaton.h"
 
 
 Test(automaton, empty_init_dimens)
@@ -45,7 +45,6 @@ Test(automaton, add_classic_state_empty_row)
     */
 
     Automaton * automaton = Automaton(1);
-    State * to_add = State(0);
     for (size_t i = 0; i < automaton->transition_table->width; i++)
         cr_assert_eq(matrix_get(automaton->transition_table, i, 0)->next, NULL);
     automaton_free(automaton);

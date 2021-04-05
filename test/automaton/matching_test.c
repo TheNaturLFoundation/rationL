@@ -1,11 +1,11 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
-#include "rationl/automaton.h"
-#include "rationl/thompson.h"
-#include "rationl/bin_tree.h"
-#include "rationl/array.h"
-#include "rationl/parsing.h"
-#include "rationl/matching.h"
+#include "automaton/automaton.h"
+#include "automaton/thompson.h"
+#include "datatypes/bin_tree.h"
+#include "datatypes/array.h"
+#include "parsing/parsing.h"
+#include "matching/matching.h"
 
 Test(matching, abba)
 {

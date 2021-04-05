@@ -141,15 +141,12 @@ char *replace_nfa(const Automaton *automaton, const char *string,
             if (end != NULL)
             {
                 size_t len = end - curr;
-                char *copy = SAFECALLOC(len + 1, sizeof(char));
-                memcpy(copy, curr, len);
                 final_size = final_size - len + repl_size;
 
                 match_bounds bounds;
                 bounds.start = curr - string;
                 bounds.end = end - string - 1;
                 array_append(matches, &bounds);
-
                 curr = string + bounds.end;
                 break;
             }

@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
-#include "rationl/bin_tree.h"
-#include "rationl/parsing.h"
+#include "datatypes/bin_tree.h"
+#include "parsing/parsing.h"
 #include "test_utils.h"
 
 Test(binary_more, ab_or_cd)

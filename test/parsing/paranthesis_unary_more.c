@@ -1,6 +1,6 @@
 #include <criterion/criterion.h>
-#include "rationl/bin_tree.h"
-#include "rationl/parsing.h"
+#include "datatypes/bin_tree.h"
+#include "parsing/parsing.h"
 #include "test_utils.h"
 
 Test(paranthesis_unary_more, left_abc_right_star)

@@ -1,5 +1,5 @@
 #include <criterion/criterion.h>
-#include "rationl/matrix.h"
+#include "datatypes/matrix.h"
 
 Test(matrix, matrix_init_0_0)
 {

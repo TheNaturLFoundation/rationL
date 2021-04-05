@@ -2,7 +2,7 @@
 #define __TEST_UTILS_H_
 
 
-#include "rationl/array.h"
+#include "datatypes/array.h"
 
 void check_ast_from_file(Array *arr, const char *path);
 
