@@ -51,7 +51,7 @@ AM_CONDITIONAL([COVERAGE], [[test -n "$LCOV"] && [test -n "$GENHTML"]])
 
 AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 
-AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/Makefile docs/DoxyfilePublic docs/DoxyfileInternal])])
+AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([docs/DoxyfilePublic docs/DoxyfileInternal])])
 
 AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [enable debug build]), [], [])
 AS_IF([test "$enable_debug" = "yes"], [
@@ -62,6 +62,6 @@ AH_TEMPLATE([DEBUG],
             [Define to 1 if debug is enabled, 0 otherwise])
 
 AC_CONFIG_HEADERS([include/config.h])
-AC_CONFIG_FILES([Makefile include/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile include/Makefile test/Makefile docs/Makefile ])
 # Output the files
 AC_OUTPUT

@@ -25,6 +25,9 @@ header_files = \
 
 librationl_la_SOURCES = $(source_files) $(header_files)
 
+
+if COVERAGE
+
 COVERAGE_INFO_FILE = $(top_builddir)/coverage.info
 COVERAGE_REPORT_DIR = $(top_builddir)/reports/coverage
 COVERAGE_REPORT_FILES_GCNO = $(source_files:.c=.gcno)
@@ -32,8 +35,7 @@ CODE_QUALITY_DIR = $(top_builddir)/reports/scan
 
 COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
 
-
-.PHONY: coverage clean-local-coverage uninstall-hook
+.PHONY: coverage clean-local-coverage
 
 
 clean-local-coverage:
@@ -54,3 +56,5 @@ coverage:
 	lcov --capture --directory $(top_builddir)/src --output-file $(COVERAGE_INFO_FILE)
 	genhtml $(COVERAGE_INFO_FILE) --output-directory $(COVERAGE_REPORT_DIR)
 	@echo "Generated coverage report succesfully"
+
+endif
