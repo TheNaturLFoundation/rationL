@@ -52,3 +52,8 @@ size_t regex_search(reg_t re, char *str, char **groups[])
     array_free(arr);
     return n;
 }
+
+char *regex_sub(reg_t re, char *str, char *sub)
+{
+    return replace_nfa(re.aut, str, sub);
+}

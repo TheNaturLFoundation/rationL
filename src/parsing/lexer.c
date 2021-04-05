@@ -399,6 +399,7 @@ Array *tokenize(const char *string)
                 last_scope.end_index = tokens->size;
                 list_free(last_scope_node);
             }
+            is_escapable = 1;
         }
         /* fall through */
         case '+':

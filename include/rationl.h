@@ -14,6 +14,6 @@ int regex_match(reg_t re, char* str);
 
 size_t regex_search(reg_t re, char *str, char **groups[]);
 
-size_t regex_sub(reg_t re, char *str, char **result);
+char *regex_sub(reg_t re, char *str, char *sub);
 
 void regex_free(reg_t re);

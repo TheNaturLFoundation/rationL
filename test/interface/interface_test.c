@@ -40,3 +40,15 @@ Test(interface_test, search_numbers)
 
     regex_free(int_reg);
 }
+
+Test(interface_replace, replace_whitespace)
+{
+    reg_t whitespace_reg = regex_compile("\\s+");
+
+    char *str = regex_sub(
+        whitespace_reg, "Bonjour,\n  je  \t \n   m'appelle  \t   Rostan!", " ");
+    cr_assert_str_eq(str, "Bonjour, je m'appelle Rostan!");
+
+    free(str);
+    regex_free(whitespace_reg);
+}
