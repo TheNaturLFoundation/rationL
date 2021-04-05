@@ -129,6 +129,8 @@ void automaton_remove_state(Automaton *automaton, State *state)
         State *another_state = *(State **)array_get(automaton->states, k);
         another_state->id -= 1;
     }
+    for (size_t x = 0; x < automaton->transition_table->width; x++)
+        list_free(matrix_get(automaton->transition_table, x, state->id));
     for (size_t k = state->id; k < automaton->states->size - 1; k++)
     {
         for (size_t x = 0; x < automaton->transition_table->width; x++)
