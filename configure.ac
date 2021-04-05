@@ -1,4 +1,4 @@
-AC_INIT([rationL], [0.1.0], [simon.scatton@epita.fr])
+AC_INIT([rationL], [v0.1.0], [simon.scatton@epita.fr])
 
 AC_CONFIG_SRCDIR([src/])
 
