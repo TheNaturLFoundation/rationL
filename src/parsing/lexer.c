@@ -126,6 +126,7 @@ static ssize_t get_uint(const char **string)
     ssize_t total = 0;
     while (**string >= '0' && **string <= '9')
     {
+        total *= 10;
         total += **string - '0';
         (*string)++;
     }
