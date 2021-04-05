@@ -105,15 +105,68 @@ Test(substring, abstara)
 
     subs = search_nfa(aut, "abbbbbbaa");
     cr_assert_eq(subs->size, 2, "expected 2, got %zu", subs->size);
+    char *s2 = *(char **)array_get(subs, 0);
+    cr_assert_str_eq(s2, "abbbbbba", "expected 'abbbbbba', got '%s'", s2);
+    s2 = *(char **)array_get(subs, 1);
+    cr_assert_str_eq(s2, "aa", "expected 'aa', got '%s'", s2);
+    array_free(subs);
+
+    subs = search_nfa(aut, "aasaabbbba4abavaabajaa");
+    cr_assert_eq(subs->size, 7, "expected 7, got %zu", subs->size);
     char *s3 = *(char **)array_get(subs, 0);
-    cr_assert_str_eq(s3, "abbbbbba", "expected 'abbbbbba', got '%s'", s3);
+    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
     s3 = *(char **)array_get(subs, 1);
+    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
+    s3 = *(char **)array_get(subs, 2);
+    cr_assert_str_eq(s3, "abbbba", "expected 'abbbba', got '%s'", s3);
+    s3 = *(char **)array_get(subs, 3);
+    cr_assert_str_eq(s3, "aba", "expected 'aba', got '%s'", s3);
+    s3 = *(char **)array_get(subs, 4);
+    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
+    s3 = *(char **)array_get(subs, 5);
+    cr_assert_str_eq(s3, "aba", "expected 'aba', got '%s'", s3);
+    s3 = *(char **)array_get(subs, 6);
     cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
     array_free(subs);
 
     subs = search_nfa(aut, "abbcba");
     cr_assert_eq(subs->size, 0, "expected 0, got %zu", subs->size);
     array_free(subs);
+
+    automaton_free(aut);
+}
+
+Test(replace, abstara)
+{
+    Automaton *aut = automaton_from_daut(TEST_PATH "automaton/abstara.daut");
+    char *string;
+
+    string = replace_nfa(aut, "abbbbaabba", "");
+    cr_assert_str_eq(string, "", "expected empty string, got '%s'", string);
+    free(string);
+
+    string = replace_nfa(aut, "aasabbbba4abavabbbajaa", "");
+    cr_assert_str_eq(string, "s4vj", "expected 's4vj', got '%s'", string);
+    free(string);
+
+    automaton_free(aut);
+}
+
+Test(replace, comma)
+{
+    Array *tokens = tokenize(", *");
+    BinTree *b = parse_symbols(tokens);
+    Automaton *aut = thompson(b);
+    char *string;
+
+    string = replace_nfa(aut, "1, 2,3,     4,  5", ", ");
+    cr_assert_str_eq(string, "1, 2, 3, 4, 5",
+                     "expected '1, 2, 3, 4, 5', got '%s'", string);
+    free(string);
+
+    string = replace_nfa(aut, "", "azerty");
+    cr_assert_str_eq(string, "", "expected empty string, got %s", string);
+    free(string);
 
     automaton_free(aut);
 }

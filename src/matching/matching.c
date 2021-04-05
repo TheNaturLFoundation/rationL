@@ -28,6 +28,7 @@ int match_nfa_from_state_rec(const Automaton *automaton, const char *string,
  */
 /*
  * Useless now, replaced by submatch_nfa_from_state
+ * I keep it commented in case I need it again later
 static int match_nfa_from_state(const Automaton *automaton, const char *string,
                          State *start)
 {
@@ -119,6 +120,63 @@ Array *search_nfa(const Automaton *automaton, const char *string)
         }
     }
     return substrings;
+}
+
+
+char *replace_nfa(const Automaton *automaton, const char *string,
+                   const char *replace)
+{
+    typedef struct {
+        size_t start;
+        size_t end;
+    } match_bounds;
+    Array *matches = Array(match_bounds);
+
+    size_t final_size = strlen(string);
+    size_t repl_size = strlen(replace);
+    for (const char *curr = string; *curr != 0; curr++)
+    {
+        arr_foreach(State *, start, automaton->starting_states)
+        {
+            char *end = submatch_nfa_from_state(automaton, curr, start);
+            if (end != NULL)
+            {
+                size_t len = end - curr;
+                char *copy = SAFECALLOC(len + 1, sizeof(char));
+                memcpy(copy, curr, len);
+                final_size = final_size - len + repl_size;
+
+                match_bounds bounds;
+                bounds.start = curr - string;
+                bounds.end = end - string - 1;
+                array_append(matches, &bounds);
+
+                curr = string + bounds.end;
+                break;
+            }
+        }
+    }
+
+    const char *start = string;
+    char *final = SAFECALLOC(final_size + 1, sizeof(char));
+    char *result = final;  // Keep a pointer to the head of the string
+    size_t last_bound = 0;
+    arr_foreach(match_bounds, bounds, matches)
+    {
+        memcpy(final, string, bounds.start - last_bound);
+        final += bounds.start - last_bound;
+        last_bound = bounds.end + 1;
+        strcpy(final, replace);
+        final += repl_size;
+        string = start + last_bound;
+    }
+    // Add the remaining characters that do not need to be changed
+    for (; *string != 0; string++, final++)
+        *final = *string;
+
+    array_free(matches);
+
+    return result;
 }
 
 /**
