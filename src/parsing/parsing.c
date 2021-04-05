@@ -182,7 +182,7 @@ BinTree *parse_sub(Array *arr, size_t *pos)
 {
     Token *token = array_get(arr, *pos);
     // token is an operator
-    if(token->value == '(')
+    if(token->type == PUNCTUATION && token->value == '(')
     {
         *pos += 1;
         BinTree *tree = parse_sub(arr, pos);
