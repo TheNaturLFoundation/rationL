@@ -159,22 +159,3 @@ Test(replace, abstara)
 
     automaton_free(aut);
 }
-
-Test(replace, comma)
-{
-    Array *tokens = tokenize(", *");
-    BinTree *b = parse_symbols(tokens);
-    Automaton *aut = thompson(b);
-    char *string;
-
-    string = replace_nfa(aut, "1, 2,3,     4,  5", ", ");
-    cr_assert_str_eq(string, "1, 2, 3, 4, 5",
-                     "expected '1, 2, 3, 4, 5', got '%s'", string);
-    free(string);
-
-    string = replace_nfa(aut, "", "azerty");
-    cr_assert_str_eq(string, "", "expected empty string, got %s", string);
-    free(string);
-
-    automaton_free(aut);
-}
