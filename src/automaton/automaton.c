@@ -86,7 +86,7 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
             list_free(trans);
             return 0;
         }
-    }
+    }  // LCOV_EXCL_LINE
 
     return 1;
 }
@@ -109,7 +109,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
                     list_free(trans);
                     break;  // Assume there aren't duplicates
                 }
-            }
+            }  // LCOV_EXCL_LINE
         }
 
     // Remove from starting_states

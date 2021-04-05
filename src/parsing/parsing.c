@@ -161,7 +161,7 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
                 *pos += 1;
                 return b;
             }
-        }
+        }  // LCOV_EXCL_LINE
         // No particular priority
         Symbol s = array_element_to_symbol(arr, *pos);
         b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
