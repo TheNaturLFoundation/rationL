@@ -87,7 +87,7 @@ Test(substring, abba)
     cr_assert_str_eq(s2, "abba", "expected 'abba', got '%s'", s2);
     free_substring_array(subs);
 
-    subs = search_nfa(abba, "abbabba");
+    subs = search_nfa(abba, "abbaabba");
     cr_assert_eq(subs->size, 2, "expected 2, got %zu", subs->size);
     arr_foreach(char *, s3, subs)
         cr_assert_str_eq(s3, "abba", "expected 'abba', got '%s'", s3);
@@ -111,7 +111,7 @@ Test(substring, abstara)
     cr_assert_str_eq(s1, "abba", "expected 'abba', got '%s'", s1);
     free_substring_array(subs);
 
-    subs = search_nfa(aut, "abbbbbbaa");
+    subs = search_nfa(aut, "abbbbbbaaa");
     cr_assert_eq(subs->size, 2, "expected 2, got %zu", subs->size);
     char *s2 = *(char **)array_get(subs, 0);
     cr_assert_str_eq(s2, "abbbbbba", "expected 'abbbbbba', got '%s'", s2);
@@ -119,7 +119,7 @@ Test(substring, abstara)
     cr_assert_str_eq(s2, "aa", "expected 'aa', got '%s'", s2);
     free_substring_array(subs);
 
-    subs = search_nfa(aut, "aasaabbbba4abavaabajaa");
+    subs = search_nfa(aut, "aasaaabbbba4abavabaaajaa");
     cr_assert_eq(subs->size, 7, "expected 7, got %zu", subs->size);
     char *s3 = *(char **)array_get(subs, 0);
     cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
@@ -130,9 +130,9 @@ Test(substring, abstara)
     s3 = *(char **)array_get(subs, 3);
     cr_assert_str_eq(s3, "aba", "expected 'aba', got '%s'", s3);
     s3 = *(char **)array_get(subs, 4);
-    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
+    cr_assert_str_eq(s3, "aba", "expected 'aa', got '%s'", s3);
     s3 = *(char **)array_get(subs, 5);
-    cr_assert_str_eq(s3, "aba", "expected 'aba', got '%s'", s3);
+    cr_assert_str_eq(s3, "aa", "expected 'aba', got '%s'", s3);
     s3 = *(char **)array_get(subs, 6);
     cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
     free_substring_array(subs);

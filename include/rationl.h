@@ -1,13 +1,19 @@
+#include <stddef.h>
+
 typedef struct Automaton Automaton;
 
-typedef struct regex_t
+typedef struct reg_t
 {
     Automaton* aut;
     char* pattern;
-} regex_t;
+} reg_t;
 
-regex_t regex_compile(char* pattern);
+reg_t regex_compile(char* pattern);
 
-int regex_match(regex_t re, char* str);
+int regex_match(reg_t re, char* str);
 
-void regex_free(regex_t re);
+size_t regex_search(reg_t re, char *str, char **groups[]);
+
+size_t regex_sub(reg_t re, char *str, char **result);
+
+void regex_free(reg_t re);

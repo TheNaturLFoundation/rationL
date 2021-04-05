@@ -114,6 +114,7 @@ Array *search_nfa(const Automaton *automaton, const char *string)
                 memcpy(copy, string, length);
                 // Add the string to the array
                 array_append(substrings, &copy);
+                string = end - 1;
                 break;
             }
         }
