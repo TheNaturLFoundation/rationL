@@ -67,7 +67,7 @@ static void free_substring_array(Array *arr)
     arr_foreach(char *, s, arr)
         free(s);
 
-    free(arr);
+    array_free(arr);
 }
 
 Test(substring, abba)
