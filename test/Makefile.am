@@ -1,5 +1,9 @@
 #Setup linking
-AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/test/  -DTEST_PATH=\"$(top_srcdir)/test/\"
+AM_CPPFLAGS = -I$(top_srcdir)/src/ \
+				-I$(top_srcdir)/include/ \
+				-I$(top_srcdir)/test/ \
+				-DTEST_PATH=\"$(top_srcdir)/test/\"
+
 AM_LDFLAGS  = $(CRITERION_LIBS)
 AM_CFLAGS 	= $(CRITERION_CFLAGS)
 LDADD = $(top_builddir)/librationl.la
