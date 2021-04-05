@@ -38,6 +38,8 @@ COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
 
 clean-local-coverage:
 	rm -rf $(COVERAGE_REPORT_FILES_GCNO)
+	rm -rf test/*/*.gcda
+	rm -rf test/*/*.gcno
 	rm -rf test/*.gcda
 	rm -rf test/*.gcno
 

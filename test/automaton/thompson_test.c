@@ -5,6 +5,12 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
+Test(thompson, null)
+{
+    Automaton *aut = thompson(NULL);
+    cr_assert_eq(aut, NULL);
+}
+
 Test(thompson, automaton_a, .disabled = 0)
 {
     Array *arr = tokenize("a");
@@ -143,3 +149,4 @@ Test(thompson, identifier)
     array_free(arr);
     bintree_free(b);
 }
+

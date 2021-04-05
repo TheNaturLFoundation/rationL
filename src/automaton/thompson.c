@@ -27,17 +27,18 @@ Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
         automaton_add_state(a, state,
                             remap_entries ? 0 : is_state_entry(b, state_b));
     }
-    for(size_t i = 0; i < b->size; i++)
+    for (size_t i = 0; i < b->size; i++)
         for (size_t j = 0; j < b->transition_table->width; j++)
         {
             LinkedList *targets = matrix_get(b->transition_table, j, i);
-            if(!list_empty(targets))
+            if (!list_empty(targets))
             {
                 State *src = *(State **)array_get(states_b_htab, i);
-                list_foreach(State*, dst, targets)
+                list_foreach(State *, dst, targets)
                 {
-                    State* real_dst = *(State **)array_get(states_b_htab, dst->id);
-                    automaton_add_transition(a, src, real_dst, j, j==0);
+                    State *real_dst =
+                        *(State **)array_get(states_b_htab, dst->id);
+                    automaton_add_transition(a, src, real_dst, j, j == 0);
                 }
             }
         }
@@ -87,9 +88,9 @@ void unite(Automaton *a, Automaton *b)
     add_new_entry(a);
     State *new_end = State(0);
     automaton_add_state(a, new_end, 0);
-    arr_foreach(State*, state, a->states)
+    arr_foreach(State *, state, a->states)
     {
-        if(state->terminal)
+        if (state->terminal)
         {
             automaton_add_transition(a, state, new_end, 'e', 1);
             state->terminal = 0;
@@ -106,9 +107,9 @@ void kleene(Automaton *a)
     automaton_add_state(a, new_entry, 0);
     automaton_add_state(a, new_end, 0);
     automaton_add_transition(a, new_entry, new_end, 'e', 1);
-    arr_foreach(State*, state, a->states)
+    arr_foreach(State *, state, a->states)
     {
-        if(state->terminal)
+        if (state->terminal)
         {
             arr_foreach(State *, entry, a->starting_states)
             {
@@ -127,14 +128,14 @@ void kleene(Automaton *a)
     new_end->terminal = 1;
 }
 
-void maybe(Automaton* aut)
+void maybe(Automaton *aut)
 {
-    State* new_entry = add_new_entry(aut);
-    State* new_end = State(0);
+    State *new_entry = add_new_entry(aut);
+    State *new_end = State(0);
     automaton_add_state(aut, new_end, 0);
-    arr_foreach(State*, state, aut->states)
+    arr_foreach(State *, state, aut->states)
     {
-        if(state->terminal)
+        if (state->terminal)
         {
             automaton_add_transition(aut, state, new_end, 'e', 1);
             state->terminal = 0;
@@ -144,19 +145,19 @@ void maybe(Automaton* aut)
     automaton_add_transition(aut, new_entry, new_end, 'e', 1);
 }
 
-void exists(Automaton* aut)
+void exists(Automaton *aut)
 {
-    State* new_end = State(0);
+    State *new_end = State(0);
     automaton_add_state(aut, new_end, 0);
-    arr_foreach(State*, state, aut->states)
+    arr_foreach(State *, state, aut->states)
     {
-        if(state->terminal)
+        if (state->terminal)
         {
             automaton_add_transition(aut, state, new_end, 'e', 1);
             state->terminal = 0;
         }
     }
-    arr_foreach(State*, starting_state, aut->starting_states)
+    arr_foreach(State *, starting_state, aut->starting_states)
     {
         automaton_add_transition(aut, new_end, starting_state, 'e', 1);
     }
@@ -165,6 +166,8 @@ void exists(Automaton* aut)
 
 Automaton *thompson(BinTree *tree)
 {
+    if(tree == NULL)
+        return NULL;
     if (tree->left == NULL && tree->right == NULL)
     {
         State *entry_state = State(0);
@@ -212,9 +215,7 @@ Automaton *thompson(BinTree *tree)
         exists(child);
         return child;
     }
-    default:
-        break;
     }
 
-    return NULL;
+    return NULL; //LCOV_EXCL_LINE
 }

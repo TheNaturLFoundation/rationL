@@ -1,5 +1,3 @@
-if HAVE_DOXYGEN
-
 public: DoxyfilePublic
 	$(DOXYGEN) $^
 
@@ -12,5 +10,3 @@ clean-local:
 
 distclean-local:
 	-rm DoxyfilePublic DoxyfileInternal Makefile
-
-endif
