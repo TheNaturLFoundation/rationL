@@ -1,7 +1,12 @@
 #include <criterion/criterion.h>
 #include <stdio.h>
-#include "automaton/automaton.h"
+#include <criterion/redirect.h>
+#include <criterion/internal/assert.h>
 
+#include "automaton/automaton.h"
+#include "automaton/thompson.h"
+#include "datatypes/bin_tree.h"
+#include "parsing/parsing.h"
 
 Test(automaton, empty_init_dimens)
 {
@@ -22,8 +27,8 @@ Test(automaton, empty_init_sentinels)
 
 Test(automaton, add_order_update)
 {
-    Automaton * automaton = Automaton(1);
-    State * to_add = State(0);
+    Automaton *automaton = Automaton(1);
+    State *to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
     cr_assert_eq(automaton->size, 1);
     automaton_free(automaton);
@@ -31,9 +36,8 @@ Test(automaton, add_order_update)
 
 Test(automaton, add_classic_state)
 {
-    Automaton * automaton = Automaton(1);
-    State * to_add = State(0)
-    automaton_add_state(automaton, to_add, 0);
+    Automaton *automaton = Automaton(1);
+    State *to_add = State(0) automaton_add_state(automaton, to_add, 0);
     cr_assert_eq(to_add->id, 0);
     automaton_free(automaton);
 }
@@ -44,7 +48,7 @@ Test(automaton, add_classic_state_empty_row)
     Checks if the row is still empty
     */
 
-    Automaton * automaton = Automaton(1);
+    Automaton *automaton = Automaton(1);
     for (size_t i = 0; i < automaton->transition_table->width; i++)
         cr_assert_eq(matrix_get(automaton->transition_table, i, 0)->next, NULL);
     automaton_free(automaton);
@@ -57,10 +61,10 @@ Test(automaton, add_classic_state_states)
     states
     */
 
-    Automaton * automaton = Automaton(1);
-    State * to_add = State(0);
+    Automaton *automaton = Automaton(1);
+    State *to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
-    State ** s = array_get(automaton->states, 0);
+    State **s = array_get(automaton->states, 0);
     cr_assert_eq(*s, to_add);
     automaton_free(automaton);
 }
@@ -72,23 +76,24 @@ Test(automaton, add_starting_state)
     starting_states array of automaton
     */
 
-    Automaton * automaton = Automaton(1);
-    State * to_add = State(0);
+    Automaton *automaton = Automaton(1);
+    State *to_add = State(0);
     automaton_add_state(automaton, to_add, 1);
-    State ** elt = array_get(automaton->starting_states, 0);
-    cr_assert_eq(*elt, to_add, "got %p expected %p\n", (void*) elt, (void*) to_add);
+    State **elt = array_get(automaton->starting_states, 0);
+    cr_assert_eq(*elt, to_add, "got %p expected %p\n", (void *)elt,
+                 (void *)to_add);
     automaton_free(automaton);
 }
 
 Test(automaton, add_multpile)
 {
     size_t entries = 0;
-    Automaton * automaton = Automaton(100);
-    State * s;
-    for(size_t i = 0; i < 100; i++)
+    Automaton *automaton = Automaton(100);
+    State *s;
+    for (size_t i = 0; i < 100; i++)
     {
         s = State(0);
-        if(i % 10 == 0)
+        if (i % 10 == 0)
         {
             automaton_add_state(automaton, s, 1);
             entries++;
@@ -106,9 +111,9 @@ Test(automaton, add_multpile)
 
 Test(automaton, add_transition_no_epsilion)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(0);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, 'A', 0);
@@ -117,17 +122,18 @@ Test(automaton, add_transition_no_epsilion)
     LinkedList *elt = list->next;
     State *target = *(State **)elt->data;
 
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void*) elt->next);
-    cr_assert_eq(target->id, s2->id, "got %zu expected %zu\n", target->id, s2->id);
+    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void *)elt->next);
+    cr_assert_eq(target->id, s2->id, "got %zu expected %zu\n", target->id,
+                 s2->id);
 
     automaton_free(automaton);
 }
 
 Test(automaton, add_transition_no_epsilion2)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(0);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s2, s1, 'A', 0);
@@ -136,17 +142,18 @@ Test(automaton, add_transition_no_epsilion2)
     LinkedList *elt = list->next;
     State *target = *(State **)elt->data;
 
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void*) elt->next);
-    cr_assert_eq(target->id, s1->id, "got %zu expected %zu\n", target->id, s1->id);
+    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void *)elt->next);
+    cr_assert_eq(target->id, s1->id, "got %zu expected %zu\n", target->id,
+                 s1->id);
 
     automaton_free(automaton);
 }
 
 Test(automaton, add_transition_epsilon)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(0);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, 'A', 1);
@@ -156,8 +163,9 @@ Test(automaton, add_transition_epsilon)
     LinkedList *elt = list->next;
     State *target = *(State **)elt->data;
 
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void*) elt->next);
-    cr_assert_eq(target->id, s2->id, "got %zu expected %zu\n", target->id, s2->id);
+    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void *)elt->next);
+    cr_assert_eq(target->id, s2->id, "got %zu expected %zu\n", target->id,
+                 s2->id);
 
     // A transition (none expected)
     list = matrix_get(automaton->transition_table, 'A', s1->id);
@@ -168,12 +176,12 @@ Test(automaton, add_transition_epsilon)
 
 Test(automaton, add_multiple_tr)
 {
-    Automaton * automaton = Automaton(500);
-    State * s;
-    State * s4vj;
-    State ** state_collector;
+    Automaton *automaton = Automaton(500);
+    State *s;
+    State *s4vj;
+    State **state_collector;
 
-    for(size_t i = 0; i < 500; i++)
+    for (size_t i = 0; i < 500; i++)
     {
         s = State(0);
         automaton_add_state(automaton, s, 0);
@@ -181,20 +189,19 @@ Test(automaton, add_multiple_tr)
     state_collector = array_get(automaton->states, 42);
     s = *state_collector;
     cr_assert_eq(s->id, 42, "got %zu, expected 42", s->id);
-    for(size_t i = 0; i < 500; i++)
+    for (size_t i = 0; i < 500; i++)
     {
         state_collector = array_get(automaton->states, i);
-        s4vj = * state_collector;
+        s4vj = *state_collector;
         automaton_add_transition(automaton, s, s4vj, 'A', 0);
     }
 
     LinkedList *list = matrix_get(automaton->transition_table, 'A', s->id);
     size_t list_size = 0;
-    list_foreach(State *, _s, list)
-        list_size++;
+    list_foreach(State *, _s, list) list_size++;
     cr_assert_eq(list_size, 500, "got %zu, expected 500", list_size);
 
-    for(size_t i = 0; i < 500; i == s->id - 1 ? i += 2 : i++)
+    for (size_t i = 0; i < 500; i == s->id - 1 ? i += 2 : i++)
     {
         list = matrix_get(automaton->transition_table, 'A', i);
         cr_assert(list_empty(list), "list isn't empty!");
@@ -205,9 +212,9 @@ Test(automaton, add_multiple_tr)
 
 Test(automaton, automaton_remove_transition1)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(0);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, 'A', 0);
@@ -223,9 +230,9 @@ Test(automaton, automaton_remove_transition1)
 
 Test(automaton, automaton_remove_transion2)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(1);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, ' ', 1);
@@ -245,9 +252,9 @@ Test(automaton, automaton_remove_transion2)
 
 Test(automaton, automaton_remove_transition3)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(1);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, ' ', 1);
@@ -267,9 +274,9 @@ Test(automaton, automaton_remove_transition3)
 
 Test(automaton, automaton_remove_transition4)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(1);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, ' ', 1);
@@ -289,9 +296,9 @@ Test(automaton, automaton_remove_transition4)
 
 Test(automaton, automaton_remove_transition_fail1)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(1);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
 
@@ -304,9 +311,9 @@ Test(automaton, automaton_remove_transition_fail1)
 
 Test(automaton, automaton_remove_transition_fail2)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(1);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
 
@@ -319,9 +326,9 @@ Test(automaton, automaton_remove_transition_fail2)
 
 Test(automaton, automaton_remove_state_no_entry)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(0);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
     automaton_remove_state(automaton, s1);
@@ -335,9 +342,9 @@ Test(automaton, automaton_remove_state_no_entry)
 
 Test(automaton, automaton_remove_state_entry)
 {
-    Automaton * automaton = Automaton(2);
-    State * s1 = State(0);
-    State * s2 = State(0);
+    Automaton *automaton = Automaton(2);
+    State *s1 = State(0);
+    State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
     automaton_remove_state(automaton, s2);
@@ -351,11 +358,11 @@ Test(automaton, automaton_remove_state_entry)
 
 Test(automaton, automaton_remove_state_upgrade)
 {
-    Automaton * automaton = Automaton(4);
-    State * s1 = State(0);
-    State * s2 = State(0);
-    State * s3 = State(1);
-    State * s4vj = State(0);
+    Automaton *automaton = Automaton(4);
+    State *s1 = State(0);
+    State *s2 = State(0);
+    State *s3 = State(1);
+    State *s4vj = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
     automaton_add_state(automaton, s3, 0);
@@ -373,11 +380,11 @@ Test(automaton, automaton_remove_state_upgrade)
 
 Test(automaton, automaton_remove_state_transitions, .disabled = 1)
 {
-    Automaton * automaton = Automaton(4);
-    State * s1 = State(0);
-    State * s2 = State(0);
-    State * s3 = State(1);
-    State * s4vj = State(0);
+    Automaton *automaton = Automaton(4);
+    State *s1 = State(0);
+    State *s2 = State(0);
+    State *s3 = State(1);
+    State *s4vj = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
     automaton_add_state(automaton, s3, 0);

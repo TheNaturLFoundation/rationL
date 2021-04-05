@@ -63,8 +63,9 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
                                    epsilon ? 0 : value, src->id);
 
     if (!list_push_back(trans, &dst))
-        errx(EXIT_FAILURE, "Unable to append to the list at address %p",
-             (void *)trans);  // LCOV_EXCL_LINE
+        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
+             "Unable to append to the list at address %p", // LCOV_EXCL_LINE
+             (void *)trans); // LCOV_EXCL_LINE
 }
 
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
@@ -98,7 +99,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
         {
             LinkedList *start = matrix_get(automaton->transition_table, x, y);
             for (LinkedList *trans = start->next; trans != NULL;
-                 trans = trans->next)
+                 trans = trans->next) // LCOV_EXCL_LINE
             {
                 State *curr = *(State **)trans->data;
                 if (curr->id == state->id)
@@ -316,13 +317,14 @@ Automaton *automaton_from_daut(const char *filename)
     return automaton;
 }
 
+//LCOV_EXCL_START
 void automaton_to_dot(Automaton *aut)
 {
     puts("digraph{\n  rankdir=LR;");
     arr_foreach(State *, start, aut->starting_states)
         printf("  node [shape = point ]; q%zu\n", start->id);
 
-    puts("  node [shape = doublecircle]; ");
+    puts("  node [shape = doublecircle];");
     arr_foreach(State *, state, aut->states)
         if (state->terminal)
             printf("  %zu;\n", state->id);
@@ -347,3 +349,4 @@ void automaton_to_dot(Automaton *aut)
         }
     puts("}");
 }
+//LCOV_EXCL_STOP

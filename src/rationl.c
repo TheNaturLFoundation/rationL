@@ -14,7 +14,7 @@ typedef struct regex_t
     char* pattern;
 } regex_t;
 
-regex_t compile(char* pattern)
+regex_t regex_compile(char* pattern)
 {
     Array *arr = tokenize(pattern);
     BinTree *tree = parse_symbols(arr);
@@ -23,6 +23,8 @@ regex_t compile(char* pattern)
     re.aut = aut;
     re.pattern = malloc((strlen(pattern) + 1) *sizeof(char));
     strcpy(re.pattern, pattern);
+    bintree_free(tree);
+    array_free(arr);
     return re;
 }
 
@@ -32,7 +34,7 @@ void regex_free(regex_t re)
     free(re.pattern);
 }
 
-int match(regex_t re, char* str)
+int regex_match(regex_t re, char* str)
 {
     return match_nfa(re.aut, str);
 }

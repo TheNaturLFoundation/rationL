@@ -29,7 +29,7 @@ void bintree_free(BinTree *tree)
         free(tree);
     }
 }
-
+//LCOV_EXCL_START
 char __get_symbol_value(Symbol *symbol)
 {
     if (symbol->type == OPERATOR)
@@ -155,6 +155,7 @@ void bin_tree_to_dot(BinTree *tree, FILE *file)
     list_free(queue);
     fprintf(file, "}\n");
 }
+//LCOV_EXCL_STOP
 
 int bintree_compare(BinTree *a, BinTree *b)
 {

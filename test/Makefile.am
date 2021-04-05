@@ -24,7 +24,8 @@ check_PROGRAMS = \
 			matrix_tests \
 			lexer_tests \
 			automaton_tests \
-			parsing_tests
+			parsing_tests \
+			interface_tests
 
 array_tests_SOURCES = array/array_test.c
 
@@ -53,5 +54,8 @@ parsing_tests_SOURCES = \
 			parsing/paranthesis_nested.c \
 			parsing/escaped_characters.c \
 			test_utils.c
+
+interface_tests_SOURCES = interface/interface_test.c
+
 
 TESTS = $(check_PROGRAMS)

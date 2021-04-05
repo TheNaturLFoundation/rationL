@@ -6,8 +6,8 @@ typedef struct regex_t
     char* pattern;
 } regex_t;
 
-regex_t compile(char* pattern);
+regex_t regex_compile(char* pattern);
 
-int match(regex_t re, char* str);
+int regex_match(regex_t re, char* str);
 
 void regex_free(regex_t re);
