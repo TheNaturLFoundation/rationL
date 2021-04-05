@@ -1,7 +1,6 @@
 #include <string.h>
-#include <utils/memory_utils.h>
-#include "rationl/matching.h"
-
+#include "matching/matching.h"
+#include "utils/memory_utils.h"
 /*
  * Recursive function that has been replaced by an iterative one (see below)
 int match_nfa_from_state_rec(const Automaton *automaton, const char *string,

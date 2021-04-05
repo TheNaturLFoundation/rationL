@@ -1,12 +1,12 @@
-#include "rationl/automaton.h"
+#include "automaton.h"
 
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
-#include "rationl/array.h"
-#include "rationl/bin_tree.h"
+#include "datatypes/array.h"
+#include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
 Automaton *automaton_create(size_t size)

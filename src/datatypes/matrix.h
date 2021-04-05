@@ -2,7 +2,7 @@
 #define __MATRIX_H_
 
 #include <stdlib.h>
-#include "linked_list.h"
+#include "datatypes/linked_list.h"
 
 #define Matrix(height, width) \
     matrix_create(height, width)

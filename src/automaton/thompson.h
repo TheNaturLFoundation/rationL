@@ -2,7 +2,7 @@
 
 
 #include "automaton.h"
-#include "bin_tree.h"
+#include "datatypes/bin_tree.h"
 
 /**
  * @author Simon Scatton

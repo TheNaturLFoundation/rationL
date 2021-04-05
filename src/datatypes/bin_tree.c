@@ -1,11 +1,11 @@
-#include "rationl/bin_tree.h"
+#include "datatypes/bin_tree.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "rationl/array.h"
-#include "rationl/linked_list.h"
-#include "rationl/parsing.h"
+#include "datatypes/array.h"
+#include "datatypes/linked_list.h"
+#include "parsing/parsing.h"
 #include "utils/memory_utils.h"
 
 BinTree *create_node(BinTree *macro_tree_data)

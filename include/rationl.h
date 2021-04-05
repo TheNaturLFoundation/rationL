@@ -1,4 +1,4 @@
-#include "rationl/automaton.h"
+typedef struct Automaton Automaton;
 
 typedef struct regex_t
 {

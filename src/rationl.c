@@ -1,9 +1,18 @@
 #include <string.h>
-#include "rationl/matching.h"
-#include "rationl/thompson.h"
-#include "rationl/automaton.h"
-#include "rationl/parsing.h"
-#include "rationl.h"
+#include "datatypes/bin_tree.h"
+#include <stdlib.h>
+#include "datatypes/array.h"
+#include "automaton/automaton.h"
+#include "matching/matching.h"
+#include "automaton/thompson.h"
+#include "parsing/lexer.h"
+#include "parsing/parsing.h"
+
+typedef struct regex_t
+{
+    Automaton* aut;
+    char* pattern;
+} regex_t;
 
 regex_t compile(char* pattern)
 {

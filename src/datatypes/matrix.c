@@ -1,8 +1,8 @@
-#include "rationl/matrix.h"
+#include "datatypes/matrix.h"
 
 #include <string.h>
 
-#include "rationl/automaton.h"
+#include "automaton/automaton.h"
 #include "utils/memory_utils.h"
 
 Matrix *matrix_create(size_t height, size_t width)

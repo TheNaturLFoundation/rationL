@@ -1,6 +1,6 @@
 #include <string.h>
 #include "utils/memory_utils.h"
-#include "rationl/array.h"
+#include "datatypes/array.h"
 
 /**
  * Multiplies the capacity of the array by ARR_GROWTH_FACTOR.

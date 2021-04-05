@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "rationl/linked_list.h"
+#include "datatypes/linked_list.h"
 #include "utils/memory_utils.h"
 
 
