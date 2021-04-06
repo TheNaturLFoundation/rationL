@@ -47,6 +47,6 @@ Clone the ``dev`` branch of the git and run the ``./bootstrap`` script to config
 
 # Documentation
 
-You can compile the documentation of the library in the ``docs`` folder using the ``make`` command.
+You can compile the documentation of the library in the ``docs`` folder using the ``make public`` command.
 
 You can also find the online documentation [here](https://thenaturlfoundation.github.io/rationL/)

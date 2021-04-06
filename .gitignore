@@ -1,15 +1,18 @@
 # http://www.gnu.org/software/automake
 
+.vscode
+.idea
+.DS_Store
 .libs/
 criterion_tests
 *.la
 libtool
 rationl-*.tar.gz
 rationl-*/
-src/*.lo
-
+*.lo
+compile_commands.json
+.cache/
 *.gcov
-
 *.o
 *.stamp
 *.log
@@ -25,17 +28,17 @@ reports/
 *.gcno
 *.gcda
 *.info
-
+*_tests
 #Autoheader files
 stamp-h1
 include/config.h
 include/config.h.in
 
 #Docs
-/docs/Doxyfile
-/docs/html
-/docs/latex
-/docs/man
+DoxyfileInternal
+DoxyfilePublic
+/docs/internal
+/docs/public
 
 Makefile.in
 /ar-lib

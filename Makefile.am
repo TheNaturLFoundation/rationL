@@ -1,54 +1,69 @@
-SUBDIRS = include
-
+SUBDIRS = include . test docs
+EXTRA_DIST = docs test
+AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
 AM_LDFLAGS = -shared -O3
+man3_MANS =	\
+	docs/man/regex_compile.man \
+	docs/man/regex_free.man \
+	docs/man/regex_sub.man \
+	docs/man/regex_search.man \
+	docs/man/regex_match.man
+
+dist_man_MANS = $(man3_MANS)
 
 lib_LTLIBRARIES = librationl.la
-
 # Put here all the source files
 # that need to be compiled with
 # the dynamic library.
-librationl_la_SOURCES = \
-	src/rationl.c
+source_files = \
+	src/rationl.c \
+	src/automaton/automaton.c \
+	src/datatypes/linked_list.c \
+	src/datatypes/array.c \
+	src/datatypes/matrix.c \
+	src/utils/memory_utils.c\
+	src/datatypes/bin_tree.c \
+	src/parsing/lexer.c \
+	src/parsing/parsing.c \
+	src/matching/matching.c \
+	src/automaton/thompson.c
+
+header_files = \
+	src/automaton/automaton.h \
+	src/datatypes/linked_list.h \
+	src/datatypes/array.h \
+	src/datatypes/matrix.h \
+	src/utils/memory_utils.h\
+	src/datatypes/bin_tree.h \
+	src/parsing/lexer.h \
+	src/parsing/parsing.h \
+	src/matching/matching.h \
+	src/automaton/thompson.h
+
+librationl_la_SOURCES = $(source_files) $(header_files)
 
 
-TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
-            $(top_srcdir)/tap-driver.sh
-
-
-# Setup Criterion TAP output using ENV
-AM_TESTS_ENVIRONMENT = \
-   CRITERION_OUTPUTS='tap:-'; \
-   export CRITERION_OUTPUTS;
-
-
-AUTOMAKE_OPTIONS = serial-tests
-
-check_PROGRAMS = criterion_tests
-
-# Put here all the criterion test suites
-# For instance if I want a test suite to test
-# function A i will create a file named test_a.c
-# then add a test_a.c to the sources of the
-# criterion tests.
-
-criterion_tests_SOURCES = \
-			test/simple.c
-
-criterion_tests_LDADD = $(lib_LTLIBRARIES)
-
-criterion_tests_CFLAGS =  $(CRITERION_CFLAGS)
-criterion_tests_LDFLAGS =  $(CRITERION_LIBS)
-
-TESTS = criterion_tests
+if COVERAGE
 
 COVERAGE_INFO_FILE = $(top_builddir)/coverage.info
 COVERAGE_REPORT_DIR = $(top_builddir)/reports/coverage
-
+COVERAGE_REPORT_FILES_GCNO = $(source_files:.c=.gcno)
 CODE_QUALITY_DIR = $(top_builddir)/reports/scan
 
 COVERAGE_CFLAGS = -O0 -fprofile-arcs -ftest-coverage
 
-.PHONY: coverage scan-build analysis
+.PHONY: coverage clean-local-coverage
+
+
+clean-local-coverage:
+	rm -rf $(COVERAGE_REPORT_FILES_GCNO)
+	rm -rf test/*/*.gcda
+	rm -rf test/*/*.gcno
+	rm -rf test/*.gcda
+	rm -rf test/*.gcno
+
+clean-local: clean-local-coverage
+
 
 coverage:
 	make clean
@@ -59,10 +74,4 @@ coverage:
 	genhtml $(COVERAGE_INFO_FILE) --output-directory $(COVERAGE_REPORT_DIR)
 	@echo "Generated coverage report succesfully"
 
-scan-build:
-	make clean
-	@echo "Starting to create code quality reports..."
-	scan-build -o $(CODE_QUALITY_DIR)  -k -V make
-	@echo "Successfully run code quality scan."
-
-analysis: coverage scan-build
+endif

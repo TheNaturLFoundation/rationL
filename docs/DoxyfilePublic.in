@@ -1,0 +1,13 @@
+PROJECT_NAME           = @PACKAGE_NAME@
+PROJECT_NUMBER         = @PACKAGE_VERSION@
+OUTPUT_DIRECTORY       = @top_srcdir@/docs/public/
+INPUT                  = @top_srcdir@/include \
+                         mainpage.md
+EXCLUDE                = @top_srcdir@/include/config.h
+GENERATE_LATEX         = NO
+GENERATE_MAN	       = NO
+JAVADOC_BANNER 	       = YES
+EXTRACT_ALL 	       = NO
+RECURSIVE	           = YES
+GENERATE_TREEVIEW      = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES

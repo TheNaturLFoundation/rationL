@@ -14,16 +14,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install doxygen and pdflatex
+      - name: Install doxygen
         run: sudo apt-get install doxygen
       - name: Bootstrap and configure
         run: ./bootstrap && ./configure
       - name: Compile
         run: make
       - name: Documentation
-        run: cd docs && make
+        run: cd docs && make public
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/html/
+          publish_dir: ./docs/public/html/
