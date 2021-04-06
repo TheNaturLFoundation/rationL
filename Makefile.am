@@ -2,6 +2,14 @@ SUBDIRS = include . test docs
 EXTRA_DIST = docs test
 AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
 AM_LDFLAGS = -shared -O3
+man3_MANS =	\
+	docs/man/regex_compile.man \
+	docs/man/regex_free.man \
+	docs/man/regex_sub.man \
+	docs/man/regex_search.man \
+	docs/man/regex_match.man
+
+dist_man_MANS = $(man3_MANS)
 
 lib_LTLIBRARIES = librationl.la
 # Put here all the source files
