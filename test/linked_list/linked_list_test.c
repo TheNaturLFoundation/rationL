@@ -31,6 +31,26 @@ Test(linked_list, push_back_1)
     list_free(list);
 }
 
+Test(linked_list, push_front)
+{
+    LinkedList* list = LinkedList(int);
+    int a = 1;
+    int b = 2;
+    list_push_front(list, &b);
+    list_push_front(list, &a);
+
+    int *data = (list->next->data);
+    cr_assert_eq(*data, a);
+    cr_assert_eq(list->next->previous, list);
+
+    data = (list->next->next->data);
+    cr_assert_eq(*data, b);
+    cr_assert_eq(list->next->next->previous, list->next);
+    cr_assert_null(list->next->next->next);
+
+    list_free(list);
+}
+
 Test(linked_list, push_and_pop)
 {
     LinkedList *list = LinkedList(int);

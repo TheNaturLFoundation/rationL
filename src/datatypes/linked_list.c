@@ -30,6 +30,22 @@ int list_push_back(LinkedList *list, void *data)
     return 1;
 }
 
+int list_push_front(LinkedList *list, void *data)
+{
+    if (list == NULL)
+        return 0;
+    LinkedList *newList = SAFEMALLOC(sizeof(LinkedList));
+    newList->data = SAFEMALLOC(list->size);
+    memcpy(newList->data, data, list->size);
+    newList->next = list->next;
+    if (list->next)
+        list->next->previous = newList;
+    newList->previous = list;
+    newList->size = list->size;
+    list->next = newList;
+    return 1;
+}
+
 LinkedList *list_pop_at(LinkedList *list, ssize_t position)
 {
     if (position < -1 || list == NULL)

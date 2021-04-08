@@ -1,22 +1,9 @@
 #include <err.h>
 #include <stdio.h>
-#include <sys/types.h>
 
 #include "parsing/lexer.h"
 #include "datatypes/linked_list.h"
 #include "datatypes/array.h"
-struct scope
-{
-    /**
-     * Either '(' or '['.
-     */
-    char start_char;
-    size_t start_index;
-    /**
-     * -1 if undefined.
-     */
-    ssize_t end_index;
-};
 
 static int is_group_last(const char *string)
 {
@@ -204,6 +191,19 @@ static int tokenize_repetition(const char **string, Array *tokens,
 // Assumes that the string ends with 0
 Array *tokenize(const char *string)
 {
+    struct scope
+    {
+        /**
+         * Either '(' or '['.
+         */
+        char start_char;
+        size_t start_index;
+        /**
+         * -1 if undefined.
+         */
+        ssize_t end_index;
+    };
+
     Array *tokens = Array(Token);
     const Token concat_token = { .type = PUNCTUATION, .value = '.' };
     // True if the previous character is implicitly concatenated to a literal.
@@ -239,7 +239,7 @@ Array *tokenize(const char *string)
                         .start_index = tokens->size + previous_concat,
                         .end_index = -1
                     };
-                    list_push_back(scopes, &scope);
+                    list_push_front(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -256,7 +256,7 @@ Array *tokenize(const char *string)
                         .start_index = tokens->size + previous_concat,
                         .end_index = -1
                     };
-                    list_push_back(scopes, &scope);
+                    list_push_front(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -277,7 +277,7 @@ Array *tokenize(const char *string)
                         .start_index = tokens->size + previous_concat,
                         .end_index = -1
                     };
-                    list_push_back(scopes, &scope);
+                    list_push_front(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -300,7 +300,7 @@ Array *tokenize(const char *string)
                         .start_index = tokens->size + previous_concat,
                         .end_index = -1
                     };
-                    list_push_back(scopes, &scope);
+                    list_push_front(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -327,7 +327,7 @@ Array *tokenize(const char *string)
                         .start_index = tokens->size + previous_concat,
                         .end_index = -1
                     };
-                    list_push_back(scopes, &scope);
+                    list_push_front(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -346,7 +346,7 @@ Array *tokenize(const char *string)
                         .start_index = tokens->size + previous_concat,
                         .end_index = -1
                     };
-                    list_push_back(scopes, &scope);
+                    list_push_front(scopes, &scope);
                     if (previous_concat)
                         array_append(tokens, &concat_token);
                     previous_concat = 1;
@@ -375,12 +375,17 @@ Array *tokenize(const char *string)
         {
             if (!escaped)
             {
+                int capturing = *(string + 1) != '?' || *(string + 2) != ':';
                 struct scope scope = {
-                    .start_char = '[',
+                    .start_char = capturing ? '{' : '(',
                     .start_index = tokens->size + previous_concat,
                     .end_index = -1
                 };
-                list_push_back(scopes, &scope);
+                if (capturing)
+                    token.value = '{';
+                else
+                    string += 2;
+                list_push_front(scopes, &scope);
                 curr_concat = previous_concat;
                 previous_concat = 0;
                 token.type = PUNCTUATION;
@@ -393,11 +398,13 @@ Array *tokenize(const char *string)
         {
             if (!escaped)
             {
-                if (scopes->next == NULL)
+                if (list_empty(scopes))
                     errx(EXIT_FAILURE, "parenthesis not balanced"); //LCOV_EXCL_LINE
-                LinkedList *last_scope_node = list_pop(scopes);
+                LinkedList *last_scope_node = list_pop_front(scopes);
                 last_scope = *(struct scope *)last_scope_node->data;
                 last_scope.end_index = tokens->size;
+                if (last_scope.start_char == '{')  // Capturing group
+                    token.value = '}';
                 list_free(last_scope_node);
             }
             is_escapable = 1;
@@ -422,7 +429,7 @@ Array *tokenize(const char *string)
                     .start_index = tokens->size + previous_concat,
                     .end_index = -1
                 };
-                list_push_back(scopes, &scope);
+                list_push_front(scopes, &scope);
                 if (previous_concat)
                     array_append(tokens, &concat_token);
                 previous_concat = 1;
@@ -442,11 +449,11 @@ Array *tokenize(const char *string)
             if (!escaped)
             {
                 struct scope scope = {
-                    .start_char = '(',
+                    .start_char = '[',
                     .start_index = tokens->size + previous_concat,
                     .end_index = -1
                 };
-                list_push_back(scopes, &scope);
+                list_push_front(scopes, &scope);
                 if (previous_concat)
                     array_append(tokens, &concat_token);
                 previous_concat = 1;

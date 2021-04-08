@@ -55,6 +55,18 @@ LinkedList *list_create(size_t size);
 int list_push_back(LinkedList *list, void *data);
 
 /**
+ * Allocates memory for a new element of the list and
+ * pushes the data passed as parameter in this new element
+ * that is then placed in the first position in the list
+ * @param list The list you wish to push_back to.
+ * @param data The data to be pushed back.
+ * @author Rostan Tabet
+ * @date 08/04/2020
+ * @return true(1) if the push_back was successful false(0) otherwise
+ */
+int list_push_front(LinkedList *list, void *data);
+
+/**
  * Removes the last element of the linked list and returns it.
  * It also sets the new end pointer of the list to NULL.
  * If the list passed as argument is NULL or a sentinel, then
