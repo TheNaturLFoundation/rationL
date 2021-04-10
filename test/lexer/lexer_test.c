@@ -29,7 +29,7 @@ Test(lexer, simple_single)
     Array *tokens = tokenize(regexp);
 
     cr_assert_eq(tokens->size, 1);
-    Token expected = { .type = LITERAL, .value = 'a' };
+    Token expected = Literal('a');
     assert_eq_token(array_get(tokens, 0), &expected);
 
     array_free(tokens);
@@ -41,12 +41,12 @@ Test(lexer, simple_operators)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'c' },
-        { .type = PUNCTUATION, .value = '*' },
+        Literal('a'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('|'),
+        Literal('c'),
+        Punctuation('*'),
     };
 
     cr_assert_eq(tokens->size, 6);
@@ -66,16 +66,16 @@ Test(lexer, simple_punctuation)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '+' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = '*' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'c' },
-        { .type = PUNCTUATION, .value = '*' },
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('+'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('}'),
+        Punctuation('*'),
+        Punctuation('|'),
+        Literal('c'),
+        Punctuation('*'),
     };
 
     cr_assert_eq(tokens->size, 10);
@@ -95,19 +95,19 @@ Test(lexer, par_concat)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '+' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'd' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = '*' }
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('+'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('}'),
+        Punctuation('.'),
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('d'),
+        Punctuation('}'),
+        Punctuation('*')
     };
 
     cr_assert_eq(tokens->size, 13);
@@ -127,15 +127,15 @@ Test(lexer, simple_group)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'c' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'd' },
-        { .type = PUNCTUATION, .value = ')' }
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('|'),
+        Literal('b'),
+        Punctuation('|'),
+        Literal('c'),
+        Punctuation('|'),
+        Literal('d'),
+        Punctuation(')')
     };
 
     cr_assert_eq(tokens->size, 9);
@@ -155,23 +155,23 @@ Test(lexer, group_concat)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '}' },
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('}'),
+        Punctuation('.'),
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('|'),
+        Literal('b'),
+        Punctuation(')'),
+        Punctuation('.'),
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('}'),
     };
 
     cr_assert_eq(tokens->size, 17);
@@ -191,25 +191,25 @@ Test(lexer, implicit_groups)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'c' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'd' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'e' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = '2' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = '3' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = '4' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = '5' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'z' },
-        { .type = PUNCTUATION, .value = ')' }
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('|'),
+        Literal('c'),
+        Punctuation('|'),
+        Literal('d'),
+        Punctuation('|'),
+        Literal('e'),
+        Punctuation('|'),
+        Literal('2'),
+        Punctuation('|'),
+        Literal('3'),
+        Punctuation('|'),
+        Literal('4'),
+        Punctuation('|'),
+        Literal('5'),
+        Punctuation('|'),
+        Literal('z'),
+        Punctuation(')')
     };
 
     cr_assert_eq(tokens->size, 19);
@@ -234,7 +234,7 @@ Test(lexer, simple_dot)
     cr_assert_eq(tokens->size, expected_size);
     cr_assert_eq(((Token *)array_get(tokens, 0))->value, '(');
 
-    Token or_token = { .type = PUNCTUATION, .value = '|' };
+    Token or_token = Punctuation('|');
     size_t i = 1;
     Token token;
     token.type = LITERAL;
@@ -265,18 +265,18 @@ Test(lexer, escaping)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = LITERAL, .value = '\\' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '(' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '+' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '*' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = ')' },
+        Literal('\\'),
+        Punctuation('.'),
+        Literal('('),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('+'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('*'),
+        Punctuation('.'),
+        Literal(')'),
     };
 
     cr_assert_eq(tokens->size, 12);
@@ -300,10 +300,10 @@ Test(lexer, digit_special)
          ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 3;
     cr_assert_eq(tokens->size, expected_size);
 
-    Token or_token = { .type = PUNCTUATION, .value = '|' };
-    Token concat_token = { .type = PUNCTUATION, .value = '.' };
-    Token open_par_token = { .type = PUNCTUATION, .value = '(' };
-    Token close_par_token = { .type = PUNCTUATION, .value = ')' };
+    Token or_token = Punctuation('|');
+    Token concat_token = Punctuation('.');
+    Token open_par_token = Punctuation('(');
+    Token close_par_token = Punctuation(')');
 
     Token token;
     token.type = LITERAL;
@@ -348,10 +348,10 @@ Test(lexer, word_special)
          ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 3;
     cr_assert_eq(tokens->size, expected_size);
 
-    Token or_token = { .type = PUNCTUATION, .value = '|' };
-    Token concat_token = { .type = PUNCTUATION, .value = '.' };
-    Token open_par_token = { .type = PUNCTUATION, .value = '(' };
-    Token close_par_token = { .type = PUNCTUATION, .value = ')' };
+    Token or_token = Punctuation('|');
+    Token concat_token = Punctuation('.');
+    Token open_par_token = Punctuation('(');
+    Token close_par_token = Punctuation(')');
 
     Token token;
     token.type = LITERAL;
@@ -422,10 +422,10 @@ Test(lexer, space_special)
          ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 3;
     cr_assert_eq(tokens->size, expected_size);
 
-    Token or_token = { .type = PUNCTUATION, .value = '|' };
-    Token concat_token = { .type = PUNCTUATION, .value = '.' };
-    Token open_par_token = { .type = PUNCTUATION, .value = '(' };
-    Token close_par_token = { .type = PUNCTUATION, .value = ')' };
+    Token or_token = Punctuation('|');
+    Token concat_token = Punctuation('.');
+    Token open_par_token = Punctuation('(');
+    Token close_par_token = Punctuation(')');
 
     Token token;
     token.type = LITERAL;
@@ -482,25 +482,25 @@ Test(lexer, simple_repeat)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
     };
 
     cr_assert_eq(tokens->size, 19);
@@ -520,42 +520,42 @@ Test(lexer, braces_repeat)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '?' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '|' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '?' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = '+' }
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('|'),
+        Literal('b'),
+        Punctuation(')'),
+        Punctuation('.'),
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('|'),
+        Literal('b'),
+        Punctuation(')'),
+        Punctuation('?'),
+        Punctuation('.'),
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('|'),
+        Literal('b'),
+        Punctuation(')'),
+        Punctuation('?'),
+        Punctuation('.'),
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('}'),
+        Punctuation('.'),
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation('}'),
+        Punctuation('+')
     };
 
     cr_assert_eq(tokens->size, 36);
@@ -576,17 +576,17 @@ Test(lexer, braces_no_repeat)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '{' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '2' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '-' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '3' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '}' },
+        Literal('a'),
+        Punctuation('.'),
+        Literal('{'),
+        Punctuation('.'),
+        Literal('2'),
+        Punctuation('.'),
+        Literal('-'),
+        Punctuation('.'),
+        Literal('3'),
+        Punctuation('.'),
+        Literal('}'),
     };
 
     cr_assert_eq(tokens->size, 11);
@@ -607,23 +607,23 @@ Test(lexer, braces_fake_repeat)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '{' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '{' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '1' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = ',' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = '2' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
+        Literal('a'),
+        Punctuation('.'),
+        Literal('{'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('{'),
+        Punctuation('.'),
+        Literal('1'),
+        Punctuation('.'),
+        Literal(','),
+        Punctuation('.'),
+        Literal('2'),
+        Punctuation('.'),
+        Literal('a'),
     };
 
     cr_assert_eq(tokens->size, 17);
@@ -644,21 +644,21 @@ Test(lexer, non_capturing_group)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '+' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '.' },
-        { .type = LITERAL, .value = 'b' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '*' }
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('+'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation(')'),
+        Punctuation('.'),
+        Literal('a'),
+        Punctuation('.'),
+        Punctuation('('),
+        Literal('a'),
+        Punctuation('.'),
+        Literal('b'),
+        Punctuation(')'),
+        Punctuation('*')
     };
 
     cr_assert_eq(tokens->size, 15);
@@ -678,13 +678,13 @@ Test(lexer, nested_groups)
     Array *tokens = tokenize(regexp);
 
     Token expected_tokens[] = {
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = PUNCTUATION, .value = '(' },
-        { .type = PUNCTUATION, .value = '{' },
-        { .type = LITERAL, .value = 'a' },
-        { .type = PUNCTUATION, .value = '}' },
-        { .type = PUNCTUATION, .value = ')' },
-        { .type = PUNCTUATION, .value = '}' },
+        Punctuation('{'),
+        Punctuation('('),
+        Punctuation('{'),
+        Literal('a'),
+        Punctuation('}'),
+        Punctuation(')'),
+        Punctuation('}'),
     };
 
     cr_assert_eq(tokens->size, 7);

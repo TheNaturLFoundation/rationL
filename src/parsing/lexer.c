@@ -28,7 +28,7 @@ static int get_group_range(const char **string, char *lower, char *upper)
 
 static void add_range(Array *tokens, char lower, char upper)
 {
-    Token or_token = { .type = PUNCTUATION, .value = '|' };
+    Token or_token = Punctuation('|');
     Token token;
     token.type = LITERAL;
     for (token.value = lower; token.value < upper; token.value++)
@@ -41,20 +41,20 @@ static void add_range(Array *tokens, char lower, char upper)
 
 static void add_literal(Array *tokens, char literal)
 {
-    const Token token = { .type = LITERAL, .value = literal };
+    const Token token = Literal(literal);
     array_append(tokens, &token);
 }
 
 static void add_punctuation(Array *tokens, char punctuation)
 {
-    const Token token = { .type = PUNCTUATION, .value = punctuation };
+    const Token token = Punctuation(punctuation);
     array_append(tokens, &token);
 }
 
 static void tokenize_group(const char **string, Array *tokens)
 {
-    const Token or_token = { .type = PUNCTUATION, .value = '|' };
-    const Token par_token = { .type = PUNCTUATION, .value = '(' };
+    const Token or_token = Punctuation('|');
+    const Token par_token = Punctuation('(');
 
     array_append(tokens, &par_token);
     (*string)++;
@@ -66,7 +66,7 @@ static void tokenize_group(const char **string, Array *tokens)
             add_range(tokens, range_lower, range_upper);
         else
         {
-            Token token = { .type = LITERAL, .value = **string };
+            Token token = Literal(**string);
             array_append(tokens, &token);
         }
         if (!is_group_last(++*string))
@@ -79,8 +79,8 @@ static void tokenize_group(const char **string, Array *tokens)
 
 static void tokenize_dot(Array *tokens)
 {
-    const Token or_token = { .type = PUNCTUATION, .value = '|' };
-    const Token par_token = { .type = PUNCTUATION, .value = '(' };
+    const Token or_token = Punctuation('|');
+    const Token par_token = Punctuation('(');
 
     array_append(tokens, &par_token);
     Token token;
@@ -205,7 +205,7 @@ Array *tokenize(const char *string)
     };
 
     Array *tokens = Array(Token);
-    const Token concat_token = { .type = PUNCTUATION, .value = '.' };
+    const Token concat_token = Punctuation('.');
     // True if the previous character is implicitly concatenated to a literal.
     int previous_concat = 0;
     // True if the previous character was an escaping '\'.
@@ -221,7 +221,7 @@ Array *tokenize(const char *string)
         int curr_concat = 0;
         int is_escapable = 0;
         Token token;
-        Token par_token = { .type = PUNCTUATION, .value = '(' };
+        Token par_token = Punctuation('(');
 
         char_switch:
         token.value = c;
