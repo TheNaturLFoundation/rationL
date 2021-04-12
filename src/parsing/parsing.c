@@ -6,10 +6,9 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/lexer.h"
 
-BinTree *parse_paranthesis(BinTree *left, Array *arr, size_t *pos);
-BinTree *parse_sub(Array *arr, size_t *pos);
-BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos);
-BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos);
+BinTree *parse_sub(Array *arr, size_t *pos, size_t *group);
+BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos, size_t *group);
+BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos, size_t *group);
 
 /**
  * Turn a token into a symbol
@@ -89,9 +88,10 @@ int is_unary(Token *token)
 }
 
 //   * + and ?    (KLEENE_STAR EXISTS and MAYBE)
-BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos)
+BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos, size_t *group)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
+    symbol.group = *group;
     // Unused variable ?
     //Token *prev_token = array_get(arr, *pos);
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
@@ -102,9 +102,10 @@ BinTree *parse_unary(BinTree *left, Array *arr, size_t *pos)
 }
 
 //   . and |    (CONCATENATION and UNION)
-BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
+BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos, size_t *group)
 {
     Symbol symbol = array_element_to_symbol(arr, *pos);
+    symbol.group = *group;
     Token *prev_token = array_get(arr, *pos);
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
     b->left = left;
@@ -126,14 +127,14 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
             if ( next_token->value == '.' &&
                  (prev_token->value == '|' || prev_token->value == '.'))
             {
-                b->right = parse_sub(arr, pos);
+                b->right = parse_sub(arr, pos, group);
                 /*
                 // Check for unary operator
                 if (*pos < arr->size)
                 {
-                    Token *tok = array_get(arr, *pos);
-                    if (is_unary(tok))
-                        return parse_unary(b, arr, pos);
+                Token *tok = array_get(arr, *pos);
+                if (is_unary(tok))
+                return parse_unary(b, arr, pos);
                 }
                 */
                 return b;
@@ -141,22 +142,27 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
             if (is_binary(next_token))
             {
                 Symbol s = array_element_to_symbol(arr, *pos);
+                s.group = *group;
                 b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
                 *pos += 1;
-                return parse_binary(b, arr, pos);
+                return parse_binary(b, arr, pos, group);
             }
             // Unary priorities
             if (is_unary(next_token))
             {
                 Symbol s = array_element_to_symbol(arr, *pos);
+                s.group = *group;
                 BinTree *tmp = BinTree(Symbol, &s, .left = NULL, .right = NULL);
                 *pos += 1;
-                b->right = parse_unary(tmp, arr, pos);
+                b->right = parse_unary(tmp, arr, pos, group);
                 return b;
             }
-            if (next_token->value == ')')
+            if (next_token->value == ')' || next_token->value == '}')
             {
+                if (next_token->value == '}')
+                    *group -= 1;
                 Symbol s = array_element_to_symbol(arr, *pos);
+                s.group = *group;
                 b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
                 *pos += 1;
                 return b;
@@ -164,13 +170,14 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
         }  // LCOV_EXCL_LINE
         // No particular priority
         Symbol s = array_element_to_symbol(arr, *pos);
+        s.group = *group;
         b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
         *pos += 1;
         return b;
     }
     else // Opening paranthesis
     {
-        b->right = parse_sub(arr, pos);
+        b->right = parse_sub(arr, pos, group);
         return b;
     }
 
@@ -178,29 +185,35 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos)
 }
 
 
-BinTree *parse_sub(Array *arr, size_t *pos)
+BinTree *parse_sub(Array *arr, size_t *pos, size_t *group)
 {
     Token *token = array_get(arr, *pos);
     // token is an operator
-    if(token->type == PUNCTUATION && token->value == '(')
+    if(token->type == PUNCTUATION && (token->value == '(' || token->value == '{'))
     {
+        if (token->value == '{')
+            *group += 1;
         *pos += 1;
-        BinTree *tree = parse_sub(arr, pos);
+        BinTree *tree = parse_sub(arr, pos, group);
         if (*pos < arr->size)
         {
             token = array_get(arr, *pos);
-            if (token->value == ')')
+            if (token->value == ')' || token->value == '}')
+            {
+                if (token->value == '}')
+                    *group -= 1;
                 *pos += 1;
+            }
             if (*pos < arr->size)
             {
                 token = array_get(arr, *pos);
                 if (is_binary(token))
                 {
-                    return parse_binary(tree, arr, pos);
+                    return parse_binary(tree, arr, pos, group);
                 }
                 if (is_unary(token))
                 {
-                    return parse_unary(tree, arr, pos);
+                    return parse_unary(tree, arr, pos, group);
                 }
             }
         }
@@ -209,6 +222,7 @@ BinTree *parse_sub(Array *arr, size_t *pos)
     }
 
     Symbol symbol = array_element_to_symbol(arr, *pos);
+    symbol.group = *group;
     BinTree *b = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
     *pos += 1;
 
@@ -217,25 +231,17 @@ BinTree *parse_sub(Array *arr, size_t *pos)
         return b;
 
     token = array_get(arr, *pos);
-    if (token->value == ')')
+    if (token->value == ')' || token->value == '}')
     {
+        if (token->value == '}')
+            *group -= 1;
         *pos += 1;
-        /*
-        if (*pos < arr->size)
-        {
-            if (is_binary(token))
-                return parse_binary(b, arr, pos);
-            if (is_unary(token))
-                return parse_unary(b, arr, pos);
-        }
-        */
-        // Check binary unary closing paranthesis
         return b;
     }
     if (is_binary(token))
-        return parse_binary(b, arr, pos);
+        return parse_binary(b, arr, pos, group);
     //if (is_unary(token))
-        return parse_unary(b, arr, pos);
+    return parse_unary(b, arr, pos, group);
     //return NULL;
 }
 
@@ -245,21 +251,33 @@ BinTree *parse_symbols(Array *arr)
         return NULL;
 
     size_t pos = 0;
+    size_t group = 0;
     // Unused variable?
     //size_t size = arr->size;
-    BinTree *b = parse_sub(arr, &pos);
+    BinTree *b = parse_sub(arr, &pos, &group);
 
     while (pos < arr->size)
     {
         Token *token = array_get(arr, pos);
         if (is_binary(token))
-            b = parse_binary(b, arr, &pos);
+            b = parse_binary(b, arr, &pos, &group);
         else
         {
             if (is_unary(token))
-                b = parse_unary(b, arr, &pos);
+                b = parse_unary(b, arr, &pos, &group);
             else
+            {
+                if (token->type == PUNCTUATION)
+                {
+                    if (token->value == '{')
+                        group += 1;
+                    else
+                        if (token->value == '}')
+                            group -= 1;
+                }
+
                 pos += 1;
+            }
         }
     }
     return b;
