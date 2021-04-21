@@ -4,6 +4,7 @@
 #include "datatypes/matrix.h"
 #include "parsing/lexer.h"
 
+#define EPSILON_INDEX 256
 #define Automaton(size) automaton_create(size);
 #define State(term) state_create(term);
 
@@ -50,6 +51,8 @@ typedef struct
      * An array containing all states
     */
     Array *states;
+	
+    int * lookup_table;
 
     int is_determined;
 
@@ -90,6 +93,18 @@ State * state_create(int is_terminal);
 */
 Automaton * automaton_create();
 
+
+/**
+ * @author Vlad Argatu
+ * @data 21/04/2021
+ * @param automatonn: the automaton.
+ * @param state_id: the id of the state which is the source of the transition
+ * @param value: the character of the transition.
+ * @param is_epsilon: if set, the value is ignored and the transition is considered as epsilon.
+ * @return  NULL if no transition with the character exists in the entire automaton, the return of matrix_get otherwise.
+ */
+
+LinkedList * get_matrix_elt(Automaton * automaton, size_t state_id, Letter value, int is_epsilon);
 
 /**
  * @author Vlad Argatu

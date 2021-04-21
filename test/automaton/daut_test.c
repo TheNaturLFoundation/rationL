@@ -2,6 +2,7 @@
 #include <criterion/internal/assert.h>
 #include "automaton/automaton.h"
 
+/*
 #define ASSERT_AUTOMATON_EQ(a1, a2) assert_automaton_eq(__LINE__, a1, a2)
 
 void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
@@ -81,9 +82,13 @@ void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
             cr_assert_eq(list1, list2);
         }
 }
+*/
 
+/*
 Test(daut, a_or_b)
 {
+
+*/
     /*
      *      /--- 1->
      *     /  a
@@ -91,6 +96,7 @@ Test(daut, a_or_b)
      *     \  b
      *      \--- 2->
      */
+  /*
     Automaton *expected = Automaton(3);
     State *q0 = State(0);
     State *q1 = State(1);
@@ -108,13 +114,18 @@ Test(daut, a_or_b)
     automaton_free(a_or_b);
 }
 
+
+
 Test(daut, abba)
 {
+
+*/
+
     /*
      *       a    b    b    a
      *  -> 0 -> 1 -> 2 -> 3 -> 4 ->
      */
-    Automaton *expected = Automaton(6);
+/*    Automaton *expected = Automaton(6);
     State *q0 = State(0);
     State *q1 = State(0);
     State *q2 = State(0);
@@ -138,4 +149,4 @@ Test(daut, abba)
 
     automaton_free(expected);
     automaton_free(abba);
-}
+}*/

@@ -4,7 +4,7 @@
 #include "automaton/thompson.h"
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
-
+/*
 Test(thompson, null)
 {
     Automaton *aut = thompson(NULL);
@@ -149,4 +149,4 @@ Test(thompson, identifier)
     array_free(arr);
     bintree_free(b);
 }
-
+*/

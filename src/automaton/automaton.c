@@ -9,14 +9,28 @@
 #include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
+LinkedList * get_matrix_elt(Automaton * automaton, size_t state_id, Letter value, int is_epsilon)
+{
+	size_t lookup_index = (is_epsilon == 1) ? EPSILON_INDEX : value;
+	int index = automaton->lookup_table[lookup_index];
+	if(index == -1)
+	{
+		return NULL;	
+	}
+	
+	return matrix_get(automaton->transition_table, index, state_id);
+}
+
 Automaton *automaton_create(size_t size)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
-    autom->transition_table = Matrix(size, 256);
+    autom->transition_table = Matrix(size, 0);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
-    autom->is_determined = 0;
+    autom->lookup_table = SAFEMALLOC(sizeof(int) * 257);
+    for(int i = 0; i < 257; i++) autom->lookup_table[i] = -1;
+	autom->is_determined = 0;
     return autom;
 }
 
@@ -27,6 +41,7 @@ void automaton_free(Automaton *automaton)
     array_free(automaton->states);
     matrix_free(automaton->transition_table);
     array_free(automaton->starting_states);
+    free(automaton->lookup_table);
     free(automaton);
 }
 
@@ -39,16 +54,18 @@ State *state_create(int is_terminal)
 
 void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
-    if (automaton->size >= automaton->transition_table->height)
+    Matrix *mat = automaton->transition_table;
+    if (mat != NULL && automaton->size >= mat->height)
     {
-        Matrix *mat = automaton->transition_table;
-        size_t new_len = mat->height * mat->width + mat->width;
-        automaton->transition_table->mat =
-            SAFEREALLOC(automaton->transition_table->mat, new_len * sizeof(LinkedList*));
+       	size_t new_len = mat->height * mat->width + mat->width;
+       	automaton->transition_table->mat = SAFEREALLOC(automaton->transition_table->mat, 
+						new_len * sizeof(LinkedList*));
         for(size_t i = mat->height * mat->width; i < new_len; i++)
-            automaton->transition_table->mat[i] = LinkedList(State*);
-        mat->height += 1;
-    }
+		{	
+			automaton->transition_table->mat[i] = LinkedList(State*);	
+		}
+		mat->height ++;
+	}
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
@@ -59,19 +76,44 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 void automaton_add_transition(Automaton *automaton, State *src, State *dst,
                               Letter value, int epsilon)
 {
+    size_t i = (epsilon == 1) ? EPSILON_INDEX : value;
+    int mat_col = automaton->lookup_table[i];
+	Matrix * mat = automaton->transition_table;
+	size_t width = (mat != NULL) ? mat->width : 0;
+    if(mat_col == -1)
+    {
+		size_t new_len = (mat != NULL) ? mat->height * mat->width + mat->height : automaton->size;
+		automaton->lookup_table[i] = width;
+		mat_col = width;
+		if(mat != NULL)
+		{    
+			mat->mat = SAFEREALLOC(mat->mat, new_len * sizeof(LinkedList*));
+			for(size_t i = mat->height * mat->width; i < new_len; i++)
+			{	
+				automaton->transition_table->mat[i] = LinkedList(State*);
+			}	
+			mat->width++;
+		}
+		else
+		{
+			automaton->transition_table = Matrix(automaton->size, 1);
+		}	
+    }
+		
     LinkedList *trans = matrix_get(automaton->transition_table,
-                                   epsilon ? 0 : value, src->id);
+                                   mat_col, src->id);
 
     if (!list_push_back(trans, &dst))
         errx(EXIT_FAILURE, //LCOV_EXCL_LINE
-             "Unable to append to the list at address %p", // LCOV_EXCL_LINE
-             (void *)trans); // LCOV_EXCL_LINE
+             "Unable to append to the list at address %p letter = %c", // LCOV_EXCL_LINE
+             (void *)trans, value); // LCOV_EXCL_LINE
+
 }
 
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-    LinkedList *start = matrix_get(automaton->transition_table,
+	LinkedList *start = matrix_get(automaton->transition_table,
                                    epsilon ? 0 : value, src->id);
 
     // Skip the sentinel
