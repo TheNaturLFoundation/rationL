@@ -7,10 +7,11 @@
 
 #define list_foreach(T, var, sentinel)                                         \
     T var;                                                                     \
-    if (sentinel->next != NULL)                                                \
-        var = *(T *)sentinel->next->data;                                      \
-    for (LinkedList *_l = sentinel->next; _l != NULL;                          \
-         var = _l->next == NULL ? *(T *)_l->data : *(T*)_l->next->data,             \
+    if ((sentinel) != NULL && (sentinel)->next != NULL)                        \
+        (var) = *(T *)(sentinel)->next->data;                                  \
+    if ((sentinel) != NULL)                                                    \
+    for (LinkedList *_l = (sentinel)->next; _l != NULL;                        \
+         (var) = _l->next == NULL ? *(T *)_l->data : *(T*)_l->next->data,      \
                     _l = _l->next)
 
 /**
