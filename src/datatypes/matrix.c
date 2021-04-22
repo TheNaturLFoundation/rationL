@@ -21,11 +21,14 @@ Matrix *matrix_create(size_t height, size_t width)
 
 void matrix_free(Matrix *mat)
 {
-    size_t len = mat->height * mat->width;
-    for (size_t i = 0; i < len; i++)
-        list_free(mat->mat[i]);
-    free(mat->mat);
-    free(mat);
+    if(mat != NULL)
+    {
+        size_t len = mat->height * mat->width;
+        for (size_t i = 0; i < len; i++)
+            list_free(mat->mat[i]);
+        free(mat->mat);
+        free(mat);
+    }
 }
 
 LinkedList *matrix_get(Matrix *mat, size_t x, size_t y)
