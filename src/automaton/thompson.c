@@ -174,7 +174,7 @@ Automaton *thompson(BinTree *tree)
         entry_state->id = 0;
         State *letter_state = State(1);
         letter_state->id = 1;
-        Automaton *aut = Automaton(2);
+        Automaton *aut = Automaton(2, 2);
         automaton_add_state(aut, entry_state, 1);
         automaton_add_state(aut, letter_state, 0);
         automaton_add_transition(aut, entry_state, letter_state,

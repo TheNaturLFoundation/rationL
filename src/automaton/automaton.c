@@ -22,11 +22,11 @@ LinkedList *get_matrix_elt(const Automaton *automaton, size_t state_id,
     return matrix_get(automaton->transition_table, index, state_id);
 }
 
-Automaton *automaton_create(size_t size)
+Automaton *automaton_create(size_t state_count, size_t letter_count)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
-    autom->transition_table = Matrix(size, 0);
+    autom->transition_table = Matrix(state_count, letter_count);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
     autom->lookup_table = SAFEMALLOC(sizeof(int) * 257);
@@ -355,7 +355,7 @@ Automaton *automaton_from_daut(const char *filename)
     FILE *file = fopen(filename, "r");
     if (file == NULL)
         err(EXIT_FAILURE, "Couldn't open %s", filename); // LCOV_EXCL_LINE
-    Automaton *automaton = Automaton(1);
+    Automaton *automaton = Automaton(1, 255);
 
     char *line = NULL;
     size_t linecap = 0;

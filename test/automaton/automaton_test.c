@@ -10,7 +10,7 @@
 
 Test(automaton, empty_init_dimens)
 {
-    Automaton *automaton = Automaton(1);
+    Automaton *automaton = Automaton(1, 0);
     cr_assert_eq(automaton->transition_table, NULL);
     cr_assert_eq(automaton->size, 0);
 	for(int i = 0; i < 257; i++)
@@ -32,7 +32,7 @@ Test(automaton, empty_init_sentinels)
 
 Test(automaton, add_order_update)
 {
-    Automaton *automaton = Automaton(1);
+    Automaton *automaton = Automaton(1, 0);
     State *to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
     cr_assert_eq(automaton->size, 1);
@@ -41,7 +41,7 @@ Test(automaton, add_order_update)
 
 Test(automaton, add_classic_state)
 {
-    Automaton *automaton = Automaton(1);
+    Automaton *automaton = Automaton(1, 0);
     State *to_add = State(0) automaton_add_state(automaton, to_add, 0);
     cr_assert_eq(to_add->id, 0);
     automaton_free(automaton);
@@ -64,7 +64,7 @@ Test(automaton, add_classic_state_states)
     //Checks if the state is correctly appended to the array of
     //states
 
-    Automaton *automaton = Automaton(1);
+    Automaton *automaton = Automaton(1, 0);
     State *to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
     State **s = array_get(automaton->states, 0);
@@ -77,7 +77,7 @@ Test(automaton, add_starting_state)
     //Checks if the entry state is correctly added to the
     //starting_states array of automaton
 
-    Automaton *automaton = Automaton(1);
+    Automaton *automaton = Automaton(1, 0);
     State *to_add = State(0);
     automaton_add_state(automaton, to_add, 1);
     State **elt = array_get(automaton->starting_states, 0);
@@ -89,7 +89,7 @@ Test(automaton, add_starting_state)
 Test(automaton, add_multpile)
 {
     size_t entries = 0;
-    Automaton *automaton = Automaton(100);
+    Automaton *automaton = Automaton(100, 0);
     State *s;
     for (size_t i = 0; i < 100; i++)
     {
@@ -112,7 +112,7 @@ Test(automaton, add_multpile)
 
 Test(automaton, add_new_transition_no_epsilion)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 2);
     State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
@@ -142,7 +142,7 @@ Test(automaton, add_new_transition_no_epsilion)
 
 Test(automaton, add_new_transition_that_exists)
 {
-	Automaton * automaton = Automaton(3);
+	Automaton * automaton = Automaton(3, 2);
 	State * s1 = State(0);
 	State * s2 = State(0);
 	State * s3 = State(0);
@@ -166,7 +166,7 @@ Test(automaton, add_new_transition_that_exists)
 
 Test(automaton, add_transition_no_epsilion2)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 2);
 	State *s1 = State(0);
     State *s2 = State(0);
     
@@ -191,7 +191,7 @@ Test(automaton, add_transition_no_epsilion2)
 
 Test(automaton, add_transition_epsilon)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 2);
     State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
@@ -216,7 +216,7 @@ Test(automaton, add_transition_epsilon)
 
 Test(automaton, add_multiple_tr)
 {
-    Automaton *automaton = Automaton(500);
+    Automaton *automaton = Automaton(500, 2);
     State *s;
     State *s4vj;
     State **state_collector;
@@ -254,7 +254,7 @@ Test(automaton, add_multiple_tr)
 
 Test(automaton, add_track_lookup)
 {
-	Automaton * automaton = Automaton(2);
+	Automaton * automaton = Automaton(2, 257);
 	State * s1 = State(0);
 	State * s2 = State(0);
 	
@@ -302,7 +302,7 @@ Test(automaton, add_track_lookup)
 
 Test(automaton, get_matrix_elt_test1)
 {
-	Automaton * automaton = Automaton(2);
+	Automaton * automaton = Automaton(2, 3);
 	State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
@@ -324,7 +324,7 @@ Test(automaton, get_matrix_elt_test1)
 
 Test(automaton, get_matrix_elt_epsilon_is_lit)
 {
-	Automaton * automaton = Automaton(2);
+	Automaton * automaton = Automaton(2, 12);
 	State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);

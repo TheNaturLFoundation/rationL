@@ -99,7 +99,7 @@ Test(daut, a_or_b)
      *     \  b
      *      \--- 2->
      */
-    Automaton *expected = Automaton(3);
+    Automaton *expected = Automaton(3, 2);
     State *q0 = State(0);
     State *q1 = State(1);
     State *q2 = State(1);
@@ -124,24 +124,18 @@ Test(daut, abba)
      *  -> 0 -> 1 -> 2 -> 3 -> 4 ->
      *          ^
      */
-    Automaton *expected = Automaton(6);
+    Automaton *expected = Automaton(6, 3);
     State *q0 = State(0);
     State *q1 = State(0);
     State *q2 = State(0);
-    State *q3 = State(0);
-    State *q4 = State(0);
-    State *q5 = State(1);
+    State *q3 = State(1);
     automaton_add_state(expected, q0, 1);
-    automaton_add_state(expected, q1, 1);
-    automaton_add_state(expected, q3, 0);
-    automaton_add_state(expected, q4, 0);
+    automaton_add_state(expected, q1, 0);
     automaton_add_state(expected, q2, 0);
-    automaton_add_state(expected, q5, 0);
-    automaton_add_transition(expected, q0, q1, 0, 1);
-    automaton_add_transition(expected, q1, q2, 'a', 0);
-    automaton_add_transition(expected, q2, q3, 'b', 0);
-    automaton_add_transition(expected, q3, q4, 'b', 0);
-    automaton_add_transition(expected, q4, q5, 'a', 0);
+    automaton_add_state(expected, q3, 0);
+    automaton_add_transition(expected, q0, q1, 'c', 0);
+    automaton_add_transition(expected, q1, q2, 'd', 0);
+    automaton_add_transition(expected, q2, q3, 'e', 0);
     automaton_to_dot(expected);
 
     Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");

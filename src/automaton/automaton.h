@@ -5,7 +5,7 @@
 #include "parsing/lexer.h"
 
 #define EPSILON_INDEX 256
-#define Automaton(size) automaton_create(size);
+#define Automaton(size, letter_count) automaton_create(size, letter_count);
 #define State(term) state_create(term);
 
 /**
