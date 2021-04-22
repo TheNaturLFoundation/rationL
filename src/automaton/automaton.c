@@ -99,10 +99,15 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
 			automaton->transition_table = Matrix(automaton->size, 1);
 		}	
     }
-		
+
     LinkedList *trans = matrix_get(automaton->transition_table,
                                    mat_col, src->id);
 
+    if (trans == NULL)
+    {
+        trans = LinkedList(State *);
+        matrix_set(automaton->transition_table, mat_col, src->id, trans);
+    }
     if (!list_push_back(trans, &dst))
         errx(EXIT_FAILURE, //LCOV_EXCL_LINE
              "Unable to append to the list at address %p letter = %c", // LCOV_EXCL_LINE
