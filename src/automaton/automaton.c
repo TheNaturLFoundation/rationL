@@ -32,6 +32,7 @@ Automaton *automaton_create(size_t state_count, size_t letter_count)
     autom->lookup_table = SAFEMALLOC(sizeof(int) * 257);
     for (int i = 0; i < 257; i++)
         autom->lookup_table[i] = -1;
+    autom->lookup_used = 0;
     autom->is_determined = 0;
     return autom;
 }
@@ -78,29 +79,14 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 void automaton_add_transition(Automaton *automaton, State *src, State *dst,
                               Letter value, int epsilon)
 {
-    size_t i = (epsilon == 1) ? EPSILON_INDEX : value;
+    size_t i = (epsilon != 0) ? EPSILON_INDEX : value;
     int mat_col = automaton->lookup_table[i];
-    Matrix *mat = automaton->transition_table;
-    size_t width = (mat != NULL) ? mat->width : 0;
+    
     if (mat_col == -1)
     {
-        size_t new_len =
-            (mat != NULL) ? mat->height * (mat->width + 1) : automaton->size;
-        automaton->lookup_table[i] = width;
-        mat_col = width;
-        if (mat != NULL)
-        {
-            mat->mat = SAFEREALLOC(mat->mat, new_len * sizeof(LinkedList *));
-            for (size_t i = mat->height * mat->width; i < new_len; i++)
-            {
-                automaton->transition_table->mat[i] = NULL;
-            }
-            mat->width++;
-        }
-        else
-        {
-            automaton->transition_table = Matrix(automaton->size, 1);
-        }
+        automaton->lookup_table[i] = automaton->lookup_used;
+        mat_col = automaton->lookup_used;
+        automaton->lookup_used++;
     }
 
     LinkedList *trans =

@@ -13,6 +13,7 @@ Test(automaton, empty_init_dimens)
     Automaton *automaton = Automaton(1, 0);
     cr_assert_eq(automaton->transition_table, NULL);
     cr_assert_eq(automaton->size, 0);
+    cr_assert_eq(automaton->lookup_used, 0);
 	for(int i = 0; i < 257; i++)
 	{
 		cr_assert_eq(automaton->lookup_table[i], -1);
@@ -110,59 +111,122 @@ Test(automaton, add_multpile)
     automaton_free(automaton);
 }
 
-Test(automaton, add_new_transition_no_epsilion)
+/*
+    Add Transition tests:
+*/
+
+Test(automaton, automaton_add_transition_update_lookup_noEpsilon)
 {
-    Automaton *automaton = Automaton(2, 2);
-    State *s1 = State(0);
-    State *s2 = State(0);
+    Automaton * automaton = Automaton(2,1);
+    State * s1 = State(0);
+    State * s2 = State(0);
+    
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     
-	automaton_add_transition(automaton, s1, s2, 'A', 0);
-	
-	int tr_mat_index = automaton->lookup_table['A'];
-	cr_assert_eq(tr_mat_index, 0, "got %d but expected 0\n", tr_mat_index);
-	for(int i = 0; i < 257; i++)
-	{
-	    if(i != 'A')
-		{
-		    cr_assert_eq(automaton->lookup_table[i], -1);
-		}
-	}
-	
-    LinkedList *list = matrix_get(automaton->transition_table, tr_mat_index, s1->id);
-    LinkedList *elt = list->next;
-    State *target = *(State **)elt->data;
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
 
-    cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void *)elt->next);
-    cr_assert_eq(target->id, s2->id, "got %zu expected %zu\n", target->id,
-                 s2->id);
-    automaton_free(automaton);
+    cr_assert_eq(automaton->lookup_table['A'], 0);
+    cr_assert_eq(automaton->lookup_used, 1);
+    
+    for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    {
+        if(i != 'A')
+        {
+            cr_assert_eq(automaton->lookup_table[i], -1);
+        }
+    }
 }
 
-Test(automaton, add_new_transition_that_exists)
+Test(automaton, automaton_add_transition_update_lookup_Epsilon)
 {
-	Automaton * automaton = Automaton(3, 2);
-	State * s1 = State(0);
-	State * s2 = State(0);
-	State * s3 = State(0);
-	
-	automaton_add_state(automaton, s1, 0);
-	automaton_add_state(automaton, s2, 0);
-	automaton_add_state(automaton, s3, 0);
-	
-	automaton_add_transition(automaton, s1, s2, 'A', 0);
-	automaton_add_transition(automaton, s1, s3, 'A', 0);
+    Automaton * automaton = Automaton(2,1);
+    State * s1 = State(0);
+    State * s2 = State(0);
+    
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    
+    automaton_add_transition(automaton, s1, s2, 'A', 1);
 
-	cr_assert_eq(automaton->transition_table->height, automaton->size);
-	cr_assert_eq(automaton->transition_table->width, 1);
-	cr_assert_eq(automaton->lookup_table['A'], 0);
-	
-	automaton_add_transition(automaton, s3, s1, 'A', 0);
-	
-	automaton_free(automaton);
-}	
+    cr_assert_eq(automaton->lookup_table[EPSILON_INDEX], 0);
+    cr_assert_eq(automaton->lookup_used, 1);
 
+    for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    {
+        if(i != EPSILON_INDEX)
+        {
+            cr_assert_eq(automaton->lookup_table[i], -1);
+        }
+    }
+
+    automaton_free(automaton);    
+}
+
+Test(automaton, automaton_add_multiple_same_value)
+{
+    Automaton * automaton = Automaton(4, NUMBER_OF_SYMB);
+ 
+    State * s1 = State(0);
+    State * s2 = State(0);
+    State * s3 = State(0);
+    State * s4 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_state(automaton, s3, 0);
+    automaton_add_state(automaton, s4, 0);
+
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+    
+    automaton_add_transition(automaton, s2, s4, 'A', 0);
+    cr_assert_eq(automaton->lookup_used, 1);
+
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+    cr_assert_eq(automaton->lookup_used, 1);
+
+    automaton_free(automaton);
+
+}
+
+Test(automaton, automaton_add_transition_updata_lookup_multiple)
+{
+    Automaton * automaton = Automaton(4, NUMBER_OF_SYMB);
+ 
+    State * s1 = State(0);
+    State * s2 = State(0);
+    State * s3 = State(0);
+    State * s4 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_state(automaton, s3, 0);
+    automaton_add_state(automaton, s4, 0);
+
+    for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    {
+        if(i == EPSILON_INDEX)
+        {
+            automaton_add_transition(automaton, s1, s2, ' ', 1);
+        }
+        else if((i % 2) == 0)
+        {
+            automaton_add_transition(automaton, s1, s2, i, 0);
+        }
+        else
+        {
+            automaton_add_transition(automaton, s3, s4, i, 0);
+        }
+    }
+
+    for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    {
+        cr_assert_eq(automaton->lookup_table[i], i, 
+            "Got %d but expected %lu\n", automaton->lookup_table[i], i);
+    }
+
+    automaton_free(automaton);
+}
 
 Test(automaton, add_transition_no_epsilion2)
 {
@@ -173,10 +237,9 @@ Test(automaton, add_transition_no_epsilion2)
 	automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s2, s1, 'A', 0);
-	
-	size_t i = automaton->lookup_table['A'];
-	cr_assert_eq(i, 0);
 
+    int i = automaton->lookup_table['A'];
+	
     LinkedList *list = matrix_get(automaton->transition_table, i, s2->id);
     LinkedList *elt = list->next;
     State *target = *(State **)elt->data;
@@ -198,9 +261,8 @@ Test(automaton, add_transition_epsilon)
     automaton_add_state(automaton, s2, 0);
     automaton_add_transition(automaton, s1, s2, 'A', 1);
 	
-	size_t i_epsilon = automaton->lookup_table[EPSILON_INDEX];
-	cr_assert_eq(i_epsilon, 0);
-    
+    int i_epsilon = automaton->lookup_table[EPSILON_INDEX];
+
 	// Epsilon transition
     LinkedList *list = matrix_get(automaton->transition_table, i_epsilon, s1->id);
     LinkedList *elt = list->next;
@@ -209,7 +271,6 @@ Test(automaton, add_transition_epsilon)
     cr_assert_eq(elt->next, NULL, "got %p expected NULL\n", (void *)elt->next);
     cr_assert_eq(target->id, s2->id, "got %zu expected %zu\n", target->id,
                  s2->id);
-	cr_assert_eq(automaton->transition_table->width, 1);
 
     automaton_free(automaton);
 }
@@ -235,8 +296,7 @@ Test(automaton, add_multiple_tr)
         s4vj = *state_collector;
         automaton_add_transition(automaton, s, s4vj, 'A', 0);
     }
-	size_t i_A = automaton->lookup_table['A'];
-	cr_assert_eq(i_A, 0);
+    int i_A = automaton->lookup_table['A'];
     
 	LinkedList *list = matrix_get(automaton->transition_table, i_A, s->id);
     size_t list_size = 0;
@@ -252,53 +312,42 @@ Test(automaton, add_multiple_tr)
     automaton_free(automaton);
 }
 
-Test(automaton, add_track_lookup)
+Test(automaton, automaton_add_transition_only_targetted)
 {
-	Automaton * automaton = Automaton(2, 257);
-	State * s1 = State(0);
-	State * s2 = State(0);
-	
-	automaton_add_state(automaton, s1, 0);
-	automaton_add_state(automaton, s2, 0);
-	
-	for(char a = 'A'; a < 'C'; a++)
-	{
-		automaton_add_transition(automaton, s1, s2, a, 0);
-	}
-	automaton_add_transition(automaton, s1, s2, 'G', 1);
-	for(char a = 'C'; a < 'Z'; a++)
-	{
-		automaton_add_transition(automaton, s1, s2, a, 0);
-	}
+    Automaton * automaton = Automaton(2, 5);
+    
+    State * s1 = State(0);
+    State * s2 = State(0);
 
-	for(size_t i = 0; i < 257; i++)
-	{
-		if(i >= 'A' && i < 'Z')
-		{
-			if(i < 'C')
-			{
-				cr_assert_eq(automaton->lookup_table[i], i - 'A',
-							"[%c] got %d but expected %d", (char)i,
-							automaton->lookup_table[i], (char)i - 'A');
-			}
-			else
-			{
-				cr_assert_eq(automaton->lookup_table[i], i - 'A' + 1);
-			}
-		}
-		else if(i == EPSILON_INDEX)
-		{
-			cr_assert_eq(automaton->lookup_table[i], 2);
-		}
-		else
-		{
-			cr_assert_eq(automaton->lookup_table[i], -1);
-		}
-	}
-	
-	automaton_free(automaton);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+
+    automaton_add_transition(automaton, s1, s2, 'K', 0);
+
+    Matrix * mat = automaton->transition_table;
+    int index = automaton->lookup_table['K'];
+
+    for(size_t x = 0; x < mat->width; x++)
+    {
+        for(size_t y = 0; y < mat->height; y++)
+        {
+            if(x == index && y == s1->id)
+            {
+                cr_assert_neq(matrix_get(mat, x, y), NULL);
+            }
+            else
+            {
+                cr_assert_eq(matrix_get(mat, x, y), NULL);
+            }
+        }
+    }
+
+    automaton_free(automaton);
 }
 
+/*
+    get_matrix_elt tests:
+*/
 
 Test(automaton, get_matrix_elt_test1)
 {

@@ -4,6 +4,7 @@
 #include "datatypes/matrix.h"
 #include "parsing/lexer.h"
 
+#define NUMBER_OF_SYMB 257
 #define EPSILON_INDEX 256
 #define Automaton(size, letter_count) automaton_create(size, letter_count);
 #define State(term) state_create(term);
@@ -53,6 +54,8 @@ typedef struct
     Array *states;
 	
     int * lookup_table;
+
+    size_t lookup_used;
 
     int is_determined;
 
