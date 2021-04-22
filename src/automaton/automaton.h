@@ -104,7 +104,7 @@ Automaton * automaton_create();
  * @return  NULL if no transition with the character exists in the entire automaton, the return of matrix_get otherwise.
  */
 
-LinkedList * get_matrix_elt(Automaton * automaton, size_t state_id, Letter value, int is_epsilon);
+LinkedList * get_matrix_elt(const Automaton * automaton, size_t state_id, Letter value, int is_epsilon);
 
 /**
  * @author Vlad Argatu

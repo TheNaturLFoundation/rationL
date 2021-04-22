@@ -9,16 +9,17 @@
 #include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
-LinkedList * get_matrix_elt(Automaton * automaton, size_t state_id, Letter value, int is_epsilon)
+LinkedList *get_matrix_elt(const Automaton *automaton, size_t state_id,
+                           Letter value, int is_epsilon)
 {
-	size_t lookup_index = (is_epsilon == 1) ? EPSILON_INDEX : value;
-	int index = automaton->lookup_table[lookup_index];
-	if(index == -1)
-	{
-		return NULL;	
-	}
-	
-	return matrix_get(automaton->transition_table, index, state_id);
+    size_t lookup_index = is_epsilon ? EPSILON_INDEX : value;
+    int index = automaton->lookup_table[lookup_index];
+    if (index == -1)
+    {
+        return NULL;
+    }
+
+    return matrix_get(automaton->transition_table, index, state_id);
 }
 
 Automaton *automaton_create(size_t size)
@@ -29,8 +30,9 @@ Automaton *automaton_create(size_t size)
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
     autom->lookup_table = SAFEMALLOC(sizeof(int) * 257);
-    for(int i = 0; i < 257; i++) autom->lookup_table[i] = -1;
-	autom->is_determined = 0;
+    for (int i = 0; i < 257; i++)
+        autom->lookup_table[i] = -1;
+    autom->is_determined = 0;
     return autom;
 }
 
@@ -57,15 +59,15 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
     Matrix *mat = automaton->transition_table;
     if (mat != NULL && automaton->size >= mat->height)
     {
-       	size_t new_len = mat->height * mat->width + mat->width;
-       	automaton->transition_table->mat = SAFEREALLOC(automaton->transition_table->mat, 
-						new_len * sizeof(LinkedList*));
-        for(size_t i = mat->height * mat->width; i < new_len; i++)
-		{	
-			automaton->transition_table->mat[i] = LinkedList(State*);	
-		}
-		mat->height ++;
-	}
+        size_t new_len = mat->height * (mat->width + 1);
+        automaton->transition_table->mat = SAFEREALLOC(
+            automaton->transition_table->mat, new_len * sizeof(LinkedList *));
+        for (size_t i = mat->height * mat->width; i < new_len; i++)
+        {
+            automaton->transition_table->mat[i] = NULL;
+        }
+        mat->height++;
+    }
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
@@ -78,30 +80,31 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
 {
     size_t i = (epsilon == 1) ? EPSILON_INDEX : value;
     int mat_col = automaton->lookup_table[i];
-	Matrix * mat = automaton->transition_table;
-	size_t width = (mat != NULL) ? mat->width : 0;
-    if(mat_col == -1)
+    Matrix *mat = automaton->transition_table;
+    size_t width = (mat != NULL) ? mat->width : 0;
+    if (mat_col == -1)
     {
-		size_t new_len = (mat != NULL) ? mat->height * mat->width + mat->height : automaton->size;
-		automaton->lookup_table[i] = width;
-		mat_col = width;
-		if(mat != NULL)
-		{    
-			mat->mat = SAFEREALLOC(mat->mat, new_len * sizeof(LinkedList*));
-			for(size_t i = mat->height * mat->width; i < new_len; i++)
-			{	
-				automaton->transition_table->mat[i] = LinkedList(State*);
-			}	
-			mat->width++;
-		}
-		else
-		{
-			automaton->transition_table = Matrix(automaton->size, 1);
-		}	
+        size_t new_len =
+            (mat != NULL) ? mat->height * (mat->width + 1) : automaton->size;
+        automaton->lookup_table[i] = width;
+        mat_col = width;
+        if (mat != NULL)
+        {
+            mat->mat = SAFEREALLOC(mat->mat, new_len * sizeof(LinkedList *));
+            for (size_t i = mat->height * mat->width; i < new_len; i++)
+            {
+                automaton->transition_table->mat[i] = NULL;
+            }
+            mat->width++;
+        }
+        else
+        {
+            automaton->transition_table = Matrix(automaton->size, 1);
+        }
     }
 
-    LinkedList *trans = matrix_get(automaton->transition_table,
-                                   mat_col, src->id);
+    LinkedList *trans =
+        matrix_get(automaton->transition_table, mat_col, src->id);
 
     if (trans == NULL)
     {
@@ -109,17 +112,17 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
         matrix_set(automaton->transition_table, mat_col, src->id, trans);
     }
     if (!list_push_back(trans, &dst))
-        errx(EXIT_FAILURE, //LCOV_EXCL_LINE
-             "Unable to append to the list at address %p letter = %c", // LCOV_EXCL_LINE
-             (void *)trans, value); // LCOV_EXCL_LINE
-
+        errx(
+            EXIT_FAILURE, // LCOV_EXCL_LINE
+            "Unable to append to the list at address %p letter = %c", // LCOV_EXCL_LINE
+            (void *)trans, value); // LCOV_EXCL_LINE
 }
 
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-	LinkedList *start = matrix_get(automaton->transition_table,
-                                   epsilon ? 0 : value, src->id);
+    LinkedList *start =
+        matrix_get(automaton->transition_table, epsilon ? 0 : value, src->id);
 
     // Skip the sentinel
     LinkedList *trans = start->next;
@@ -133,7 +136,7 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
             list_free(trans);
             return 0;
         }
-    }  // LCOV_EXCL_LINE
+    } // LCOV_EXCL_LINE
 
     return 1;
 }
@@ -154,9 +157,9 @@ void automaton_remove_state(Automaton *automaton, State *state)
                     trans->previous->next = trans->next;
                     trans->next = NULL;
                     list_free(trans);
-                    break;  // Assume there aren't duplicates
+                    break; // Assume there aren't duplicates
                 }
-            }  // LCOV_EXCL_LINE
+            } // LCOV_EXCL_LINE
         }
 
     // Remove from starting_states
@@ -183,7 +186,8 @@ void automaton_remove_state(Automaton *automaton, State *state)
     {
         for (size_t x = 0; x < automaton->transition_table->width; x++)
         {
-            LinkedList *list = matrix_get(automaton->transition_table, x, k + 1);
+            LinkedList *list =
+                matrix_get(automaton->transition_table, x, k + 1);
             matrix_set(automaton->transition_table, x, k, list);
         }
     }
@@ -364,7 +368,7 @@ Automaton *automaton_from_daut(const char *filename)
     return automaton;
 }
 
-//LCOV_EXCL_START
+// LCOV_EXCL_START
 void automaton_to_dot(Automaton *aut)
 {
     puts("digraph{\n  rankdir=LR;");
@@ -372,28 +376,29 @@ void automaton_to_dot(Automaton *aut)
         printf("  node [shape = point ]; q%zu\n", start->id);
 
     puts("  node [shape = doublecircle];");
-    arr_foreach(State *, state, aut->states)
-        if (state->terminal)
-            printf("  %zu;\n", state->id);
+    arr_foreach(State *, state, aut->states) if (state->terminal)
+        printf("  %zu;\n", state->id);
     puts("  node [shape = circle];");
     arr_foreach(State *, state_2, aut->starting_states)
         printf("  q%zu -> %zu\n", state_2->id, state_2->id);
 
     for (size_t src = 0; src < aut->size; src++)
-        for (size_t c = 0; c < aut->transition_table->width; c++)
+    {
+        const Letter eps_index = 0;
+        for (Letter c = 0; c < 255; c++)
         {
-            LinkedList *list = matrix_get(aut->transition_table, c, src);
+            int is_epsilon = c == eps_index;
+            LinkedList *list = get_matrix_elt(aut, src, c, is_epsilon);
+            Letter transition_str[3] = { 0 };
+            if (is_epsilon)
+                memcpy(transition_str, "ε", 3);
+            else
+                transition_str[0] = c;
             list_foreach(State *, target, list)
-            {
-                char transition_str[5] = { 0 };
-                if (c == 0)
-                    memcpy(transition_str, "ε", 3);
-                else
-                    transition_str[0] = c;
                 printf("  %zu -> %zu[label=\"%s\"]\n", src, target->id,
                        transition_str);
-            }
         }
+    }
     puts("}");
 }
-//LCOV_EXCL_STOP
+// LCOV_EXCL_STOP

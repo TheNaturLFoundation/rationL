@@ -17,7 +17,7 @@
  * @author Rostan Tabet
  * @date 04/03/2021
  */
-typedef char Letter;
+typedef unsigned char Letter;
 
 /**
  * Used to distinguish between the two types of tokens: literal and punctuation.

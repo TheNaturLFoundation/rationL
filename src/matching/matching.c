@@ -88,15 +88,26 @@ static int match_nfa_from_state(const Automaton *automaton, const char *string,
 
 static char *submatch_nfa_from_state(const Automaton *, const char *, State *);
 
-int match_nfa(const Automaton *automaton, const char *string)
+Match *match_nfa(const Automaton *automaton, const char *string)
 {
     arr_foreach(State *, start, automaton->starting_states)
     {
         char *end = submatch_nfa_from_state(automaton, string, start);
-        if (end != NULL && *end == 0)
-            return 1;
+        if (end != NULL)
+        {
+            Match *match = SAFEMALLOC(sizeof(Match));
+            match->string = string;
+            match->start = 0;
+            match->length = end - string;
+
+            // TODO: Fix when groups are supported
+            match->nb_groups = 0;
+            match->groups = NULL;
+
+            return match;
+        }
     }
-    return 0;
+    return NULL;
 }
 
 Array *search_nfa(const Automaton *automaton, const char *string)
@@ -216,9 +227,11 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
             }
         }
 
-        // Test transition transitions
+        // Test epsilon transitions
         LinkedList *transition =
-            matrix_get(automaton->transition_table, 0, curr_state->id)->next;
+            get_matrix_elt(automaton, curr_state->id, 0, 0);
+        if (transition != NULL)
+            transition = transition->next;
         for (; transition != NULL; transition = transition->next)
         {
             State *state = *(State **)transition->data;
@@ -230,8 +243,9 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
         // Test the current letter
         if (*curr_str != 0)
         {
-            transition = matrix_get(automaton->transition_table, *curr_str,
-                                    curr_state->id)->next;
+            transition = get_matrix_elt(automaton, curr_state->id, *curr_str, 0);
+            if (transition != NULL)
+                transition = transition->next;
             for (; transition != NULL; transition = transition->next)
             {
                 State *state = *(State **)transition->data;

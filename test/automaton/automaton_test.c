@@ -278,8 +278,8 @@ Test(automaton, add_track_lookup)
 			if(i < 'C')
 			{
 				cr_assert_eq(automaton->lookup_table[i], i - 'A',
-							"[%c] got %d but expected %d", i,
-							automaton->lookup_table[i], i - 'A');
+							"[%c] got %d but expected %d", (char)i,
+							automaton->lookup_table[i], (char)i - 'A');
 			}
 			else
 			{
@@ -345,8 +345,7 @@ Test(automaton, get_matrix_elt_epsilon_is_lit)
 	size_t i = s1->id;
 
 	LinkedList * list = get_matrix_elt(automaton, i, 'S', 1);
-	cr_assert_neq(list, NULL, "what the fuck : %p, %p\n", automaton->transition_table[0],
-					matrix_get(automaton->transition_table, 0, 0));
+	cr_assert_neq(list, NULL);
 	LinkedList * list1 = get_matrix_elt(automaton, i, 'M', 1);
 	cr_assert_neq(list1, NULL);
 	cr_assert_eq(list1, list);
