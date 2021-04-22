@@ -147,5 +147,5 @@ void *list_get_value(LinkedList* list, ssize_t position)
 
 int list_empty(LinkedList* list)
 {
-    return list->next == NULL;
+    return list == NULL || list->next == NULL;
 }
