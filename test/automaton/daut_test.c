@@ -89,7 +89,7 @@ void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
         }
 }
 
-
+/*
 Test(daut, a_or_b)
 {
     /*
@@ -99,7 +99,7 @@ Test(daut, a_or_b)
      *     \  b
      *      \--- 2->
      */
-    Automaton *expected = Automaton(3, 2);
+   /* Automaton *expected = Automaton(3, 2);
     State *q0 = State(0);
     State *q1 = State(1);
     State *q2 = State(1);
@@ -115,8 +115,8 @@ Test(daut, a_or_b)
     automaton_free(expected);
     automaton_free(a_or_b);
 }
-
-
+*/
+/*
 Test(daut, abba)
 {
     /*
@@ -124,7 +124,7 @@ Test(daut, abba)
      *  -> 0 -> 1 -> 2 -> 3 -> 4 ->
      *          ^
      */
-    Automaton *expected = Automaton(6, 3);
+  /*  Automaton *expected = Automaton(6, 3);
     State *q0 = State(0);
     State *q1 = State(0);
     State *q2 = State(0);
@@ -144,3 +144,4 @@ Test(daut, abba)
     automaton_free(expected);
     automaton_free(abba);
 }
+*/

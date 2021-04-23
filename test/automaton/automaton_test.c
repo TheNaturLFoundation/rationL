@@ -13,6 +13,7 @@ Test(automaton, empty_init_dimens)
     Automaton *automaton = Automaton(1, 0);
     cr_assert_eq(automaton->transition_table, NULL);
     cr_assert_eq(automaton->size, 0);
+    cr_assert_eq(automaton->capacity, 1);
     cr_assert_eq(automaton->lookup_used, 0);
 	for(int i = 0; i < 257; i++)
 	{
@@ -21,19 +22,20 @@ Test(automaton, empty_init_dimens)
     automaton_free(automaton);
 }
 
-/*
-Test(automaton, empty_init_sentinels)
+
+Test(automaton, empty_init)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 1);
     for (size_t i = 0; i < automaton->transition_table->width; i++)
-        cr_assert_eq(matrix_get(automaton->transition_table, i, 1)->next, NULL);
+        cr_assert_eq(matrix_get(automaton->transition_table, i, 1), NULL);
     automaton_free(automaton);
 }
-*/
+
 
 Test(automaton, add_order_update)
 {
     Automaton *automaton = Automaton(1, 0);
+    cr_assert_eq(automaton->size, 0);
     State *to_add = State(0);
     automaton_add_state(automaton, to_add, 0);
     cr_assert_eq(automaton->size, 1);
@@ -47,18 +49,7 @@ Test(automaton, add_classic_state)
     cr_assert_eq(to_add->id, 0);
     automaton_free(automaton);
 }
-/*
-Test(automaton, add_classic_state_empty_row)
-{
-    
-    //Checks if the row is still empty
 
-    Automaton *automaton = Automaton(1);
-    for (size_t i = 0; i < automaton->transition_table->width; i++)
-        cr_assert_eq(matrix_get(automaton->transition_table, i, 0)->next, NULL);
-    automaton_free(automaton);
-}
-*/
 Test(automaton, add_classic_state_states)
 {
     
@@ -527,13 +518,17 @@ Test(automaton, automaton_remove_transition_fail3)
 }
 
 /*
+    automaton_remove_transition test
+*/
+
 Test(automaton, automaton_remove_state_no_entry)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 0);
     State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
+
     automaton_remove_state(automaton, s1);
 
     cr_assert_eq(automaton->size, 1, "got %lu, expected 1\n", automaton->size);
@@ -546,11 +541,12 @@ Test(automaton, automaton_remove_state_no_entry)
 
 Test(automaton, automaton_remove_state_entry)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 0);
     State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
+
     automaton_remove_state(automaton, s2);
 
     cr_assert_eq(automaton->size, 1);
@@ -562,15 +558,17 @@ Test(automaton, automaton_remove_state_entry)
 
 Test(automaton, automaton_remove_state_upgrade)
 {
-    Automaton *automaton = Automaton(4);
+    Automaton *automaton = Automaton(4, 1);
     State *s1 = State(0);
     State *s2 = State(0);
     State *s3 = State(1);
     State *s4vj = State(0);
+
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
     automaton_add_state(automaton, s3, 0);
     automaton_add_state(automaton, s4vj, 1);
+
     automaton_add_transition(automaton, s2, s1, 'C', 0);
 
     automaton_remove_state(automaton, s1);
@@ -582,33 +580,137 @@ Test(automaton, automaton_remove_state_upgrade)
     automaton_free(automaton);
 }
 
-Test(automaton, automaton_remove_state_transitions, .disabled = 1)
+Test(automaton, automaton_remove_state_transitions_checking)
 {
-    Automaton *automaton = Automaton(4);
+    Automaton *automaton = Automaton(4, 3);
     State *s1 = State(0);
     State *s2 = State(0);
     State *s3 = State(1);
     State *s4vj = State(0);
+
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 1);
     automaton_add_state(automaton, s3, 0);
     automaton_add_state(automaton, s4vj, 1);
-    automaton_add_transition(automaton, s2, s1, 'C', 0);
+
     automaton_add_transition(automaton, s3, s4vj, 'D', 0);
-    automaton_add_transition(automaton, s3, s1, ' ', 1);
     automaton_add_transition(automaton, s3, s2, ' ', 1);
+    
+    automaton_add_transition(automaton, s2, s1, 'C', 0);
+    automaton_add_transition(automaton, s3, s1, ' ', 1);
+
     automaton_remove_state(automaton, s1);
 
     for (size_t c = 0; c < automaton->transition_table->width; c++)
     {
-        LinkedList *list = matrix_get(automaton->transition_table, c, 0);
-        cr_assert_eq(list->next, NULL);
+        LinkedList *list = matrix_get(automaton->transition_table, c, s2->id);
+        cr_assert_eq(list, NULL, "got %p but expected NULL", list);
     }
 
-    LinkedList *list = matrix_get(automaton->transition_table, 'D', s3->id);
+    LinkedList *list = get_matrix_elt(automaton, s3->id, ' ', 1);
+    cr_assert_neq(list, NULL);
+
     State *target = *(State **)list->next->data;
-    cr_assert_eq(target->id, s4vj->id);
+    cr_assert_eq(target, s2);
+    cr_assert_eq(list->next->next, NULL);
 
     automaton_free(automaton);
 }
+
+Test(automaton, automaton_remove_state_write_elt_deleted)
+{
+    Automaton *automaton = Automaton(4, 3);
+    State *s1 = State(0);
+    State *s2 = State(0);
+    State *s3 = State(1);
+    State *s4vj = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+    automaton_add_state(automaton, s3, 0);
+    automaton_add_state(automaton, s4vj, 1);
+
+    automaton_add_transition(automaton, s3, s4vj, 'D', 1);
+    automaton_add_transition(automaton, s3, s2, ' ', 1);
+    
+    automaton_add_transition(automaton, s2, s1, 'C', 0);
+    automaton_add_transition(automaton, s3, s1, ' ', 1);
+
+    automaton_remove_state(automaton, s2);
+
+
+
+    LinkedList *list = get_matrix_elt(automaton, s3->id, ' ', 1);
+    cr_assert_neq(list, NULL);
+
+    State *target = *(State **)list->next->data;
+    cr_assert_eq(target, s4vj);
+    target = *(State **)list->next->next->data;
+    cr_assert_eq(target, s1);
+    cr_assert_eq(list->next->next->next, NULL);
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_state_check_matrix_size_changed)
+{
+    Automaton *automaton = Automaton(2, 1);
+    State *s1 = State(0);
+    State *s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+
+    size_t former_matrix_width = automaton->transition_table->width;
+    size_t former_matrix_height = automaton->transition_table->height;
+
+    automaton_remove_state(automaton, s1);
+
+    cr_assert_eq(former_matrix_width, automaton->transition_table->width);
+    cr_assert_eq(former_matrix_height - 1,
+        automaton->transition_table->height);
+
+
+    automaton_free(automaton);
+}
+
+Test(automaton, automaton_remove_state_check_matrix_size_changed_oversized)
+{
+    Automaton *automaton = Automaton(200, 1);
+    State *s1 = State(0);
+    State *s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+
+    size_t former_matrix_width = automaton->transition_table->width;
+    size_t former_matrix_height = automaton->transition_table->height;
+
+    automaton_remove_state(automaton, s1);
+
+    cr_assert_eq(former_matrix_width, automaton->transition_table->width);
+    cr_assert_eq(former_matrix_height - 1,
+        automaton->transition_table->height);
+
+
+    automaton_free(automaton);
+}
+
+/*
+    BONUS
 */
+
+Test(automaton, add_after_remove)
+{
+    //if it does not crash, it works hehe
+    Automaton *automaton = Automaton(2, 0);
+    State *s1 = State(0);
+    State *s2 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 1);
+
+    automaton_remove_state(automaton, s1);
+
+    s1 = State(0);
+    automaton_add_state(automaton, s1, 0);
+    cr_assert_eq(1, 1);
+    automaton_free(automaton);
+}

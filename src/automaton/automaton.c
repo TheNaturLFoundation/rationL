@@ -26,6 +26,7 @@ Automaton *automaton_create(size_t state_count, size_t letter_count)
 {
     Automaton *autom = SAFEMALLOC(sizeof(Automaton));
     autom->size = 0;
+    autom->capacity = state_count;
     autom->transition_table = Matrix(state_count, letter_count);
     autom->starting_states = Array(State *);
     autom->states = Array(State *);
@@ -58,9 +59,10 @@ State *state_create(int is_terminal)
 void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
     Matrix *mat = automaton->transition_table;
+    
     if (mat != NULL && automaton->size >= mat->height)
     {
-        size_t new_len = mat->height * (mat->width + 1);
+        size_t new_len = mat->height * mat->width + mat->width;
         automaton->transition_table->mat = SAFEREALLOC(
             automaton->transition_table->mat, new_len * sizeof(LinkedList *));
         for (size_t i = mat->height * mat->width; i < new_len; i++)
@@ -69,6 +71,14 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
         }
         mat->height++;
     }
+    /*
+    if(automaton->size + 1 > automaton->capacity)
+    {
+        errx(EXIT_FAILURE,
+            "Impossible to add more states than originally declared: maximum is %lu, but you are adding number%lu\n",
+            mat->height, automaton->size);
+    }
+    */
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
@@ -108,7 +118,6 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
     LinkedList *start = get_matrix_elt(automaton, src->id, value, epsilon);
-    
     // Skip the sentinel
     if(start != NULL)
     {
@@ -136,23 +145,21 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
 void automaton_remove_state(Automaton *automaton, State *state)
 {
     // Remove all transitions pointing to it
-    for (size_t y = 0; y < automaton->size; y++)
-        for (size_t x = 0; x < automaton->transition_table->width; x++)
+    State * src;
+    for(size_t symb = 0; symb < NUMBER_OF_SYMB; symb ++)
+    {
+        for(size_t i = 0; i < state->id; i++)
         {
-            LinkedList *start = matrix_get(automaton->transition_table, x, y);
-            for (LinkedList *trans = start->next; trans != NULL;
-                 trans = trans->next) // LCOV_EXCL_LINE
-            {
-                State *curr = *(State **)trans->data;
-                if (curr->id == state->id)
-                {
-                    trans->previous->next = trans->next;
-                    trans->next = NULL;
-                    list_free(trans);
-                    break; // Assume there aren't duplicates
-                }
-            } // LCOV_EXCL_LINE
+            src = *(State **)array_get(automaton->states, i);
+            automaton_remove_transition(automaton, src, state, symb, symb == EPSILON_INDEX);
         }
+
+        for(size_t i = state->id + 1; i < automaton->size; i++)
+        {
+            src = *(State **)array_get(automaton->states, i);
+            automaton_remove_transition(automaton, src, state, symb, symb == EPSILON_INDEX);
+        }
+    }
 
     // Remove from starting_states
     size_t antoine = 0;
@@ -172,20 +179,36 @@ void automaton_remove_state(Automaton *automaton, State *state)
         State *another_state = *(State **)array_get(automaton->states, k);
         another_state->id -= 1;
     }
-    for (size_t x = 0; x < automaton->transition_table->width; x++)
-        list_free(matrix_get(automaton->transition_table, x, state->id));
-    for (size_t k = state->id; k < automaton->states->size - 1; k++)
+
+    if(automaton->transition_table != NULL)
     {
+        //Deal with matrix
+            //We start by freeing the lists of the line we want to delete
         for (size_t x = 0; x < automaton->transition_table->width; x++)
+            list_free(matrix_get(automaton->transition_table, x, state->id));
+            
+            //Then, we shift the matrix below the deleted line by one line
+        for (size_t k = state->id; k < automaton->states->size - 1; k++)
         {
-            LinkedList *list =
-                matrix_get(automaton->transition_table, x, k + 1);
-            matrix_set(automaton->transition_table, x, k, list);
+            for (size_t x = 0; x < automaton->transition_table->width; x++)
+            {
+                LinkedList *list =
+                    matrix_get(automaton->transition_table, x, k + 1);
+                matrix_set(automaton->transition_table, x, k, list);
+            }
         }
+            //Then, we change the matrix height and width
+        automaton->transition_table->height --;
+        /*
+            //Finally we perform the realloc
+        automaton->transition_table = SAFEREALLOC(automaton->transition_table,
+            automaton->transition_table->width * automaton->transition_table->height * sizeof(LinkedList *));
+        
+        I don't know if reallocing is the right thing to do as we malloc what is supposed
+        to be a fixed sized automaton, however the code of add_automaton_allows to go over that
+        number
+        */
     }
-    for (size_t x = 0; x < automaton->transition_table->width; x++)
-        matrix_set(automaton->transition_table, x, automaton->states->size - 1,
-                   LinkedList(State *));
 
     array_remove(automaton->states, state->id);
     automaton->size -= 1;

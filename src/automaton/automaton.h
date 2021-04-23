@@ -26,6 +26,11 @@ typedef struct
     size_t size;
 
     /**
+     * This is the maximum number of states allowed.
+     */
+    size_t capacity;
+
+    /**
      * Transition table of the automaton.
      * Lines are states, columns are transitions.
      * Each cell contains a linked list of states.
