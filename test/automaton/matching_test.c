@@ -45,7 +45,7 @@ static void assert_match_eq_(Match *expected, Match *actual, size_t line)
 
 Test(matching, abba)
 {
-    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
+    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut", 6);
     Match *match;
 
     // TODO: Free!
@@ -80,7 +80,7 @@ Test(matching, abba)
 
 Test(matching, a_or_b)
 {
-    Automaton *a_or_b = automaton_from_daut(TEST_PATH "automaton/a+b.daut");
+    Automaton *a_or_b = automaton_from_daut(TEST_PATH "automaton/a+b.daut", 3);
     Match *match;
 
     match = match_nfa(a_or_b, "a");
@@ -110,7 +110,7 @@ Test(matching, a_or_b)
 
 Test(matching, ab_or_cstar)
 {
-    Automaton *ab_or_cstar = automaton_from_daut(TEST_PATH "automaton/ab+cstar.daut");
+    Automaton *ab_or_cstar = automaton_from_daut(TEST_PATH "automaton/ab+cstar.daut", 9);
     Match *match;
 
     match = match_nfa(ab_or_cstar, "c");
@@ -184,7 +184,7 @@ static void free_substring_array(Array *arr)
 Test(substring, abba)
 {
     Array *subs;
-    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
+    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut", 6);
 
     subs = search_nfa(abba, "abba");
     cr_assert_eq(subs->size, 1, "expected 1, got %zu", subs->size);
@@ -214,7 +214,7 @@ Test(substring, abba)
 Test(substring, abstara)
 {
     Array *subs;
-    Automaton *aut = automaton_from_daut(TEST_PATH "automaton/abstara.daut");
+    Automaton *aut = automaton_from_daut(TEST_PATH "automaton/abstara.daut", 5);
 
     subs = search_nfa(aut, "abba");
     cr_assert_eq(subs->size, 1, "expected 1, got %zu", subs->size);
@@ -257,7 +257,7 @@ Test(substring, abstara)
 
 Test(replace, abstara)
 {
-    Automaton *aut = automaton_from_daut(TEST_PATH "automaton/abstara.daut");
+    Automaton *aut = automaton_from_daut(TEST_PATH "automaton/abstara.daut", 5);
     char *string;
 
     string = replace_nfa(aut, "abbbbaabba", "");

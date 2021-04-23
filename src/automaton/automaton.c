@@ -353,12 +353,12 @@ static void parse_daut_line(Automaton *automaton, const char *line,
                                  is_epsilon);
 }
 
-Automaton *automaton_from_daut(const char *filename)
+Automaton *automaton_from_daut(const char *filename, size_t size)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
         err(EXIT_FAILURE, "Couldn't open %s", filename); // LCOV_EXCL_LINE
-    Automaton *automaton = Automaton(1, 255);
+    Automaton *automaton = Automaton(size, NUMBER_OF_SYMB);
 
     char *line = NULL;
     size_t linecap = 0;
