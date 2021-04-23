@@ -102,6 +102,22 @@ Test(automaton, add_multpile)
     automaton_free(automaton);
 }
 
+Test(automaton, automaton_add_state_overbooked)
+{
+    Automaton * automaton = Automaton(2, 1);
+    State * s = State(0);
+    automaton_add_state(automaton, s, 0);
+    s = State(0);
+    automaton_add_state(automaton, s, 0);
+    s = State(0);
+    automaton_add_state(automaton, s, 0);
+
+    cr_assert_eq(automaton->capacity, 3);
+    cr_assert_eq(automaton->transition_table->height, 3);
+    cr_assert_eq(automaton->transition_table->width, 1);
+    automaton_free(automaton);
+}
+
 /*
     Add Transition tests:
 */

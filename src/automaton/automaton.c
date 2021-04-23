@@ -62,9 +62,8 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
     
     if(automaton->size + 1 > automaton->capacity)
     {
-        errx(EXIT_FAILURE,
-            "Impossible to add more states than originally declared: maximum is %lu, but you are adding number %lu\n",
-            mat->height, automaton->size + 1);
+        automaton->capacity += 1;
+        matrix_add_row(automaton->transition_table);
     }
     
     array_append(automaton->states, &state);
