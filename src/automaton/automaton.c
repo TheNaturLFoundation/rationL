@@ -60,25 +60,13 @@ void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
     Matrix *mat = automaton->transition_table;
     
-    if (mat != NULL && automaton->size >= mat->height)
-    {
-        size_t new_len = (mat->height + 1) * mat->width;
-        automaton->transition_table->mat = SAFEREALLOC(
-            automaton->transition_table->mat, new_len * sizeof(LinkedList *));
-        for (size_t i = mat->height * mat->width; i < new_len; i++)
-        {
-            automaton->transition_table->mat[i] = NULL;
-        }
-        mat->height++;
-    }
-    /*
     if(automaton->size + 1 > automaton->capacity)
     {
         errx(EXIT_FAILURE,
-            "Impossible to add more states than originally declared: maximum is %lu, but you are adding number%lu\n",
-            mat->height, automaton->size);
+            "Impossible to add more states than originally declared: maximum is %lu, but you are adding number %lu\n",
+            mat->height, automaton->size + 1);
     }
-    */
+    
     array_append(automaton->states, &state);
     state->id = automaton->size;
     automaton->size++;
