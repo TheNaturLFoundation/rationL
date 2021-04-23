@@ -403,10 +403,12 @@ Test(automaton, get_matrix_elt_epsilon_is_lit)
 }
 
 /*
+    automaton_remove_transition tests:
+*/
 
-Test(automaton, automaton_remove_transition1)
+Test(automaton, automaton_remove_transition_succes_check_lookup_and_ret)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 1);
     State *s1 = State(0);
     State *s2 = State(0);
     automaton_add_state(automaton, s1, 0);
@@ -415,61 +417,53 @@ Test(automaton, automaton_remove_transition1)
 
     int ret = automaton_remove_transition(automaton, s1, s2, 'A', 0);
 
-	cr_assert_eq(1,2);
-
 	int index = automaton->lookup_table['A'];
 	cr_assert_eq(index, 0);
+    cr_assert_eq(automaton->lookup_used, 1);
     cr_assert_eq(ret, 0);
 
     automaton_free(automaton);
 }
 
-Test(automaton, automaton_remove_transion2)
+Test(automaton, automaton_remove_transion_test_list_is_deleted)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 2);
     State *s1 = State(0);
     State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
-    automaton_add_transition(automaton, s1, s2, ' ', 1);
+
     automaton_add_transition(automaton, s1, s2, 'A', 0);
 
     int ret = automaton_remove_transition(automaton, s1, s2, 'A', 0);
 
-    LinkedList *list = matrix_get(automaton->transition_table, 0, s1->id);
-    State *target = *(State **)list->next->data;
-
-    cr_assert_eq(ret, 0);
-    cr_assert_eq(list->next->next, NULL);
-    cr_assert_eq(target->id, s2->id);
+    LinkedList * list = get_matrix_elt(automaton, s1->id, 'A', 0);
+    cr_assert_eq(list, NULL);
 
     automaton_free(automaton);
 }
-Test(automaton, automaton_remove_transition3)
+
+Test(automaton, automaton_remove_test_list_is_deleted_epsilon)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 2);
     State *s1 = State(0);
     State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
     automaton_add_state(automaton, s2, 0);
+
     automaton_add_transition(automaton, s1, s2, ' ', 1);
-    automaton_add_transition(automaton, s1, s2, 'A', 0);
 
     int ret = automaton_remove_transition(automaton, s1, s2, 's', 1);
 
-    LinkedList *list = matrix_get(automaton->transition_table, 'A', s1->id);
-    State *target = *(State **)list->next->data;
-
-    cr_assert_eq(ret, 0);
-    cr_assert_eq(list->next->next, NULL);
-    cr_assert_eq(target->id, s2->id);
+    LinkedList * list = get_matrix_elt(automaton, s1->id, 'k', 1);
+    cr_assert_eq(list, NULL);
 
     automaton_free(automaton);
 }
 
-Test(automaton, automaton_remove_transition4)
+Test(automaton, automaton_remove_transition_check_list_with_more_than_one)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 2);
     State *s1 = State(0);
     State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
@@ -479,19 +473,16 @@ Test(automaton, automaton_remove_transition4)
 
     int ret = automaton_remove_transition(automaton, s1, s2, 's', 1);
 
-    LinkedList *list = matrix_get(automaton->transition_table, 0, s1->id);
-    State *target = *(State **)list->next->data;
-
-    cr_assert_eq(ret, 0);
-    cr_assert_eq(list->next->next, NULL);
-    cr_assert_eq(target->id, s2->id);
-
+    LinkedList * list = get_matrix_elt(automaton, s1->id, 'a', 1);
+    State * dst = *(State **)list->next->data;
+    cr_assert_neq(list, NULL);
+    cr_assert_eq(dst, s2);
     automaton_free(automaton);
 }
 
 Test(automaton, automaton_remove_transition_fail1)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 1);
     State *s1 = State(0);
     State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
@@ -506,7 +497,7 @@ Test(automaton, automaton_remove_transition_fail1)
 
 Test(automaton, automaton_remove_transition_fail2)
 {
-    Automaton *automaton = Automaton(2);
+    Automaton *automaton = Automaton(2, 1);
     State *s1 = State(0);
     State *s2 = State(1);
     automaton_add_state(automaton, s1, 0);
@@ -519,6 +510,23 @@ Test(automaton, automaton_remove_transition_fail2)
     automaton_free(automaton);
 }
 
+Test(automaton, automaton_remove_transition_fail3)
+{
+    Automaton *automaton = Automaton(2, 1);
+    State *s1 = State(0);
+    State *s2 = State(1);
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_transition(automaton, s2, s1, 'L', 0);
+
+    int ret = automaton_remove_transition(automaton, s1, s2, 'A', 0);
+
+    cr_assert_eq(ret, 1);
+
+    automaton_free(automaton);
+}
+
+/*
 Test(automaton, automaton_remove_state_no_entry)
 {
     Automaton *automaton = Automaton(2);
@@ -534,6 +542,7 @@ Test(automaton, automaton_remove_state_no_entry)
 
     automaton_free(automaton);
 }
+
 
 Test(automaton, automaton_remove_state_entry)
 {

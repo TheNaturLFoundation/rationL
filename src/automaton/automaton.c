@@ -107,23 +107,29 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-    LinkedList *start =
-        matrix_get(automaton->transition_table, epsilon ? 0 : value, src->id);
-
+    LinkedList *start = get_matrix_elt(automaton, src->id, value, epsilon);
+    
     // Skip the sentinel
-    LinkedList *trans = start->next;
-    for (size_t i = 0; trans != NULL; trans = trans->next, i++)
+    if(start != NULL)
     {
-        State *curr_dst = *(State **)trans->data;
-        if (curr_dst->id == dst->id)
+        for (LinkedList *trans = start->next; trans != NULL; trans = trans->next)
         {
-            trans->previous->next = trans->next;
-            trans->next = NULL;
-            list_free(trans);
-            return 0;
-        }
-    } // LCOV_EXCL_LINE
-
+            State *curr_dst = *(State **)trans->data;
+            if (curr_dst->id == dst->id)
+            {
+                trans->previous->next = trans->next;
+                trans->next = NULL;
+                list_free(trans);
+                if(start->next == NULL)
+                {
+                    size_t i = (epsilon != 0) ? EPSILON_INDEX : value;
+                    matrix_set(automaton->transition_table, 
+                        automaton->lookup_table[i], src->id, NULL);
+                }
+                return 0;
+            }
+        } // LCOV_EXCL_LINE
+    }
     return 1;
 }
 
