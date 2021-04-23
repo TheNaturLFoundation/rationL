@@ -1,5 +1,8 @@
-#include <string.h>
 #include "matching/matching.h"
+
+#include <printf.h>
+#include <string.h>
+
 #include "utils/memory_utils.h"
 /*
  * Recursive function that has been replaced by an iterative one (see below)
@@ -229,7 +232,7 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
 
         // Test epsilon transitions
         LinkedList *transition =
-            get_matrix_elt(automaton, curr_state->id, 0, 0);
+            get_matrix_elt(automaton, curr_state->id, 0, 1);
         if (transition != NULL)
             transition = transition->next;
         for (; transition != NULL; transition = transition->next)
