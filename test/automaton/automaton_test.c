@@ -203,13 +203,13 @@ Test(automaton, automaton_add_transition_updata_lookup_multiple)
     automaton_add_state(automaton, s3, 0);
     automaton_add_state(automaton, s4, 0);
 
-    for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    for (size_t i = 0; i < NUMBER_OF_SYMB; i++)
     {
-        if(i == EPSILON_INDEX)
+        if (i == EPSILON_INDEX)
         {
             automaton_add_transition(automaton, s1, s2, ' ', 1);
         }
-        else if((i % 2) == 0)
+        else if ((i % 2) == 0)
         {
             automaton_add_transition(automaton, s1, s2, i, 0);
         }
@@ -219,10 +219,12 @@ Test(automaton, automaton_add_transition_updata_lookup_multiple)
         }
     }
 
-    for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    for (size_t i = 0; i < NUMBER_OF_SYMB; i++)
     {
-        cr_assert_eq(automaton->lookup_table[i], i, 
-            "Got %d but expected %lu\n", automaton->lookup_table[i], i);
+        size_t expected = i == EPSILON_INDEX ? 0 : i;
+        cr_assert_eq(automaton->lookup_table[i], expected,
+                     "Got %d but expected %lu\n", automaton->lookup_table[i],
+                     expected);
     }
 
     automaton_free(automaton);
