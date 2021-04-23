@@ -42,7 +42,7 @@ static void assert_match_eq_(Match *expected, Match *actual, size_t line)
                      i, expected->groups[i], actual->groups[i], line);
     }
 }
-/*
+
 Test(matching, abba)
 {
     Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
@@ -153,6 +153,7 @@ Test(matching, ab_or_cstar)
     automaton_free(ab_or_cstar);
 }
 
+/*
 Test(matching, email)
 {
     Array *email_tokens = tokenize("\\w+(\\.\\w+)?@\\w+(\\.[a-z]{2,})+");
@@ -170,6 +171,7 @@ Test(matching, email)
     array_free(email_tokens);
     bintree_free(b);
 }
+*/
 
 static void free_substring_array(Array *arr)
 {
@@ -269,6 +271,7 @@ Test(replace, abstara)
     automaton_free(aut);
 }
 
+/*
 Test(replace, comma)
 {
     Array *tokens = tokenize(", *");

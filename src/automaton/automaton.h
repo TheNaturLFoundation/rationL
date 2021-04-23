@@ -60,7 +60,7 @@ typedef struct
 	
     int * lookup_table;
 
-    size_t lookup_used;
+    unsigned char lookup_used;
 
     int is_determined;
 

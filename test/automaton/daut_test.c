@@ -58,16 +58,17 @@ void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
                  "First automaton has size %zu, second has size %zu (line %zu)",
                  a1->size, a2->size, line);
 
-    cr_assert_eq(a1->transition_table->width, a2->transition_table->width,
-                 "First table has width %zu, second has width %zu (line %zu)",
-                 a1->transition_table->width, a2->transition_table->width, line);
+    cr_assert_eq(a1->lookup_used, a2->lookup_used,
+                 "First table has %du different states, "
+                 "second has width %du (line %zu)",
+                 a1->lookup_used, a2->lookup_used, line);
 
-    // Check if the two transition tables are equal
-    for (Letter x = 0; x < a1->transition_table->width; x++)
-        for (size_t y = 0; y < a1->size; y++)
+    for (Letter c = 0; c < a1->lookup_used; c++)
+        for (size_t src = 0; src < a1->size; src++)
         {
-            LinkedList *list1 = matrix_get(a1->transition_table, x, y);
-            LinkedList *list2 = matrix_get(a2->transition_table, x, y);
+            int is_epsilon = src == 0;
+            LinkedList *list1 = get_matrix_elt(a1, src, c, is_epsilon);
+            LinkedList *list2 = get_matrix_elt(a2, src, c, is_epsilon);
             if (list1 == NULL || list2 == NULL)
                 cr_assert_eq(list1, list2, "%p != %p", list1, list2);
             else
@@ -120,23 +121,28 @@ Test(daut, a_or_b)
 Test(daut, abba)
 {
     /*
-     *       a    b    b    a
-     *  -> 0 -> 1 -> 2 -> 3 -> 4 ->
-     *          ^
+     *    ε    a    b    b    a
+     *  0 -> 1 -> 2 -> 3 -> 4 -> 5 ->
+     *       ^
      */
   /*  Automaton *expected = Automaton(6, 3);
     State *q0 = State(0);
     State *q1 = State(0);
     State *q2 = State(0);
-    State *q3 = State(1);
+    State *q3 = State(0);
+    State *q4 = State(0);
+    State *q5 = State(1);
     automaton_add_state(expected, q0, 1);
-    automaton_add_state(expected, q1, 0);
-    automaton_add_state(expected, q2, 0);
+    automaton_add_state(expected, q1, 1);
     automaton_add_state(expected, q3, 0);
-    automaton_add_transition(expected, q0, q1, 'c', 0);
-    automaton_add_transition(expected, q1, q2, 'd', 0);
-    automaton_add_transition(expected, q2, q3, 'e', 0);
-    automaton_to_dot(expected);
+    automaton_add_state(expected, q4, 0);
+    automaton_add_state(expected, q2, 0);
+    automaton_add_state(expected, q5, 0);
+    automaton_add_transition(expected, q0, q1, 0, 1);
+    automaton_add_transition(expected, q1, q2, 'a', 0);
+    automaton_add_transition(expected, q2, q3, 'b', 0);
+    automaton_add_transition(expected, q3, q4, 'b', 0);
+    automaton_add_transition(expected, q4, q5, 'a', 0);
 
     Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
     ASSERT_AUTOMATON_EQ(abba, expected);
