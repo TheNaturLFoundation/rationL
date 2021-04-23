@@ -173,9 +173,10 @@ void automaton_free(Automaton * automaton);
 /**
  * @author Rostan Tabet
  * @date 24/03/2021
- * @filename: path to the .daut file.
+ * @param filename Path to the .daut file.
+ * @param size The number of states in the automaton
  */
-Automaton *automaton_from_daut(const char *filename);
+Automaton *automaton_from_daut(const char *filename, size_t size);
 
 
 
