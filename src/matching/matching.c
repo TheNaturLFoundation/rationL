@@ -1,8 +1,5 @@
 #include "matching/matching.h"
-
-#include <printf.h>
 #include <string.h>
-
 #include "utils/memory_utils.h"
 /*
  * Recursive function that has been replaced by an iterative one (see below)
