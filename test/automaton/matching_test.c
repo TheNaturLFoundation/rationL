@@ -7,6 +7,7 @@
 #include "parsing/parsing.h"
 #include "matching/matching.h"
 
+/*
 #define assert_match_eq(expected, actual) \
     assert_match_eq_(expected, actual, __LINE__)
 
@@ -172,6 +173,7 @@ Test(matching, email)
     bintree_free(b);
 }
 */
+/*
 
 static void free_substring_array(Array *arr)
 {
@@ -270,7 +272,7 @@ Test(replace, abstara)
 
     automaton_free(aut);
 }
-
+*/
 /*
 Test(replace, comma)
 {
