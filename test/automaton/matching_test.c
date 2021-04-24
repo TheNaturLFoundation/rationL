@@ -185,84 +185,134 @@ Test(matching, email)
 }
 */
 
-static void free_substring_array(Array *arr)
+static void free_matches_array(Array *arr)
 {
-    arr_foreach(char *, s, arr)
-        free(s);
+    arr_foreach(Match *, match, arr)
+        free_match(match);
 
     array_free(arr);
 }
 
 Test(substring, abba)
 {
-    Array *subs;
     Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut", 6);
+    Array *matches;
+    Match *match;
 
-    subs = search_nfa(abba, "abba");
-    cr_assert_eq(subs->size, 1, "expected 1, got %zu", subs->size);
-    char *s1 = *(char **)array_get(subs, 0);
-    cr_assert_str_eq(s1, "abba", "expected 'abba', got '%s'", s1);
-    free_substring_array(subs);
+    matches = search_nfa(abba, "abba");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    Match expected = {
+        .string = "abba",
+        .start = 0,
+        .length = 4,
+        .nb_groups = 0,
+        .groups = NULL
+    };
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
 
-    subs = search_nfa(abba, "aaabbaa");
-    cr_assert_eq(subs->size, 1, "expected 1, got %zu", subs->size);
-    char *s2 = *(char **)array_get(subs, 0);
-    cr_assert_str_eq(s2, "abba", "expected 'abba', got '%s'", s2);
-    free_substring_array(subs);
+    matches = search_nfa(abba, "aaabbaa");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "aaabbaa";
+    expected.start = 2;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
 
-    subs = search_nfa(abba, "abbaabba");
-    cr_assert_eq(subs->size, 2, "expected 2, got %zu", subs->size);
-    arr_foreach(char *, s3, subs)
-        cr_assert_str_eq(s3, "abba", "expected 'abba', got '%s'", s3);
-    free_substring_array(subs);
+    matches = search_nfa(abba, "abbaabba");
+    cr_assert_eq(matches->size, 2, "expected 2, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "abbaabba";
+    expected.start = 0;
+    assert_match_eq(&expected, match);
+    match = *(Match **)array_get(matches, 1);
+    expected.start = 4;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
 
-    subs = search_nfa(abba, "abb");
-    cr_assert_eq(subs->size, 0, "expected 0, got %zu", subs->size);
-    free_substring_array(subs);
+    matches = search_nfa(abba, "abb");
+    cr_assert_eq(matches->size, 0, "expected 0, got %zu", matches->size);
+    free_matches_array(matches);
 
     automaton_free(abba);
 }
 
 Test(substring, abstara)
 {
-    Array *subs;
     Automaton *aut = automaton_from_daut(TEST_PATH "automaton/abstara.daut", 5);
+    Array *matches;
+    Match *match;
 
-    subs = search_nfa(aut, "abba");
-    cr_assert_eq(subs->size, 1, "expected 1, got %zu", subs->size);
-    char *s1 = *(char **)array_get(subs, 0);
-    cr_assert_str_eq(s1, "abba", "expected 'abba', got '%s'", s1);
-    free_substring_array(subs);
+    matches = search_nfa(aut, "abba");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    Match expected = {
+        .string = "abba",
+        .start = 0,
+        .length = 4,
+        .nb_groups = 0,
+        .groups = NULL
+    };
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
 
-    subs = search_nfa(aut, "abbbbbbaaa");
-    cr_assert_eq(subs->size, 2, "expected 2, got %zu", subs->size);
-    char *s2 = *(char **)array_get(subs, 0);
-    cr_assert_str_eq(s2, "abbbbbba", "expected 'abbbbbba', got '%s'", s2);
-    s2 = *(char **)array_get(subs, 1);
-    cr_assert_str_eq(s2, "aa", "expected 'aa', got '%s'", s2);
-    free_substring_array(subs);
+    matches = search_nfa(aut, "abbbbbbaaa");
+    cr_assert_eq(matches->size, 2, "expected 2, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "abbbbbbaaa";
+    expected.start = 0;
+    expected.length = 8;
+    assert_match_eq(&expected, match);
+    match = *(Match **)array_get(matches, 1);
+    expected.string = "abbbbbbaaa";
+    expected.start = 8;
+    expected.length = 2;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
 
-    subs = search_nfa(aut, "aasaaabbbba4abavabaaajaa");
-    cr_assert_eq(subs->size, 7, "expected 7, got %zu", subs->size);
-    char *s3 = *(char **)array_get(subs, 0);
-    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
-    s3 = *(char **)array_get(subs, 1);
-    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
-    s3 = *(char **)array_get(subs, 2);
-    cr_assert_str_eq(s3, "abbbba", "expected 'abbbba', got '%s'", s3);
-    s3 = *(char **)array_get(subs, 3);
-    cr_assert_str_eq(s3, "aba", "expected 'aba', got '%s'", s3);
-    s3 = *(char **)array_get(subs, 4);
-    cr_assert_str_eq(s3, "aba", "expected 'aa', got '%s'", s3);
-    s3 = *(char **)array_get(subs, 5);
-    cr_assert_str_eq(s3, "aa", "expected 'aba', got '%s'", s3);
-    s3 = *(char **)array_get(subs, 6);
-    cr_assert_str_eq(s3, "aa", "expected 'aa', got '%s'", s3);
-    free_substring_array(subs);
+    matches = search_nfa(aut, "aasaaabbbba4abavabaaajaa");
+    //                         012345678901234567890123
+    cr_assert_eq(matches->size, 7, "expected 7, got %zu", matches->size);
+    expected.string = "aasaaabbbba4abavabaaajaa";
 
-    subs = search_nfa(aut, "abbcba");
-    cr_assert_eq(subs->size, 0, "expected 0, got %zu", subs->size);
-    free_substring_array(subs);
+    match = *(Match **)array_get(matches, 0);
+    expected.start = 0;
+    expected.length = 2;
+    assert_match_eq(&expected, match);
+
+    match = *(Match **)array_get(matches, 1);
+    expected.start = 3;
+    assert_match_eq(&expected, match);
+
+    match = *(Match **)array_get(matches, 2);
+    expected.start = 5;
+    expected.length = 6;
+    assert_match_eq(&expected, match);
+
+    match = *(Match **)array_get(matches, 3);
+    expected.start = 12;
+    expected.length = 3;
+    assert_match_eq(&expected, match);
+
+    match = *(Match **)array_get(matches, 4);
+    expected.start = 16;
+    assert_match_eq(&expected, match);
+
+    match = *(Match **)array_get(matches, 5);
+    expected.start = 19;
+    expected.length = 2;
+    assert_match_eq(&expected, match);
+
+    match = *(Match **)array_get(matches, 6);
+    expected.start = 22;
+    assert_match_eq(&expected, match);
+
+    free_matches_array(matches);
+
+    matches = search_nfa(aut, "abbcba");
+    cr_assert_eq(matches->size, 0, "expected 0, got %zu", matches->size);
+    free_matches_array(matches);
 
     automaton_free(aut);
 }

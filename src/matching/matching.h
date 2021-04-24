@@ -13,6 +13,7 @@ typedef struct Match
 {
     /**
      * The original string passed to the matching function.
+     * @warning Not reallocated in the heap
      */
     const char *string;
     /**
@@ -46,12 +47,12 @@ typedef struct Match
 Match *match_nfa(const Automaton *automaton, const char *string);
 
 /**
- * Return all substrings of a string recognized by a given NFA.
+ * Return all matches in a string recognized by a given NFA.
  * @author Rostan Tabet
  * @date 05/04/2021
  * @param automaton Some NFA.
  * @param string The string to extract substrings from.
- * @return An array containing all the matched substrings.
+ * @return An array containing all the matches.
  */
 Array *search_nfa(const Automaton *automaton, const char *string);
 

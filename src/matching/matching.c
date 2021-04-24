@@ -1,5 +1,8 @@
 #include "matching/matching.h"
+
+#include <printf.h>
 #include <string.h>
+
 #include "utils/memory_utils.h"
 /*
  * Recursive function that has been replaced by an iterative one (see below)
@@ -112,7 +115,8 @@ Match *match_nfa(const Automaton *automaton, const char *string)
 
 Array *search_nfa(const Automaton *automaton, const char *string)
 {
-    Array *substrings = Array(char *);
+    Array *matches = Array(Match *);
+    const char *string_start = string;
     for (; *string != 0; string++)
     {
         arr_foreach(State *, start, automaton->starting_states)
@@ -120,17 +124,21 @@ Array *search_nfa(const Automaton *automaton, const char *string)
             char *end = submatch_nfa_from_state(automaton, string, start);
             if (end != NULL)
             {
-                size_t length = end - string;
-                char *copy = SAFECALLOC(length + 1, sizeof(char));
-                memcpy(copy, string, length);
-                // Add the string to the array
-                array_append(substrings, &copy);
+                Match *match = SAFEMALLOC(sizeof(Match));
+                match->string = string_start;
+                match->start = string - string_start;
+                match->length = end - string;
+                // TODO: Fix when groups are supported
+                match->nb_groups = 0;
+                match->groups = NULL;
+                array_append(matches, &match);
                 string = end - 1;
                 break;
             }
         }
     }
-    return substrings;
+
+    return matches;
 }
 
 
@@ -262,7 +270,11 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
 
 void free_match(Match *match)
 {
-    if (match != NULL)
+    if (match != NULL && match->groups != NULL)
+    {
+        for (size_t i = 0; i < match->nb_groups; i++)
+            free(match->groups[i]);
         free(match->groups);
+    }
     free(match);
 }
