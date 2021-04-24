@@ -1,5 +1,5 @@
-#include <string.h>
 #include "datatypes/matrix.h"
+#include <string.h>
 #include "utils/memory_utils.h"
 
 Matrix *matrix_create(size_t height, size_t width)
@@ -11,7 +11,7 @@ Matrix *matrix_create(size_t height, size_t width)
     mat->mat = SAFECALLOC(len, sizeof(LinkedList *));
     mat->height = height;
     mat->width = width;
-    mat->y_capacity = 10;
+    mat->y_capacity = height;
     return mat;
 }
 
@@ -46,7 +46,6 @@ void matrix_add_row(Matrix *mat)
         mat->mat = SAFEREALLOC(mat->mat, sizeof(LinkedList *) *
                                    mat->width * mat->y_capacity);
     }
-
     for (size_t x = 0; x < mat->width; x++)
         matrix_set(mat, x, mat->height, NULL);
     mat->height++;
