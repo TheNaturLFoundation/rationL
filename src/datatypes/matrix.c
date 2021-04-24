@@ -11,7 +11,7 @@ Matrix *matrix_create(size_t height, size_t width)
     mat->mat = SAFECALLOC(len, sizeof(LinkedList *));
     mat->height = height;
     mat->width = width;
-    mat->y_capacity = height;
+    mat->y_capacity = height > 1 ? height : 2;
     return mat;
 }
 
