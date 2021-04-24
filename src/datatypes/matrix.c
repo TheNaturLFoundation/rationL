@@ -7,11 +7,11 @@ Matrix *matrix_create(size_t height, size_t width)
     if (width == 0 || height == 0)
         return NULL;
     Matrix *mat = SAFEMALLOC(sizeof(Matrix));
-    size_t len = height * width;
+    mat->y_capacity = height > 1 ? height : 2;
+    size_t len = mat->y_capacity * width;
     mat->mat = SAFECALLOC(len, sizeof(LinkedList *));
     mat->height = height;
     mat->width = width;
-    mat->y_capacity = height > 1 ? height : 2;
     return mat;
 }
 

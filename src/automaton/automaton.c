@@ -119,6 +119,7 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                 if(start->next == NULL)
                 {
                     size_t i = (epsilon != 0) ? EPSILON_INDEX : value;
+                    list_free(start);
                     matrix_set(automaton->transition_table, 
                         automaton->lookup_table[i], src->id, NULL);
                 }

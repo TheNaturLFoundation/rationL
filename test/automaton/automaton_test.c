@@ -143,6 +143,8 @@ Test(automaton, automaton_add_transition_update_lookup_noEpsilon)
             cr_assert_eq(automaton->lookup_table[i], -1);
         }
     }
+
+    automaton_free(automaton);
 }
 
 Test(automaton, automaton_add_transition_update_lookup_Epsilon)
