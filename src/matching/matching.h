@@ -67,3 +67,8 @@ Array *search_nfa(const Automaton *automaton, const char *string);
  */
 char *replace_nfa(const Automaton *automaton, const char *string,
                   const char *replace);
+
+/**
+ * Frees an allocated `Match` struct
+ */
+void free_match(Match *match);

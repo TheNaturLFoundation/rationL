@@ -259,3 +259,10 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
     list_free(str_queue);
     return max_str;
 }
+
+void free_match(Match *match)
+{
+    if (match != NULL)
+        free(match->groups);
+    free(match);
+}

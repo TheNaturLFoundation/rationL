@@ -49,8 +49,6 @@ Test(matching, abba)
     Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut", 6);
     Match *match;
 
-    // TODO: Free!
-
     // abba
     match = match_nfa(abba, "abba");
     Match expected = {
@@ -61,20 +59,23 @@ Test(matching, abba)
         .groups = NULL
     };
     assert_match_eq(&expected, match);
+    free(match);
 
     // abbaa
     match = match_nfa(abba, "abbaa");
     expected.string = "abbaa";
     assert_match_eq(&expected, match);
-
+    free(match);
 
     // abb
     match = match_nfa(abba, "abb");
     assert_match_eq(NULL, match);
+    free(match);
 
     // empty string
     match = match_nfa(abba, "");
     assert_match_eq(NULL, match);
+    free(match);
 
     automaton_free(abba);
 }
@@ -93,14 +94,17 @@ Test(matching, a_or_b)
         .groups = NULL
     };
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(a_or_b, "abba");
     expected.string = "abba";
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(a_or_b, "b");
     expected.string = "b";
     assert_match_eq(&expected, match);
+    free(match);
 
     assert_match_eq(NULL, match_nfa(a_or_b, "c"));
     assert_match_eq(NULL, match_nfa(a_or_b, "dba"));
@@ -123,33 +127,40 @@ Test(matching, ab_or_cstar)
         .groups = NULL
     };
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(ab_or_cstar, "ca");
     expected.string = "ca";
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(ab_or_cstar, "ab");
     expected.string = "ab";
     expected.length = 2;
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(ab_or_cstar, "ccccccccccccc");
     expected.string = "ccccccccccccc";
     expected.length = 13;
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(ab_or_cstar, "");
     expected.string = "";
     expected.length = 0;
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(ab_or_cstar, "accccccccccccca");
     expected.string = "accccccccccccca";
     assert_match_eq(&expected, match);
+    free(match);
 
     match = match_nfa(ab_or_cstar, "adibou");
     expected.string = "adibou";
     assert_match_eq(&expected, match);
+    free(match);
 
     automaton_free(ab_or_cstar);
 }
