@@ -4,7 +4,7 @@
 #include "automaton/thompson.h"
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
-/*
+
 Test(thompson, null)
 {
     Automaton *aut = thompson(NULL);
@@ -47,6 +47,7 @@ Test(thompson, automaton_a_or_b)
     bintree_free(b);
 }
 
+/*
 Test(thompson, automaton_aabb_or_bbaa_c)
 {
     Array *arr = tokenize("(aabb|bbaa)c");
@@ -59,7 +60,6 @@ Test(thompson, automaton_aabb_or_bbaa_c)
     array_free(arr);
     bintree_free(b);
 }
-
 Test(thompson, automaton_a_star)
 {
     Array *arr = tokenize("a*");
