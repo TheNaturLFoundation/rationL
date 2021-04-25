@@ -45,6 +45,7 @@ automaton_tests_SOURCES = \
 			automaton/thompson_test.c \
 			automaton/matching_test.c \
 			automaton/automaton_test.c \
+			automaton/delete_eps_test.c \
 			automaton/daut_test.c
 
 

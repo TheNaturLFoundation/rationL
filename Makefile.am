@@ -26,7 +26,8 @@ source_files = \
 	src/parsing/lexer.c \
 	src/parsing/parsing.c \
 	src/matching/matching.c \
-	src/automaton/thompson.c
+	src/automaton/thompson.c \
+	src/automaton/delete_eps.c
 
 header_files = \
 	src/automaton/automaton.h \
@@ -38,7 +39,8 @@ header_files = \
 	src/parsing/lexer.h \
 	src/parsing/parsing.h \
 	src/matching/matching.h \
-	src/automaton/thompson.h
+	src/automaton/thompson.h \
+	src/automaton/delete_eps.h
 
 librationl_la_SOURCES = $(source_files) $(header_files)
 

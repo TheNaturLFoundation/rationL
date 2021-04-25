@@ -8,6 +8,10 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
+/*
+    Initialization tests
+*/
+
 Test(automaton, empty_init_dimens)
 {
     Automaton *automaton = Automaton(1, 0);
@@ -31,6 +35,10 @@ Test(automaton, empty_init)
     automaton_free(automaton);
 }
 
+
+/*
+    automaton_add_state tests
+*/
 
 Test(automaton, add_order_update)
 {
@@ -230,10 +238,9 @@ Test(automaton, automaton_add_transition_updata_lookup_multiple)
 
     for (size_t i = 0; i < NUMBER_OF_SYMB; i++)
     {
-        size_t expected = i == EPSILON_INDEX ? 0 : i;
-        cr_assert_eq(automaton->lookup_table[i], expected,
+        cr_assert_eq(automaton->lookup_table[i], i,
                      "Got %d but expected %lu\n", automaton->lookup_table[i],
-                     expected);
+                     i);
     }
 
     automaton_free(automaton);
@@ -733,4 +740,30 @@ Test(automaton, add_after_remove)
     automaton_add_state(automaton, s1, 0);
     cr_assert_eq(1, 1);
     automaton_free(automaton);
+}
+
+/*
+    is_state_entry tests
+*/
+Test(automaton, state_is_entry)
+{
+    Automaton *automaton = Automaton(4, 1);
+    
+    State *s1 = State(0);
+    State *s2 = State(0);
+    State *s3 = State(1);
+    State *s4vj = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_state(automaton, s3, 1);
+    automaton_add_state(automaton, s4vj, 0);
+
+    cr_assert_eq(state_is_entry(automaton, s1), 0);
+    cr_assert_eq(state_is_entry(automaton, s2), 0);
+    cr_assert_eq(state_is_entry(automaton, s3), 1);
+    cr_assert_eq(state_is_entry(automaton, s4vj), 0);
+
+    automaton_free(automaton);
+
 }

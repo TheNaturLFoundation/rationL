@@ -12,7 +12,7 @@
 LinkedList *get_matrix_elt(const Automaton *automaton, size_t state_id,
                            Letter value, int is_epsilon)
 {
-    size_t lookup_index = is_epsilon ? EPSILON_INDEX : value;
+    size_t lookup_index = (is_epsilon != 0) ? EPSILON_INDEX : value;
     int index = automaton->lookup_table[lookup_index];
     if (index == -1)
     {
@@ -20,6 +20,17 @@ LinkedList *get_matrix_elt(const Automaton *automaton, size_t state_id,
     }
 
     return matrix_get(automaton->transition_table, index, state_id);
+}
+
+int state_is_entry(Automaton * automaton, State * s)
+{
+    arr_foreach(State *, entry, automaton->starting_states)
+    {
+        if(entry == s)
+            return 1;
+    }
+
+    return 0;
 }
 
 Automaton *automaton_create(size_t state_count, size_t letter_count)
@@ -114,6 +125,10 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
             if (curr_dst->id == dst->id)
             {
                 trans->previous->next = trans->next;
+                if(trans->next != NULL)
+                {
+                    trans->next->previous = trans->previous;
+                }
                 trans->next = NULL;
                 list_free(trans);
                 if(start->next == NULL)

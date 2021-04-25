@@ -187,3 +187,12 @@ Automaton *automaton_from_daut(const char *filename, size_t size);
  * Prints the dot reprensentation of the automaton in the
  * stdout. */
 void automaton_to_dot(Automaton* aut);
+
+/**
+ * @author Vlad Argatu
+ * @date 25/04/2021
+ * @param automaton: The automaton.
+ * @param s: The State you are looking for.
+ * @return 0 if false, 1 if true.
+ */
+int state_is_entry(Automaton * automaton, State * s);

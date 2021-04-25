@@ -47,10 +47,9 @@ Test(thompson, automaton_a_or_b)
     bintree_free(b);
 }
 
-/*
 Test(thompson, automaton_aabb_or_bbaa_c)
 {
-    Array *arr = tokenize("(aabb|bbaa)c");
+    Array *arr = tokenize("a(aa|bbaa)");
     BinTree *b = parse_symbols(arr);
     Automaton *aut = thompson(b);
     // print_automaton(aut);
@@ -60,6 +59,8 @@ Test(thompson, automaton_aabb_or_bbaa_c)
     array_free(arr);
     bintree_free(b);
 }
+
+
 Test(thompson, automaton_a_star)
 {
     Array *arr = tokenize("a*");
@@ -94,25 +95,12 @@ Test(thompson, automaton_aa_or_bb_star_a_star_b_star_c)
     //tree_to_dot(b);
     Automaton *aut = thompson(b);
     // print_automaton(aut);
-    //automaton_to_dot(aut);
+    // automaton_to_dot(aut);
     // cr_assert_eq(aut->size, 4);
     automaton_free(aut);
     array_free(arr);
     bintree_free(b);
 }
-
-Test(thompson, automaton_a_b_maybe)
-{
-    Array *arr = tokenize("(ab)?");
-    BinTree *b = parse_symbols(arr);
-    //tree_to_dot(b);
-    Automaton *aut = thompson(b);
-    //automaton_to_dot(aut);
-    automaton_free(aut);
-    array_free(arr);
-    bintree_free(b);
-}
-
 
 Test(thompson, automaton_a_b_exists)
 {
@@ -126,6 +114,21 @@ Test(thompson, automaton_a_b_exists)
     bintree_free(b);
 }
 
+
+
+Test(thompson, automaton_a_b_maybe)
+{
+    Array *arr = tokenize("(ab)?");
+    BinTree *b = parse_symbols(arr);
+    //tree_to_dot(b);
+    Automaton *aut = thompson(b);
+    automaton_to_dot(aut);
+    automaton_free(aut);
+    array_free(arr);
+    bintree_free(b);
+}
+
+/*
 Test(thompson, aa_star)
 {
     Array *arr = tokenize("aa*");
