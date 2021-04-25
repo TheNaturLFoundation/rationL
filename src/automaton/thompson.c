@@ -167,13 +167,32 @@ void thompson_recur(BinTree *tree, Automaton *aut)
     }
 }
 
+void count_symbols(BinTree *tree, size_t *size, size_t *letter_count)
+{
+    if(tree->left == NULL && tree->right == NULL)
+    {
+        *letter_count += 1;
+        *size += 1;
+    }
+    else
+    {
+        if (((Symbol *)tree->data)->value.operator != CONCATENATION)
+            *size += 1;
+    }
+    if(tree->left)
+        count_symbols(tree->left, size, letter_count);
+    if(tree->right)
+        count_symbols(tree->right, size, letter_count);
+}
+
 Automaton *thompson(BinTree *tree)
 {
     if (tree == NULL)
         return NULL;
-    // TODO Parser needs to count the number of operators the automaton
-    // can be optimized.
-    Automaton *aut = Automaton(200, 255);
+    size_t size = 0;
+    size_t letter_count = 0;
+    count_symbols(tree, &size, &letter_count);
+    Automaton *aut = Automaton(2*size, letter_count);
     thompson_recur(tree, aut);
     return aut;
 }
