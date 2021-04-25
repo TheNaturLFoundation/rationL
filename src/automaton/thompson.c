@@ -31,7 +31,7 @@ Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
         for (size_t j = 0; j < b->transition_table->width; j++)
         {
             LinkedList *targets = matrix_get(b->transition_table, j, i);
-            if (!list_empty(targets))
+            if(targets != NULL)
             {
                 State *src = *(State **)array_get(states_b_htab, i);
                 list_foreach(State *, dst, targets)
