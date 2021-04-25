@@ -498,9 +498,6 @@ Test(delete_eps, after_easy_thompson)
     Automaton * automaton = automaton_from_daut("automaton/res.daut", 6);
     
     automaton_delete_epsilon_tr(aut);
-
-    automaton_to_dot(aut);
-    automaton_to_dot(automaton);
     
     automaton->lookup_used++;
 
