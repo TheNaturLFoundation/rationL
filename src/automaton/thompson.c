@@ -9,10 +9,16 @@ void concatenate(Automaton *aut)
 {
     State *entry_to_patch = *(State **)array_get(
         aut->starting_states, aut->starting_states->size - 2);
-    State *end_to_patch =
-        *(State **)array_get(aut->states, aut->states->size - 1);
-    automaton_add_transition(aut, end_to_patch, entry_to_patch, 'e', 1);
-    end_to_patch->terminal = 0;
+    for (int i = aut->states->size - 1; i >= 0; i--)
+    {
+        State *end_to_patch = *(State **)array_get(aut->states, i);
+        if (end_to_patch->terminal)
+        {
+            automaton_add_transition(aut, end_to_patch, entry_to_patch, 'e', 1);
+            end_to_patch->terminal = 0;
+            break;
+        }
+    }
     array_remove(aut->starting_states, aut->starting_states->size - 2);
 }
 
@@ -21,21 +27,21 @@ void unite(Automaton *aut)
     State *new_start = State(0);
     State *new_end = State(0);
     State *first_start = *(State **)array_get(aut->starting_states,
-                                                aut->starting_states->size - 1);
+                                              aut->starting_states->size - 1);
     State *second_start = *(State **)array_get(aut->starting_states,
-                                                aut->starting_states->size - 2);
+                                               aut->starting_states->size - 2);
 
     automaton_add_state(aut, new_start, 0);
     automaton_add_state(aut, new_end, 0);
     int count = 0;
     for (int i = aut->states->size - 1; i >= 0; i--)
     {
-        State* state = *(State**) array_get(aut->states, i);
-        if(state->terminal)
+        State *state = *(State **)array_get(aut->states, i);
+        if (state->terminal)
         {
             automaton_add_transition(aut, state, new_end, 'e', 1);
             state->terminal = 0;
-            if(count == 1)
+            if (count == 1)
                 break;
             else
                 count++;
@@ -43,8 +49,8 @@ void unite(Automaton *aut)
     }
     automaton_add_transition(aut, new_start, first_start, 'e', 1);
     automaton_add_transition(aut, new_start, second_start, 'e', 1);
-    array_remove(aut->starting_states, aut->starting_states->size-1);
-    array_set(aut->starting_states, aut->starting_states->size-1, &new_start);
+    array_remove(aut->starting_states, aut->starting_states->size - 1);
+    array_set(aut->starting_states, aut->starting_states->size - 1, &new_start);
     new_end->terminal = 1;
 }
 
@@ -58,8 +64,8 @@ void kleene(Automaton *aut)
     automaton_add_state(aut, new_end, 0);
     for (int i = aut->states->size - 1; i >= 0; i--)
     {
-        State* state = *(State**) array_get(aut->states, i);
-        if(state->terminal)
+        State *state = *(State **)array_get(aut->states, i);
+        if (state->terminal)
         {
             automaton_add_transition(aut, state, current_start, 'e', 1);
             automaton_add_transition(aut, state, new_end, 'e', 1);
@@ -95,13 +101,13 @@ void maybe(Automaton *aut)
     State *new_start = State(0);
     State *new_end = State(0);
     State *start = *(State **)array_get(aut->starting_states,
-                                                aut->starting_states->size - 1);
+                                        aut->starting_states->size - 1);
     automaton_add_state(aut, new_start, 0);
     automaton_add_state(aut, new_end, 0);
     for (int i = aut->states->size - 1; i >= 0; i--)
     {
-        State* state = *(State**) array_get(aut->states, i);
-        if(state->terminal)
+        State *state = *(State **)array_get(aut->states, i);
+        if (state->terminal)
         {
             automaton_add_transition(aut, state, new_end, 'e', 1);
             state->terminal = 0;
@@ -109,7 +115,7 @@ void maybe(Automaton *aut)
         }
     }
     automaton_add_transition(aut, new_start, start, 'e', 1);
-    array_set(aut->starting_states, aut->starting_states->size-1, &new_start);
+    array_set(aut->starting_states, aut->starting_states->size - 1, &new_start);
     new_end->terminal = 1;
     automaton_add_transition(aut, new_start, new_end, 'e', 1);
 }
@@ -165,6 +171,8 @@ Automaton *thompson(BinTree *tree)
 {
     if (tree == NULL)
         return NULL;
+    // TODO Parser needs to count the number of operators the automaton
+    // can be optimized.
     Automaton *aut = Automaton(200, 255);
     thompson_recur(tree, aut);
     return aut;
