@@ -7,7 +7,7 @@
 #include "parsing/parsing.h"
 #include "automaton/delete_eps.h"
 
-#define ASSERT_AUTOMATON_EQ(a1, a2) assert_automaton_eq(__LINE__, a1, a2)
+#define ASSERT_AUTOMATON_EQ(a1, a2) _assert_automaton_eq(__LINE__, a1, a2)
 
 void _assert_list_content(LinkedList * list, size_t n_args, ...)
 {
@@ -118,8 +118,8 @@ void _assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
                  a1->size, a2->size, line);
 
     cr_assert_eq(a1->lookup_used, a2->lookup_used,
-                 "First table has %du different states, "
-                 "second has width %du (line %zu)",
+                 "First table has %d different states, "
+                 "second has width %d (line %zu)",
                  a1->lookup_used, a2->lookup_used, line);
 
     for (Letter c = 0; c < a1->lookup_used; c++)
@@ -398,21 +398,19 @@ Test(delete_eps, automaton_single_delete_epsilon_tr_check_eps_null)
 
     automaton_free(automaton);
 }
-/*
+
 Test(delete_eps, automaton_multiple_delete_epsilon_tr_check_eps_null)
 {
     Automaton * automaton = automaton_from_daut("automaton/multiple_check_delete.daut", 6);
-    Automaton * res = automaton_from_daut("automaton/res.daut", 6);
-    
-    State * s5 = State(0);
-    automaton_add_state(res, s5, 0);
 
     automaton_delete_epsilon_tr(automaton);
-    ASSERT_AUTOMATON_EQ(automaton, res);
+
+    LinkedList * list = get_matrix_elt(automaton, 1, 'e', 1);
+    
+    cr_assert_eq(list, NULL);
 
     automaton_free(automaton);
 }
-*/
 
 Test(delete_eps, corrrect_call_to_transfer)
 {
@@ -437,7 +435,6 @@ Test(delete_eps, corrrect_call_to_transfer)
 Test(delete_eps, could_be_cursed_double_epsilon)
 {
     Automaton * automaton = automaton_from_daut("automaton/cursed.daut", 4);
-    Automaton * automaton_int = automaton_from_daut("automaton/cursed.daut", 4);
 
     automaton_delete_epsilon_tr(automaton);
 
@@ -487,4 +484,30 @@ Test(delete_eps, terminal_redirection)
     cr_assert_eq(test->terminal, 1);
 
     automaton_free(automaton);
+}
+
+/*
+    Application hehehe
+*/
+
+Test(delete_eps, after_easy_thompson)
+{
+    Array *arr = tokenize("ab*");
+    BinTree *b = parse_symbols(arr);
+    Automaton *aut = thompson(b);
+    Automaton * automaton = automaton_from_daut("automaton/res.daut", 6);
+    
+    automaton_delete_epsilon_tr(aut);
+
+    automaton_to_dot(aut);
+    automaton_to_dot(automaton);
+    
+    automaton->lookup_used++;
+
+    ASSERT_AUTOMATON_EQ(automaton, aut);
+
+    automaton_free(aut);
+    automaton_free(automaton);
+    array_free(arr);
+    bintree_free(b);
 }
