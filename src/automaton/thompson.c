@@ -28,21 +28,17 @@ Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
                             remap_entries ? 0 : is_state_entry(b, state_b));
     }
     for (size_t i = 0; i < b->size; i++)
-        for (size_t j = 0; j < NUMBER_OF_SYMB; j++)
+        for (size_t j = 0; j < b->transition_table->width; j++)
         {
-            if(b->lookup_table[j] != -1)
+            LinkedList *targets = matrix_get(b->transition_table, j, i);
+            if (!list_empty(targets))
             {
-                LinkedList *targets = matrix_get(b->transition_table,
-                    b->lookup_table[j], i);
-                if (targets != NULL)
+                State *src = *(State **)array_get(states_b_htab, i);
+                list_foreach(State *, dst, targets)
                 {
-                    State *src = *(State **)array_get(states_b_htab, i);
-                    list_foreach(State *, dst, targets)
-                    {
-                        State *real_dst =
-                            *(State **)array_get(states_b_htab, dst->id);
-                        automaton_add_transition(a, src, real_dst, j, j == EPSILON_INDEX);
-                    }
+                    State *real_dst =
+                        *(State **)array_get(states_b_htab, dst->id);
+                    automaton_add_transition(a, src, real_dst, j, j == 0);
                 }
             }
         }
@@ -79,7 +75,7 @@ State *add_new_entry(Automaton *a)
     automaton_add_state(a, new_entry, 0);
     arr_foreach(State *, entry, a->starting_states)
     {
-       automaton_add_transition(a, new_entry, entry, 'e', 1);
+        automaton_add_transition(a, new_entry, entry, 'e', 1);
     }
     array_clear(a->starting_states);
     array_append(a->starting_states, &new_entry);
