@@ -82,15 +82,18 @@ void kleene(Automaton *aut)
 void exists(Automaton *aut)
 {
     State *new_end = State(0);
-    State *curr_start = *(State **)array_get(aut->starting_states, 0);
+    State *current_start = *(State **)array_get(aut->starting_states,
+                                                aut->starting_states->size - 1);
     automaton_add_state(aut, new_end, 0);
-    automaton_add_transition(aut, new_end, curr_start, 'e', 1);
-    arr_foreach(State *, state, aut->states)
+    automaton_add_transition(aut, new_end, current_start, 'e', 1);
+    for (int i = aut->states->size - 1; i >= 0; i--)
     {
+        State *state = *(State **)array_get(aut->states, i);
         if (state->terminal)
         {
             automaton_add_transition(aut, state, new_end, 'e', 1);
             state->terminal = 0;
+            break;
         }
     }
     new_end->terminal = 1;
