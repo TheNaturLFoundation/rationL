@@ -15,6 +15,15 @@ typedef struct reg_t
     char* pattern;
 } reg_t;
 
+typedef struct match
+{
+    const char *string;
+    size_t start;
+    size_t length;
+    size_t nb_groups;
+    char **groups;
+} match;
+
 reg_t regex_compile(char* pattern)
 {
     Array *arr = tokenize(pattern);
@@ -35,19 +44,24 @@ void regex_free(reg_t re)
     free(re.pattern);
 }
 
-int regex_match(reg_t re, char* str)
+void match_free(match *match)
 {
-    return match_nfa(re.aut, str);
+    free_match((Match *) match);
 }
 
-size_t regex_search(reg_t re, char *str, char **groups[])
+match *regex_match(reg_t re, char* str)
+{
+    return (match *)match_nfa(re.aut, str);
+}
+
+size_t regex_search(reg_t re, char *str, match **groups[])
 {
     Array *arr = search_nfa(re.aut, str);
     size_t n = arr->size;
     *groups = SAFEMALLOC(n * sizeof(char *));
 
     for (size_t i = 0; i < n; i++)
-        (*groups)[i] = *(char **)array_get(arr, i);
+        (*groups)[i] = *(match **)array_get(arr, i);
 
     array_free(arr);
     return n;

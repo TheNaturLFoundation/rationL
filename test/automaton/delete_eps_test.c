@@ -118,8 +118,8 @@ void _assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
                  a1->size, a2->size, line);
 
     cr_assert_eq(a1->lookup_used, a2->lookup_used,
-                 "First table has %d different states, "
-                 "second has width %d (line %zu)",
+                 "First table has %zu different states, "
+                 "second has width %zu (line %zu)",
                  a1->lookup_used, a2->lookup_used, line);
 
     for (Letter c = 0; c < a1->lookup_used; c++)
