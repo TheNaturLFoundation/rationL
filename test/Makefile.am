@@ -45,6 +45,7 @@ matrix_tests_SOURCES = matrix/matrix_test.c
 lexer_tests_SOURCES = lexer/lexer_test.c
 
 automaton_tests_SOURCES = \
+            automaton/utils.c \
 			automaton/thompson_test.c \
 			automaton/matching_test.c \
 			automaton/automaton_test.c \
