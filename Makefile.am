@@ -20,6 +20,7 @@ source_files = \
 	src/automaton/automaton.c \
 	src/datatypes/linked_list.c \
 	src/datatypes/array.c \
+	src/datatypes/map.c \
 	src/datatypes/matrix.c \
 	src/utils/memory_utils.c\
 	src/datatypes/bin_tree.c \
@@ -33,6 +34,7 @@ header_files = \
 	src/automaton/automaton.h \
 	src/datatypes/linked_list.h \
 	src/datatypes/array.h \
+	src/datatypes/map.h \
 	src/datatypes/matrix.h \
 	src/utils/memory_utils.h\
 	src/datatypes/bin_tree.h \

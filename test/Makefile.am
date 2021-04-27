@@ -22,6 +22,7 @@ AM_TESTS_ENVIRONMENT = \
 AUTOMAKE_OPTIONS = serial-tests
 
 check_PROGRAMS = \
+            map_tests \
 			array_tests \
 			bin_tree_tests \
 			linked_list_tests \
@@ -30,6 +31,8 @@ check_PROGRAMS = \
 			automaton_tests \
 			parsing_tests \
 			interface_tests
+
+map_tests_SOURCES = map/map_test.c
 
 array_tests_SOURCES = array/array_test.c
 
