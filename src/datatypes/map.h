@@ -98,11 +98,21 @@ void *map_get(Map *map, void *key);
 /**
  * Associate a value to a key in a hash map.
  * If the key is already in the map, overwrite the value, else add it.
+ * If the load factor exceeds the threshold, expand the map.
  * @param map The map in which to associate the value.
  * @param key A pointer to the key.
  * @param value A pointer to the value.
  */
 void map_set(Map *map, void *key, void *value);
+
+/**
+ * Create the union of two maps, put the result in the first one.
+ * When there is a conflict, the value is overwritten by the value in the source.
+ * If the load factor exceeds the threshold, expand the map.
+ * @param dst The map that wil be modified.
+ * @param src The source map.
+ */
+void map_union(Map *dst, Map *src);
 
 void map_free(Map *map);
 

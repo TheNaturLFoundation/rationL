@@ -73,6 +73,15 @@ void map_set(Map *map, void *key, void *value)
         map_grow(map);
 }
 
+void map_union(Map *dst, Map *src)
+{
+    arr_foreach(LinkedList *, bucket, src->buckets)
+    {
+        list_foreach(MapNode *, node, bucket)
+            map_set(dst, node->key, node->value);
+    }
+}
+
 
 // Hash and comparison functions
 
@@ -170,13 +179,13 @@ static void _map_set(Map *map, void *key, void *value)
     LinkedList *bucket = *(LinkedList **) array_get(map->buckets, index);
 
     list_foreach(MapNode *, node, bucket)
+    {
+        if (map->compare(node->key, key) == 0)
         {
-            if (map->compare(node->key, key) == 0)
-            {
-                memcpy(node->value, value, map->val_size);
-                return;
-            }
+            memcpy(node->value, value, map->val_size);
+            return;
         }
+    }
 
     MapNode *new_node = SAFEMALLOC(sizeof(MapNode));
     new_node->key = SAFEMALLOC(map->key_size);

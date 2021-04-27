@@ -35,6 +35,16 @@ Test(map, map_get_set)
     map_free(map);
 }
 
+Test(map, map_get_not)
+{
+    Map *map = Map(char *, int, &hash_string, &compare_strings);
+
+    char *key = "10";
+    cr_assert_eq(map_get(map, &key), NULL);
+
+    map_free(map);
+}
+
 Test(map, map_set_multiple)
 {
     Map *map = Map(char *, int, &hash_string, &compare_strings);
@@ -96,7 +106,7 @@ Test(map, map_update)
 
 Test(map, map_grow)
 {
-    Map *map = Map(char *, int, &hash_int, &compare_ints);
+    Map *map = Map(int, int, &hash_int, &compare_ints);
 
     size_t i;
     for (i = 0; i < MAP_INITIAL_CAP * MAP_LOAD_FACTOR; i++)
@@ -112,4 +122,61 @@ Test(map, map_grow)
         cr_assert_eq(i, *(int *) map_get(map, &i));
 
     map_free(map);
+}
+
+Test(map, map_union)
+{
+    Map *map1 = Map(int, int, &hash_int, &compare_ints);
+    Map *map2 = Map(int, int, &hash_int, &compare_ints);
+
+    for (int i = 0; i < 3; i++)
+    {
+        int x = i + 1;
+        map_set(map1, &i, &x);
+    }
+    for (int i = 2; i < 5; i++)
+    {
+        int x = i * 2;
+        map_set(map2, &i, &x);
+    }
+
+    map_union(map1, map2);
+
+    cr_assert_eq(map1->size, 5);
+    for (int i = 0; i < 2; i++)
+        cr_assert_eq(*(int *)map_get(map1, &i), i + 1);
+    for (int i = 2; i < 5; i++)
+        cr_assert_eq(*(int *)map_get(map1, &i), i * 2);
+
+    cr_assert_eq(map2->size, 3);
+    for (int i = 2; i < 5; i++)
+        cr_assert_eq(*(int *)map_get(map2, &i), i * 2);
+
+    map_free(map1);
+    map_free(map2);
+}
+
+Test(map, map_union_expand)
+{
+    Map *map1 = Map(int, int, &hash_int, &compare_ints);
+    Map *map2 = Map(int, int, &hash_int, &compare_ints);
+
+    int i;
+    for (i = 0; i < MAP_INITIAL_CAP * MAP_LOAD_FACTOR; i++)
+    {
+        int x = i + 1;
+        map_set(map1, &i, &x);
+    }
+    map_set(map2, &i, &i);
+
+    map_union(map1, map2);
+    cr_assert_eq(map1->size, MAP_INITIAL_CAP * MAP_LOAD_FACTOR + 1);
+    cr_assert_eq(map1->buckets->size, MAP_INITIAL_CAP * MAP_GROWTH_FACTOR);
+
+    for (i = 0; i < MAP_INITIAL_CAP * MAP_LOAD_FACTOR; i++)
+        cr_assert_eq(*(int *)map_get(map1, &i), i + 1);
+    cr_assert_eq(*(int *)map_get(map1, &i), i);
+
+    map_free(map1);
+    map_free(map2);
 }
