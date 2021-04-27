@@ -49,6 +49,7 @@ automaton_tests_SOURCES = \
 			automaton/matching_test.c \
 			automaton/automaton_test.c \
 			automaton/delete_eps_test.c \
+			automaton/prune_test.c \
 			automaton/daut_test.c
 
 
