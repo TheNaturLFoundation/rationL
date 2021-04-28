@@ -29,7 +29,8 @@ source_files = \
 	src/matching/matching.c \
 	src/automaton/thompson.c \
 	src/automaton/prune.c \
-	src/automaton/delete_eps.c
+	src/automaton/delete_eps.c \
+	src/automaton/determine.c
 
 header_files = \
 	src/automaton/automaton.h \
@@ -44,7 +45,8 @@ header_files = \
 	src/matching/matching.h \
 	src/automaton/thompson.h \
 	src/automaton/delete_eps.h \
-	src/automaton/prune.h
+	src/automaton/prune.h \
+	src/automaton/determine.h
 
 librationl_la_SOURCES = $(source_files) $(header_files)
 

@@ -8,8 +8,9 @@
 #define STR_HASH_MAGIC_NUMBER 5381
 #define INT_HASH_MAGIC_NUMBER 0x45d9f3b
 
+
 static void map_grow(Map *map);
-static void _map_set(Map *map, void *key, void *value);
+static void _map_set(Map *map, const void *key, const void *value);
 
 Map *map_init(size_t key_size, size_t val_size,
               uint64_t (*hash)(const void *),
@@ -34,23 +35,37 @@ Map *map_init(size_t key_size, size_t val_size,
     return map;
 }
 
-void map_free(Map *map)
+void map_clear(Map *map)
 {
-    arr_foreach(LinkedList *, list, map->buckets)
+    arr_foreach(LinkedList *, bucket, map->buckets)
     {
-        list_foreach(MapNode *, node, list)
+        list_foreach(MapNode *, node, bucket)
         {
             free(node->key);
             free(node->value);
             free(node);
         }
-        list_free(list);
+        bucket->next = NULL;
+    }
+}
+
+void map_free(Map *map)
+{
+    arr_foreach(LinkedList *, bucket, map->buckets)
+    {
+        list_foreach(MapNode *, node, bucket)
+        {
+            free(node->key);
+            free(node->value);
+            free(node);
+        }
+        list_free(bucket);
     }
     array_free(map->buckets);
     free(map);
 }
 
-void *map_get(Map *map, void *key)
+void *map_get(const Map *map, const void *key)
 {
     size_t index = map->hash(key) % map->buckets->size;
     LinkedList *bucket = *(LinkedList **) array_get(map->buckets, index);
@@ -65,7 +80,7 @@ void *map_get(Map *map, void *key)
 }
 
 
-void map_set(Map *map, void *key, void *value)
+void map_set(Map *map, const void *key, const void *value)
 {
     _map_set(map, key, value);
 
@@ -73,7 +88,7 @@ void map_set(Map *map, void *key, void *value)
         map_grow(map);
 }
 
-void map_union(Map *dst, Map *src)
+void map_union(Map *dst, const Map *src)
 {
     arr_foreach(LinkedList *, bucket, src->buckets)
     {
@@ -85,15 +100,8 @@ void map_union(Map *dst, Map *src)
 
 // Hash and comparison functions
 
-int compare_ints(const void *lhs, const void *rhs)
+static uint64_t hash_number(size_t x)
 {
-    return *(int *)lhs - *(int *)rhs;
-}
-
-uint64_t hash_int(const void *key)
-{
-    int x = *(int *)key;
-
     // I trust the guy from Stack Overflow that
     // calculated the magic number for me.
     // The result should be "nearly as good (not quite) as when using AES".
@@ -102,6 +110,50 @@ uint64_t hash_int(const void *key)
     x = (x >> 16) ^ x;
 
     return x;
+}
+
+int compare_chars(const void *lhs, const void *rhs)
+{
+    return *(char *)lhs - *(char *)rhs;
+}
+
+int compare_uchars(const void *lhs, const void *rhs)
+{
+    unsigned char a = *(unsigned char *)lhs;
+    unsigned char b = *(unsigned char *)rhs;
+
+    return a > b ? 1 : a < b ? -1 : 0;
+}
+
+uint64_t hash_char(const void *key)
+{
+   char x = *(char *)key;
+   return hash_number(x);
+}
+
+int compare_ints(const void *lhs, const void *rhs)
+{
+    return *(int *)lhs - *(int *)rhs;
+}
+
+uint64_t hash_int(const void *key)
+{
+    int x = *(int *)key;
+    return hash_number(x);
+}
+
+int compare_size_t(const void *lhs, const void *rhs)
+{
+    size_t a = *(size_t *)lhs;
+    size_t b = *(size_t *)rhs;
+
+    return a > b ? 1 : a < b ? -1 : 0;
+}
+
+uint64_t hash_size_t(const void *key)
+{
+    size_t x = *(size_t *)key;
+    return hash_number(x);
 }
 
 int compare_strings(const void *lhs, const void *rhs)
@@ -126,7 +178,39 @@ uint64_t hash_string(const void *key)
     unsigned char c;
 
     while ((c = *string++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + x */
+        hash = ((hash << 5) + hash) + c;
+
+    return hash;
+}
+
+int compare_sets(const void *lhs, const void *rhs)
+{
+    const Map *map1 = *(Map **)lhs;
+    const Map *map2 = *(Map **)rhs;
+
+    if (map1->buckets->size != map2->buckets->size)
+        return (int)((long)map1->buckets->size - (long)map2->buckets->size);
+
+    arr_foreach(LinkedList *, bucket, map1->buckets)
+    {
+        list_foreach(MapNode *, node, bucket)
+            if (!map_get(map2, node->key))
+                return 1;
+    }
+
+    return 0;
+}
+
+uint64_t hash_set(const void *set)
+{
+    uint64_t hash = 0;
+
+    const Map *map = *(Map **)set;
+    arr_foreach(LinkedList *, bucket, map->buckets)
+    {
+        list_foreach(MapNode *, node, bucket)
+            hash = ((hash << 5) + hash) + map->hash(node->key);
+    }
 
     return hash;
 }
@@ -173,7 +257,7 @@ static void map_grow(Map *map)
     array_free(buckets);
 }
 
-static void _map_set(Map *map, void *key, void *value)
+static void _map_set(Map *map, const void *key, const void *value)
 {
     size_t index = map->hash(key) % map->buckets->size;
     LinkedList *bucket = *(LinkedList **) array_get(map->buckets, index);

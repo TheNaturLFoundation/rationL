@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stdint.h>
 #include <stdlib.h>
+
 #include "datatypes/array.h"
 #include "datatypes/linked_list.h"
 
@@ -9,8 +11,15 @@
 #define MAP_LOAD_FACTOR 0.75
 
 #define Map(K, V, hash, compare) map_init(sizeof(K), sizeof(V), hash, compare)
-
-
+#define map_foreach_key(T, var, set, body)                                     \
+    arr_foreach(LinkedList *, __##set##_bucket, (set)->buckets)                \
+    {                                                                          \
+        list_foreach(MapNode *, __##set##_node, __##set##_bucket)                \
+        {                                                                      \
+            T(var) = *(T *)__##set##_node->key;                                  \
+            body                                                               \
+        }                                                                      \
+    }
 /**
  * @struct MapNode
  * @brief A simple key-value pair used in a hash map
@@ -74,7 +83,6 @@ typedef struct Map
     float growth_factor;
 } Map;
 
-
 /**
  * Initializes an empty hash map with the default meta parameters.
  * @param key_size The size of the key type.
@@ -87,13 +95,20 @@ Map *map_init(size_t key_size, size_t val_size,
               int (*compare)(const void *, const void *));
 
 /**
+ * Clears and frees all the buckets.
+ * @param map The map to clear.
+ */
+void map_clear(Map *map);
+
+
+/**
  * Returns a pointer to the element associated to the key in the hash map.
  * @param map The map in which to look for the element.
  * @param key A pointer to the key.
  * @return If the key is present in the map, a pointer to the associated value,
  *         else NULL.
  */
-void *map_get(Map *map, void *key);
+void *map_get(const Map *map, const void *key);
 
 /**
  * Associate a value to a key in a hash map.
@@ -103,7 +118,7 @@ void *map_get(Map *map, void *key);
  * @param key A pointer to the key.
  * @param value A pointer to the value.
  */
-void map_set(Map *map, void *key, void *value);
+void map_set(Map *map, const void *key, const void *value);
 
 /**
  * Create the union of two maps, put the result in the first one.
@@ -112,14 +127,38 @@ void map_set(Map *map, void *key, void *value);
  * @param dst The map that wil be modified.
  * @param src The source map.
  */
-void map_union(Map *dst, Map *src);
+void map_union(Map *dst, const Map *src);
 
 void map_free(Map *map);
 
 // Hash and comparison functions
 
+int compare_uchars(const void *lhs, const void *rhs);
+int compare_chars(const void *lhs, const void *rhs);
+uint64_t hash_char(const void *key);
+
 int compare_ints(const void *lhs, const void *rhs);
 uint64_t hash_int(const void *key);
 
+int compare_size_t(const void *lhs, const void *rhs);
+uint64_t hash_size_t(const void *key);
+
 int compare_strings(const void *lhs, const void *rhs);
 uint64_t hash_string(const void *key);
+
+/**
+ * Compare two sets. If the first is less than, equal to, or greater than
+ * the second, return a value respectively less than, equal to, or greater
+ * than 0.
+ * If the two sets have the same size but not the same elements,
+ * the return value can be any non-zero integer.
+ */
+int compare_sets(const void *lhs, const void *rhs);
+uint64_t hash_set(const void *set);
+
+// A set is a map with no values
+
+typedef Map Set;
+
+#define Set(T, hash, compare) map_init(sizeof(T), 0, hash, compare)
+#define set_add(set, key) map_set(set, key, NULL);

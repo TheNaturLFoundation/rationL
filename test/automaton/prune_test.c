@@ -158,7 +158,7 @@ Test(prune, removed_states)
     cr_assert_eq(automaton->size, 7, "Got %lu expected 7", automaton->size);
 
 
-    arr_foreach(State *, s, automaton->states);
+    arr_foreach(State *, s, automaton->states)
     {
         for(size_t i = 0; i < 4; i++)
             cr_assert_neq(s, removed[i], "found node %lu which was supposed to be deleted", 
@@ -174,15 +174,15 @@ Test(flex, flex)
     BinTree *b = parse_symbols(arr);
     Automaton *aut = thompson(b);
     
-    automaton_to_dot(aut);
+    // automaton_to_dot(aut);
 
     automaton_delete_epsilon_tr(aut);
 
-    automaton_to_dot(aut);
+    // automaton_to_dot(aut);
     
     automaton_prune(aut);
 
-    automaton_to_dot(aut);
+    // automaton_to_dot(aut);
 
     automaton_free(aut);
     array_free(arr);
