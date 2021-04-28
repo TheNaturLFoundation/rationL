@@ -128,18 +128,10 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos, size_t *group)
                  (prev_token->value == '|' || prev_token->value == '.'))
             {
                 b->right = parse_sub(arr, pos, group);
-                /*
-                // Check for unary operator
-                if (*pos < arr->size)
-                {
-                Token *tok = array_get(arr, *pos);
-                if (is_unary(tok))
-                return parse_unary(b, arr, pos);
-                }
-                */
                 return b;
             }
-            if (is_binary(next_token))
+
+            if (next_token->value == prev_token->value)
             {
                 Symbol s = array_element_to_symbol(arr, *pos);
                 s.group = *group;
