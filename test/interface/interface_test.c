@@ -48,7 +48,6 @@ Test(interface_test, match_email)
 {
     reg_t email = regex_compile("\\w+(\\.\\w+)?@\\w+(\\.[a-z]{2,})+");
 
-    /*
     match *match;
 
     match = regex_match(email, "rostan.tabet@gmail.com");
@@ -70,7 +69,6 @@ Test(interface_test, match_email)
     match = regex_match(email, "");
     cr_assert_not(match);
     match_free(match);
-    */
 
     regex_free(email);
 }
