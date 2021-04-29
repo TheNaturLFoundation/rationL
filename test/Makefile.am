@@ -56,6 +56,7 @@ automaton_tests_SOURCES = \
 
 
 parsing_tests_SOURCES = \
+			test_utils.c \
 			parsing/binary_basics.c \
 			parsing/binary_more.c \
 			parsing/paranthesis_basics.c \
@@ -64,7 +65,8 @@ parsing_tests_SOURCES = \
 			parsing/paranthesis_unary_more.c \
 			parsing/paranthesis_nested.c \
 			parsing/escaped_characters.c \
-			test_utils.c
+			parsing/unary_basics.c \
+			parsing/groups.c
 
 interface_tests_SOURCES = interface/interface_test.c
 

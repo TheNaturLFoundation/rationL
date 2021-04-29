@@ -3,6 +3,7 @@
 #include "parsing/parsing.h"
 #include "test_utils.h"
 
+
 Test(binary_more, ab_or_cd)
 {
     Array *arr = tokenize("ab|cd");

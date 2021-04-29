@@ -57,7 +57,7 @@ typedef struct Symbol
 {
     SymbolType type;
     SymbolValue value;
-    size_t group;
+    int group;
 } Symbol;
 
 

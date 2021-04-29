@@ -3,52 +3,38 @@
 #include "parsing/parsing.h"
 #include "test_utils.h"
 
+
 Test(unary_basics, a_star)
 {
-    Array *arr = tokenise("a*");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a*");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_star.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_star.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
 Test(unary_basics, ab_star)
 {
-    Array *arr = tokenise("ab*");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("ab*");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/ab_star.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/ab_star.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
 Test(unary_basics, a_star_b)
 {
-    Array *arr = tokenise("a*b");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a*b");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_star_b.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_star_b.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
 Test(unary_basics, a_or_b_star)
 {
-    Array *arr = tokenise("a|b*");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a|b*");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_b_star.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_or_b_star.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }
 
 Test(unary_basics, a_star_or_b)
 {
-    Array *arr = tokenise("a*|b");
-    BinTree *got = parse_symbols(arr);
+    Array *arr = tokenize("a*|b");
+    check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_star_or_b.dot");
     array_free(arr);
-    BinTree *expected = bin_tree_from_dot("expected_trees/a_star_or_b.dot");
-    cr_assert_true(bintree_compare(expected, got));
-    bintree_free(got);
 }

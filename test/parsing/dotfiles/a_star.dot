@@ -1,0 +1,5 @@
+digraph {
+  94050381463840[label="*" xlabel="0" peripheries="2"]
+  94050381463760[label="a" xlabel="0" peripheries="1"]
+  94050381463840  ->  94050381463760
+}
