@@ -20,8 +20,6 @@ Test(groups, left_a_right_left_b_right_left_c_right_left_d_right)
 Test(groups, left_left_a_right_left_b_right_left_c_right_left_d_right_right)
 {
     Array *arr = tokenize("((a)(b)(c)(d))");
-    BinTree *b = parse_symbols(arr);
-    bin_tree_to_dot(b, stdout);
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/left_left_a_right_left_b_right_left_c_right_left_d_right_right.dot");
     array_free(arr);
 }
