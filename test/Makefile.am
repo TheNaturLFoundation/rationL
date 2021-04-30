@@ -52,7 +52,8 @@ automaton_tests_SOURCES = \
 			automaton/delete_eps_test.c \
 			automaton/prune_test.c \
 			automaton/daut_test.c \
-			automaton/determine_test.c
+			automaton/determine_test.c \
+			automaton/minimization_test.c
 
 
 parsing_tests_SOURCES = \
