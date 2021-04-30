@@ -27,13 +27,11 @@ Automaton *transpose(Automaton *source)
     {
         State *old_src = *(State **)(array_get(automaton->states, j));
 
-
         for (size_t letter = 0; letter < 256; letter++)
         {
             list_foreach(State *, old_dst, get_matrix_elt(source, j, letter, letter == 0))
             {
                 automaton_add_transition(automaton, old_dst, old_src, letter, letter == 0);
-
             }
         }
     }
