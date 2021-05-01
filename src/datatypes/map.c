@@ -6,6 +6,7 @@
 #include "utils/memory_utils.h"
 
 #define STR_HASH_MAGIC_NUMBER 5381
+#define INT_HASH_ADD_MAGIC_NUMBER 4355467
 #define INT_HASH_MAGIC_NUMBER 0x45d9f3b
 
 
@@ -102,6 +103,8 @@ void map_union(Map *dst, const Map *src)
 
 static uint64_t hash_number(size_t x)
 {
+    x += INT_HASH_ADD_MAGIC_NUMBER;
+
     // I trust the guy from Stack Overflow that
     // calculated the magic number for me.
     // The result should be "nearly as good (not quite) as when using AES".
@@ -188,8 +191,8 @@ int compare_sets(const void *lhs, const void *rhs)
     const Map *map1 = *(Map **)lhs;
     const Map *map2 = *(Map **)rhs;
 
-    if (map1->buckets->size != map2->buckets->size)
-        return (int)((long)map1->buckets->size - (long)map2->buckets->size);
+    if (map1->size != map2->size)
+        return (int)((long)map1->size - (long)map2->size);
 
     arr_foreach(LinkedList *, bucket, map1->buckets)
     {
