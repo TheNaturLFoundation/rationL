@@ -53,7 +53,8 @@ automaton_tests_SOURCES = \
 			automaton/prune_test.c \
 			automaton/daut_test.c \
 			automaton/determine_test.c \
-			automaton/minimization_test.c
+            automaton/minimization_test.c \
+			automaton/stringify_test.c
 
 
 parsing_tests_SOURCES = \

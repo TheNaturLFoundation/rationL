@@ -31,7 +31,8 @@ source_files = \
 	src/automaton/prune.c \
 	src/automaton/delete_eps.c \
 	src/automaton/determine.c \
-	src/automaton/minimization.c
+	src/automaton/minimization.c \
+    src/automaton/stringify.c
 
 header_files = \
 	src/automaton/automaton.h \
@@ -48,7 +49,8 @@ header_files = \
 	src/automaton/delete_eps.h \
 	src/automaton/prune.h \
 	src/automaton/determine.h \
-	src/automaton/minimization.h
+    src/automaton/minimization.h \
+	src/automaton/stringify.h
 
 librationl_la_SOURCES = $(source_files) $(header_files)
 
