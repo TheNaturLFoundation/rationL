@@ -215,10 +215,10 @@ BinTree *parse_brackets(Array *arr, size_t *pos, int group, int *max_group, int 
         return b;
     }
 
-    if (token->type == PUNCTUATION && is_unary(token))
-    {
+    //if (token->type == PUNCTUATION && is_unary(token))
+    //{
         return parse_unary(b, arr, pos, group);
-    }
+    //}
 }
 
 BinTree *parse_sub(BinTree *b, Array *arr, size_t *pos, int group, int *max_group, int *curr_group)
