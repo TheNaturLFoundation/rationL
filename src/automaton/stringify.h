@@ -8,4 +8,4 @@
  * @return A string representing the regular expression.
  * @warning This is the user's responsibility to free the string.
  */
-char *stringify(const Automaton *automaton);
+char *stringify(Automaton *automaton);

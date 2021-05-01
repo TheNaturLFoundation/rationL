@@ -94,7 +94,7 @@ void array_remove(Array *array, size_t index);
  * @param value: Element to insert.
  * @return the element that was at the specified index.
  */
-void array_insert(Array *array, size_t index, void *value);
+void array_insert(Array *array, size_t index, const void *value);
 
 /**
  * Clears an array. The size is set to 0 but the capacity doesn't change.
