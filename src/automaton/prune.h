@@ -12,7 +12,7 @@
 
  This function should only be used for testing pruposes. 
  */
-void _automaton_prune(Automaton * automaton, State *s, int * access, int * escape);
+size_t _automaton_prune(Automaton * automaton, State * s, size_t * pref, int * escape, State ** higher, size_t * cpt);
 
 /**
  * @author Vlad Argatu
