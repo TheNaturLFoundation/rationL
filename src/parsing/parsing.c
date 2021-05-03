@@ -130,7 +130,13 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos, int group, int *ma
 
         if (next_token->value == '.')
         {
-            b->right = parse_sub(NULL, arr, pos, group, max_group);
+
+            Symbol s = array_element_to_symbol(arr, *pos);
+            s.group = group;
+            *pos+=1;
+            b->right = parse_binary(BinTree(Symbol, &s, .left = NULL, .right = NULL), arr, pos, group, max_group);
+
+            //b->right = parse_sub(NULL, arr, pos, group, max_group);
             return b;
         }
         if (next_token->value == '|')
@@ -139,7 +145,7 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos, int group, int *ma
             s.group = group;
             b->right = BinTree(Symbol, &s, .left = NULL, .right = NULL);
             *pos += 1;
-            return parse_binary(b, arr, pos, group, max_group);
+            return b;//parse_binary(b, arr, pos, group, max_group);
         }
         if (is_unary(next_token))
         {
@@ -197,6 +203,10 @@ BinTree *parse_brackets(Array *arr, size_t *pos, int group, int *max_group)
             {
                 return parse_unary(b, arr, pos, group);
             }
+            if (tok->type == PUNCTUATION && tok->value == '.')
+            {
+                return parse_binary(b, arr, pos, group, max_group);
+            }
         }
 
         return b;
@@ -208,7 +218,30 @@ BinTree *parse_brackets(Array *arr, size_t *pos, int group, int *max_group)
         {
             b = parse_sub(b, arr, pos, group, max_group);
             if (*pos < arr->size)
+            {
                 token = array_get(arr, *pos);
+
+                // Handle closing brackets
+                if (token->type == PUNCTUATION && (token->value == ')' || token->value == '}'))
+                {
+                    group -= 1;
+                    *pos += 1;
+                    if (*pos < arr->size)
+                    {
+                        Token *tok = array_get(arr, *pos);
+                        if (tok->type == PUNCTUATION && is_unary(tok))
+                        {
+                            return parse_unary(b, arr, pos, group);
+                        }
+                        if (tok->type == PUNCTUATION && tok->value == '.')
+                        {
+                            return parse_binary(b, arr, pos, group, max_group);
+                        }
+                    }
+
+                    return b;
+                }
+            }
         }
         return b;
     }
