@@ -200,6 +200,13 @@ void automaton_remove_state(Automaton *automaton, State *state)
                 matrix_set(automaton->transition_table, x, k, list);
             }
         }
+
+        for (size_t x = 0; x < automaton->transition_table->width; x++)
+        {
+            LinkedList *null = NULL;
+            matrix_set(automaton->transition_table, x, automaton->size - 1, null);
+        }
+
             //Then, we change the matrix height and width
         automaton->transition_table->height --;
         /*

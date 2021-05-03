@@ -36,7 +36,7 @@ reg_t regex_compile(char* pattern)
     automaton_delete_epsilon_tr(aut);
     automaton_prune(aut);
     Automaton *minimized = minimize(aut);
-    //automaton_free(aut);
+    automaton_free(aut);
 
     reg_t re;
     re.aut = minimized;
