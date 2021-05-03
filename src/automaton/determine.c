@@ -81,9 +81,9 @@ Automaton *determine(const Automaton *source)
                     {
                         terminal = 1;
                         // map_foreach_key uses two loops, break isn't enough
-                        goto out85;
+                        goto out86;
                     }
-                }) out85:;
+                }) out86:;
                 dst_state = State(terminal);
                 automaton_add_state(automaton, dst_state, 0);
                 map_set(powersets, &set, &dst_state->id);
@@ -101,6 +101,7 @@ Automaton *determine(const Automaton *source)
 
     // The contained sets are either freed or moveed to the powersets map
     // so there is no need to free them.
+    map_clear(state_sets);
     map_free(state_sets);
     free_powersets(powersets);
 
