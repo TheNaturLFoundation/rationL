@@ -14,13 +14,14 @@ Automaton *transpose(Automaton *source)
     arr_foreach(State *, state, source->states)
     {
         int terminal = state->terminal;
-        state->terminal = 0;
-        automaton_add_state(automaton, state, terminal);
+        State *new_state = State(0);
+        automaton_add_state(automaton, new_state, terminal);
     }
 
     arr_foreach(State *, start_state, source->starting_states)
     {
-        start_state->terminal = 1;
+        State *new_state = *(State **)array_get(automaton->states, start_state->id);
+        new_state->terminal = 1;
     }
 
     for(size_t j = 0; j < source->size; j++)
@@ -31,7 +32,8 @@ Automaton *transpose(Automaton *source)
         {
             list_foreach(State *, old_dst, get_matrix_elt(source, j, letter, letter == 0))
             {
-                automaton_add_transition(automaton, old_dst, old_src, letter, letter == 0);
+                State *new_dst = *(State **)array_get(automaton->states, old_dst->id);
+                automaton_add_transition(automaton, new_dst, old_src, letter, letter == 0);
             }
         }
     }

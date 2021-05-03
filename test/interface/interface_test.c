@@ -44,6 +44,13 @@ Test(interface_test, compile)
     regex_free(regexp);
 }
 
+Test(interface_test, read_daut)
+{
+    reg_t regexp = regex_read_daut(TEST_PATH "automaton/sum_mod_3.daut");
+    cr_assert_str_eq(regexp.pattern, "(?:0*|0*10*1(?:(?:0|10*10*1))*10*)");
+    regex_free(regexp);
+}
+
 Test(interface_test, match_email)
 {
     reg_t email = regex_compile("\\w+(\\.\\w+)?@\\w+(\\.[a-z]{2,})+");

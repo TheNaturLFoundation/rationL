@@ -18,6 +18,8 @@ typedef struct match
 
 reg_t regex_compile(char* pattern);
 
+reg_t regex_read_daut(char *path);
+
 match *regex_match(reg_t re, char* str);
 
 size_t regex_search(reg_t re, char *str, match **groups[]);

@@ -96,7 +96,6 @@ Automaton *determine(const Automaton *source)
             }
 
             automaton_add_transition(automaton, src_state, dst_state, value, 0);
-
         });
     }
 

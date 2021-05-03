@@ -6,6 +6,10 @@
 #include "automaton/automaton.h"
 #include "matching/matching.h"
 #include "automaton/thompson.h"
+#include "automaton/delete_eps.h"
+#include "automaton/prune.h"
+#include "automaton/minimization.h"
+#include "automaton/stringify.h"
 #include "parsing/lexer.h"
 #include "parsing/parsing.h"
 
@@ -29,12 +33,32 @@ reg_t regex_compile(char* pattern)
     Array *arr = tokenize(pattern);
     BinTree *tree = parse_symbols(arr);
     Automaton *aut = thompson(tree);
+    automaton_delete_epsilon_tr(aut);
+    automaton_prune(aut);
+    Automaton *minimized = minimize(aut);
+    //automaton_free(aut);
+
     reg_t re;
-    re.aut = aut;
-    re.pattern = malloc((strlen(pattern) + 1) *sizeof(char));
+    re.aut = minimized;
+    re.pattern = malloc((strlen(pattern) + 1) * sizeof(char));
     strcpy(re.pattern, pattern);
     bintree_free(tree);
     array_free(arr);
+    return re;
+}
+
+reg_t regex_read_daut(char *path)
+{
+    Automaton *aut = automaton_from_daut(path, 255);
+    automaton_delete_epsilon_tr(aut);
+    automaton_prune(aut);
+    Automaton *minimized = minimize(aut);
+    automaton_free(aut);
+
+    reg_t re;
+    re.aut = minimized;
+    re.pattern = stringify(minimized);
+
     return re;
 }
 
