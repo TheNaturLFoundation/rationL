@@ -5,7 +5,6 @@
 #include "datatypes/map.h"
 
 static void free_powersets(Map *);
-static void clear_state_sets(Map *sets);
 
 Automaton *determine(const Automaton *source)
 {
@@ -39,7 +38,7 @@ Automaton *determine(const Automaton *source)
         size_t current_id = *(size_t *)map_get(powersets, &current_set);
         State *src_state = *(State **)array_get(automaton->states, current_id);
 
-        clear_state_sets(state_sets);
+        map_clear(state_sets);
         // Initialize the `state_sets` dict
         map_foreach_key(size_t, state_id, current_set, {
             for (Letter c = 0; c < 255; c++)
@@ -91,6 +90,7 @@ Automaton *determine(const Automaton *source)
             }
             else
             {
+                map_free(set);
                 size_t id = *(size_t *)ptr;
                 dst_state = *(State **)array_get(automaton->states, id);
             }
@@ -101,18 +101,10 @@ Automaton *determine(const Automaton *source)
 
     // The contained sets are either freed or moveed to the powersets map
     // so there is no need to free them.
-    map_clear(state_sets);
     map_free(state_sets);
     free_powersets(powersets);
 
     return automaton;
-}
-
-static void clear_state_sets(Map *sets)
-{
-    map_foreach_key(Letter, key, sets,
-                    { Set *value = *(Set **)map_get(sets, &key); });
-    map_clear(sets);
 }
 
 static void free_powersets(Map *powersets)
