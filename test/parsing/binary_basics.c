@@ -57,14 +57,3 @@ Test(binary_basics, a_or_bc)
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_bc.dot");
     array_free(arr);
 }
-
-/*
-Test(binary_basics, tmp)
-{
-    Array *arr = tokenize("a|b|cd|e|f");
-    BinTree *b = parse_symbols(arr);
-    bin_tree_to_dot(b, stdout);
-    bintree_free(b);
-    array_free(arr);
-}
-*/
