@@ -64,7 +64,7 @@ void automaton_delete_epsilon_tr(Automaton * automaton)
                     s->terminal = 1;
                 }
                 
-                if(state_is_entry(automaton, s) == 1)
+                if(state_is_entry(automaton, s) == 1 && state_is_entry(automaton, dst) != 1)
                 {
                    array_append(automaton->starting_states, &dst);
                 }
