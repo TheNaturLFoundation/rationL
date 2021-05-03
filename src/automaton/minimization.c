@@ -43,10 +43,15 @@ Automaton *transpose(Automaton *source)
 
 Automaton *minimize(Automaton *source)
 {
-    source = transpose(source);
-    source = determine(source);
-    source = transpose(source);
-    source = determine(source);
+    Automaton *tr;
+    tr = transpose(source);
+    Automaton *det_tr = determine(tr);
+    automaton_free(tr);
+
+    tr = transpose(det_tr);
+    source = determine(tr);
+    automaton_free(det_tr);
+    automaton_free(tr);
 
     return source;
 }
