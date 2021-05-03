@@ -1,7 +1,7 @@
 SUBDIRS = include . test docs
 EXTRA_DIST = docs test
 AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
-AM_LDFLAGS = -shared -O3
+AM_LDFLAGS = -shared -Ofast
 man3_MANS =	\
 	docs/man/regex_compile.man \
 	docs/man/regex_free.man \

@@ -1,5 +1,6 @@
 #include <stddef.h>
-#include "automaton/automaton.h"
+
+typedef struct Automaton Automaton;
 
 typedef struct reg_t
 {

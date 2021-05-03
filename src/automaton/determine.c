@@ -57,8 +57,7 @@ Automaton *determine(const Automaton *source)
                 else
                     set = *(Set **)ptr;
 
-                list_foreach(State *, next, list)
-                    set_add(set, &next->id);
+                list_foreach(State *, next, list) set_add(set, &next->id);
             }
         });
 
@@ -99,11 +98,13 @@ Automaton *determine(const Automaton *source)
         });
     }
 
+
+    list_free(set_queue);
+
     // The contained sets are either freed or moveed to the powersets map
     // so there is no need to free them.
     map_free(state_sets);
     free_powersets(powersets);
-
     return automaton;
 }
 
