@@ -48,8 +48,6 @@ Automaton *transpose(Automaton *source)
     return automaton;
 }
 
-#include <stdio.h>
-
 void tr(Automaton *source)
 {
     Array *new_transitions = Array(Transition);
@@ -83,12 +81,7 @@ void tr(Automaton *source)
                     transition.old_dst = state_dst->id;
                     transition.letter = i;
                     array_append(new_transitions, &transition);
-
-                    // Remove the old transition
-                    //automaton_remove_transition(source, state_src, state_dst, i, i==0);
                 }
-
-                //list_free(transitions);
             }
         }
     }
@@ -117,6 +110,10 @@ void tr(Automaton *source)
                                  *(State **)array_get(source->states, tr.old_src),
                                  tr.letter, tr.letter==0);
     }
+
+
+    array_free(new_transitions);
+    array_free(new_starting_states);
 }
 
 Automaton *minimize(Automaton *source)
@@ -124,7 +121,7 @@ Automaton *minimize(Automaton *source)
     tr(source);
     Automaton *atm1;
     atm1 = determine(source);
-    //automaton_free(source);
+    tr(source);
 
     tr(atm1);
     Automaton *atm2;
