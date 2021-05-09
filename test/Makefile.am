@@ -54,7 +54,8 @@ automaton_tests_SOURCES = \
 			automaton/daut_test.c \
 			automaton/determine_test.c \
             automaton/minimization_test.c \
-			automaton/stringify_test.c
+			automaton/stringify_test.c \
+			automaton/build_search_dfa_test.c
 
 
 parsing_tests_SOURCES = \

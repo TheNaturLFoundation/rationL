@@ -161,4 +161,4 @@ uint64_t hash_set(const void *set);
 typedef Map Set;
 
 #define Set(T, hash, compare) map_init(sizeof(T), 0, hash, compare)
-#define set_add(set, key) map_set(set, key, NULL);
+#define set_add(set, key) map_set(set, key, NULL)

@@ -31,7 +31,6 @@ Automaton *determine(const Automaton *source)
     list_push_back(set_queue, &start_set);
 
     // Add states until we can't
-    size_t current_index = 0;
     while (!list_empty(set_queue))
     {
         Set *current_set = *(Set **)list_pop_front_value(set_queue);
@@ -59,7 +58,7 @@ Automaton *determine(const Automaton *source)
 
                 list_foreach(State *, next, list) set_add(set, &next->id);
             }
-        });
+        })
 
         // For each set of states, if it does not exist,
         // create a corresponding state and map it.
@@ -95,21 +94,98 @@ Automaton *determine(const Automaton *source)
             }
 
             automaton_add_transition(automaton, src_state, dst_state, value, 0);
-        });
+        })
     }
-
 
     list_free(set_queue);
 
-    // The contained sets are either freed or moveed to the powersets map
+    // The contained sets are either freed or moved to the powersets map
     // so there is no need to free them.
     map_free(state_sets);
     free_powersets(powersets);
     return automaton;
 }
 
+Automaton *build_search_dfa(Automaton *source)
+{
+    Automaton *automaton = automaton_copy(source);
+
+    Letter letter_mapping[automaton->transition_table->width];
+    {
+        size_t index = 0;
+        for (size_t i = 0; i < NUMBER_OF_SYMB; i++)
+            if (automaton->lookup_table[i] != -1)
+                letter_mapping[index++] = i;
+    }
+    int visited[automaton->size];
+    for (size_t i = 0; i < automaton->size; i++)
+        visited[i] = 0;
+
+    LinkedList *curr_stack = LinkedList(State);
+    LinkedList *pref_stack = LinkedList(State);
+
+    State *start = *(State **)array_get(automaton->starting_states, 0);
+    State *curr = start;
+    State *pref = curr;
+    list_push_back(pref_stack, pref);
+    list_push_back(curr_stack, curr);
+    while (!list_empty(pref_stack))
+    {
+        pref = list_pop_value(pref_stack);
+        curr = list_pop_value(curr_stack);
+        visited[curr->id] = 1;
+        // No transition need to be added from terminal states:
+        // a substring match can't fail once it has reached a terminal state.
+        if (curr->terminal)
+            continue;
+
+        for (size_t i = 0; i < automaton->transition_table->width; i++)
+        {
+            Letter letter = letter_mapping[i];
+            LinkedList *pref_list =
+                matrix_get(automaton->transition_table, i, pref->id);
+            LinkedList *curr_list =
+                matrix_get(automaton->transition_table, i, curr->id);
+
+            if (!list_empty(pref_list))
+            {
+                State *pref_dest = *(State **)pref_list->next->data;
+
+                // If there is a transition in the prefix but not
+                // in the current position
+                if (list_empty(curr_list))
+                    automaton_add_transition(automaton, curr, pref_dest, letter,
+                                             0);
+                else
+                {
+                    State *curr_dest = *(State **)curr_list->next->data;
+                    if (visited[curr_dest->id])
+                        continue;
+                    pref_dest =
+                        pref_dest->id != curr_dest->id ? pref_dest : start;
+                    list_push_back(pref_stack, pref_dest);
+                    list_push_back(curr_stack, curr_dest);
+                }
+            }
+            else if (!list_empty(curr_list))
+            {
+                State *curr_dest = *(State **)curr_list->next->data;
+                if (visited[curr_dest->id])
+                    continue;
+                list_push_back(pref_stack, start);
+                list_push_back(curr_stack, curr_dest);
+            }
+        }
+    }
+
+    list_free(pref_stack);
+    list_free(curr_stack);
+
+    return automaton;
+}
+
 static void free_powersets(Map *powersets)
 {
-    map_foreach_key(Set *, set, powersets, map_free(set););
+    map_foreach_key(Set *, set, powersets, map_free(set);)
     map_free(powersets);
 }

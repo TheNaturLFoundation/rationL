@@ -53,7 +53,8 @@ Test(automaton, add_order_update)
 Test(automaton, add_classic_state)
 {
     Automaton *automaton = Automaton(1, 0);
-    State *to_add = State(0) automaton_add_state(automaton, to_add, 0);
+    State *to_add = State(0);
+    automaton_add_state(automaton, to_add, 0);
     cr_assert_eq(to_add->id, 0);
     automaton_free(automaton);
 }

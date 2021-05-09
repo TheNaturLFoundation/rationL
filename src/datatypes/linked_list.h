@@ -10,9 +10,10 @@
     if ((sentinel) != NULL && (sentinel)->next != NULL)                        \
         (var) = *(T *)(sentinel)->next->data;                                  \
     if ((sentinel) != NULL)                                                    \
-    for (LinkedList *_l = (sentinel)->next; _l != NULL;                        \
-         (var) = _l->next == NULL ? *(T *)_l->data : *(T*)_l->next->data,      \
-                    _l = _l->next)
+        for (LinkedList *l_##var = (sentinel)->next; l_##var != NULL;          \
+             (var) = l_##var->next == NULL ? *(T *)l_##var->data               \
+                                           : *(T *)l_##var->next->data,        \
+                        l_##var = l_##var->next)
 
 /**
  * @struct LinkedList

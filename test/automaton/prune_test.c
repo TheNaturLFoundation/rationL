@@ -22,7 +22,7 @@ void _assert_array_content_int(int * arr, size_t n_args, ...)
     for(size_t i = 0; i < n_args; i++)
     {
         elt = va_arg(ptr, int);
-        cr_assert_eq(arr[i], elt , "index: %lu, exepected %d but got %d\n", i, elt, arr[i]);
+        cr_assert_eq(arr[i], elt , "index: %lu, exepected %zu but got %d\n", i, elt, arr[i]);
     }
 }
 

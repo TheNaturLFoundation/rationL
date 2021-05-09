@@ -6,8 +6,8 @@
 
 #define NUMBER_OF_SYMB 257
 #define EPSILON_INDEX 256
-#define Automaton(size, letter_count) automaton_create(size, letter_count);
-#define State(term) state_create(term);
+#define Automaton(size, letter_count) automaton_create(size, letter_count)
+#define State(term) state_create(term)
 
 /**
  * @struct Automaton
@@ -162,6 +162,15 @@ void automaton_add_transition(Automaton * automaton,
 */
 int automaton_remove_transition(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon);
+
+/**
+ * @author Rostan Tabet
+ * @date 09/04/2021
+ * @brief Create a full copy of an automaton.
+ * @param source The source automaton, kept unchanged.
+ * @return A newly created automaton, identical to the source.
+ */
+Automaton *automaton_copy(Automaton *source);
 
 /**
  * @author Vlad Argatu

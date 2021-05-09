@@ -61,14 +61,14 @@ void assert_automaton_eq_(size_t line, Automaton *a1, Automaton *a2)
                  "second has width %zu (line %zu)",
                  a1->lookup_used, a2->lookup_used, line);
 
-    for (Letter c = 0; c < a1->lookup_used; c++)
+    for (size_t c = 0; c < NUMBER_OF_SYMB; c++)
         for (size_t src = 0; src < a1->size; src++)
         {
-            int is_epsilon = src == 0;
-            LinkedList *list1 = get_matrix_elt(a1, src, c, is_epsilon);
-            LinkedList *list2 = get_matrix_elt(a2, src, c, is_epsilon);
+            LinkedList *list1 = get_matrix_elt(a1, src, c, c == EPSILON_INDEX);
+            LinkedList *list2 = get_matrix_elt(a2, src, c, c == EPSILON_INDEX);
             if (list1 == NULL || list2 == NULL)
-                cr_assert_eq(list1, list2, "%p != %p", list1, list2);
+                cr_assert_eq(list1, list2, "%p != %p (line: %zu)",
+                             list1, list2, line);
             else
             {
                 list1 = list1->next;

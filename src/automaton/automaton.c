@@ -3,10 +3,8 @@
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "datatypes/array.h"
-#include "datatypes/bin_tree.h"
 #include "utils/memory_utils.h"
 
 LinkedList *get_matrix_elt(const Automaton *automaton, size_t state_id,
@@ -224,6 +222,43 @@ void automaton_remove_state(Automaton *automaton, State *state)
     automaton->size -= 1;
 
     free(state);
+}
+
+Automaton *automaton_copy(Automaton *source)
+{
+    Automaton *copy = Automaton(source->size, source->transition_table->width);
+
+    {
+        arr_foreach(State *, state, source->states)
+        {
+            State *new_state = State(state->terminal);
+            int is_entry = 0;
+            arr_foreach(State *, starting_state, source->starting_states)
+                if (starting_state->id == state->id)
+                {
+                    is_entry = 1;
+                    break;
+                }
+            automaton_add_state(copy, new_state, is_entry);
+        }
+    }
+
+    for (size_t i = 0; i < NUMBER_OF_SYMB; i++)
+    {
+        for (size_t j = 0; j < source->size; j++)
+        {
+            State *src = *(State **)array_get(copy->states, j);
+            LinkedList *transitions = get_matrix_elt(source, j, i, i == EPSILON_INDEX);
+            list_foreach(State *, old_dest, transitions)
+                {
+                    State *dest = *(State **)array_get(copy->states, old_dest->id);
+                    automaton_add_transition(copy, src, dest, i,
+                                             i == EPSILON_INDEX);
+                }
+        }
+    }
+
+    return copy;
 }
 
 // Helpers for daut conversion
