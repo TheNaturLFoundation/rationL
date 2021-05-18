@@ -125,14 +125,12 @@ Automaton *build_search_dfa(Automaton *source)
     LinkedList *pref_stack = LinkedList(State);
 
     State *start = *(State **)array_get(automaton->starting_states, 0);
-    State *curr = start;
-    State *pref = curr;
-    list_push_back(pref_stack, pref);
-    list_push_back(curr_stack, curr);
+    list_push_back(pref_stack, start);
+    list_push_back(curr_stack, start);
     while (!list_empty(pref_stack))
     {
-        pref = list_pop_value(pref_stack);
-        curr = list_pop_value(curr_stack);
+        State *pref = list_pop_value(pref_stack);
+        State *curr = list_pop_value(curr_stack);
         visited[curr->id] = 1;
         // No transition need to be added from terminal states:
         // a substring match can't fail once it has reached a terminal state.
