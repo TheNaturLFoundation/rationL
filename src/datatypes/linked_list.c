@@ -105,6 +105,9 @@ int list_free(LinkedList *list)
 {
     if (list == NULL)
         return 0;
+    LinkedList *start = list;
+    list = list->next;
+    free(start);
     while (list != NULL)
     {
         LinkedList *next = list->next;

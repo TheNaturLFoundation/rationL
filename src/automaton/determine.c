@@ -115,6 +115,7 @@ Automaton *build_search_dfa(Automaton *source)
 {
     typedef struct context
     {
+        size_t offset;
         State *pref;
         State *curr;
     } context;
@@ -135,7 +136,7 @@ Automaton *build_search_dfa(Automaton *source)
     State *start = *(State **)array_get(aut->starting_states, 0);
     LinkedList *stack = LinkedList(context);
     { // Prevent name conflicts
-        context ctx = { .pref = start, .curr = start };
+        context ctx = { .offset = 0, .pref = start, .curr = start };
         list_push_back(stack, &ctx);
     }
     while (!list_empty(stack))
@@ -162,16 +163,23 @@ Automaton *build_search_dfa(Automaton *source)
                 // If there is a transition in the prefix but not
                 // in the current position, add it at the current position
                 if (list_empty(curr_list))
+                {
                     automaton_add_transition(aut, ctx->curr, pref_dest, letter,
                                              0);
+                    LinkedList *tr =
+                        get_matrix_elt(aut, ctx->curr->id, letter, 0);
+                    tr->data = (void *)(ctx->offset + 1);
+                }
                 else
                 {
                     State *curr_dest = *(State **)curr_list->next->data;
                     if (visited[curr_dest->id])
                         continue;
-                    pref_dest =
-                        pref_dest->id != curr_dest->id ? pref_dest : start;
-                    context c = { .pref = pref_dest, .curr = curr_dest };
+                    int fake = pref_dest->id == curr_dest->id;
+                    pref_dest = fake ? start : pref_dest;
+                    context c = { .offset = ctx->offset + !fake,
+                                  .pref = pref_dest,
+                                  .curr = curr_dest };
                     list_push_back(stack, &c);
                 }
             }
@@ -180,7 +188,7 @@ Automaton *build_search_dfa(Automaton *source)
                 State *curr_dest = *(State **)curr_list->next->data;
                 if (visited[curr_dest->id])
                     continue;
-                context c = { .pref = start, .curr = curr_dest };
+                context c = { .offset = 0, .pref = start, .curr = curr_dest };
                 list_push_back(stack, &c);
             }
         }
