@@ -85,6 +85,22 @@ typedef struct State
     int terminal;
 } State;
 
+
+/**
+ * @struct State
+ * @brief Representation of transiton, used to store maps of transitions.
+ * @author Argatu Vlad
+ * @date 06/02/2021
+ */
+ /*
+typedef struct Transition
+{
+    size_t start;
+    size_t trg;
+    Letter value;
+
+} Transition;
+*/
 /**
  * @author Vlad Argatu
  * @date 07/03/2021

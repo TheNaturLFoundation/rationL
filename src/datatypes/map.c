@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "utils/memory_utils.h"
+#include "automaton/automaton.h"
 
 #define STR_HASH_MAGIC_NUMBER 5381
 #define INT_HASH_ADD_MAGIC_NUMBER 4355467
@@ -283,3 +284,33 @@ static void _map_set(Map *map, const void *key, const void *value)
 
     map->size++;
 }
+/*
+uint64_t hash_transition(const void *key)
+{
+    Transition * tr = key;
+    char * str_tr = NULL;
+    transition_stringify(tr, &str_tr);
+    //transition_stringify allocates str_tr on the stack with the right size.
+    //It translates the transition into an unique string that is 
+    //the hashed
+    uint64_t hash = hash_string(str_tr);
+    free(str_tr);
+    return hash;
+}
+
+int compare_transitions(const void *lhs, const void *rhs)
+{
+    Transition * tr1 = lhs;
+    Transition * tr2 = lhs;
+    char * str_tr1, str_tr2;
+    transition_stringify(tr1, str_tr1);
+    transition_stringify(tr2, str_tr2);
+
+    int result = compare_strings(str_tr1, str_tr2);
+
+    free(str_tr1);
+    free(str_tr2);
+
+    return result;
+}
+*/

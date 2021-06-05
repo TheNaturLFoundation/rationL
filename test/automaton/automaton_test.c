@@ -723,6 +723,38 @@ Test(automaton, automaton_remove_state_check_matrix_size_changed_oversized)
 }
 
 /*
+    Transition stringify test
+*/
+
+/* 
+Test(automaton, transition_stringify_basic)
+{
+    Transition tr = {1, 2, 'c'};
+    char * str_tr;
+    transition_stringify(tr, str_tr);
+    cr_assert_eq(strcmp(str_tr, "(1, 2, c)"), 0);
+    free(str_tr);
+}
+
+Test(automaton, transition_stringify_2_digits)
+{
+    Transition tr = {12, 94, 'c'};
+    char * str_tr;
+    transition_stringify(tr, str_tr);
+    cr_assert_eq(strcmp(str_tr, "(12, 94, c)"), 0);
+    free(str_tr);
+}
+
+Test(automaton, transition_stringify_epsilon)
+{
+    Transition tr = {1, 4, EPSILON_INDEX};
+    char * str_tr;
+    transition_stringify(tr, str_tr);
+    cr_assert_eq(strcmp(str_tr, "(1, 4, eps)"), 0);
+    free(str_tr);
+}
+*/
+/*
     BONUS
 */
 
@@ -768,3 +800,4 @@ Test(automaton, state_is_entry)
     automaton_free(automaton);
 
 }
+
