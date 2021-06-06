@@ -8,6 +8,18 @@
 #include "datatypes/bin_tree.h"
 #include "parsing/parsing.h"
 
+
+/*
+Internal tests
+*/
+
+Test(automaton_internal, count_digits)
+{
+    cr_assert_eq(_digit_count(0), 1);
+    cr_assert_eq(_digit_count(100), 3);
+    cr_assert_eq(_digit_count(589741), 6);
+}
+
 /*
     Initialization tests
 */
@@ -726,34 +738,34 @@ Test(automaton, automaton_remove_state_check_matrix_size_changed_oversized)
     Transition stringify test
 */
 
-/* 
 Test(automaton, transition_stringify_basic)
 {
-    Transition tr = {1, 2, 'c'};
-    char * str_tr;
-    transition_stringify(tr, str_tr);
-    cr_assert_eq(strcmp(str_tr, "(1, 2, c)"), 0);
+    Transition tr = {1, 2, 'c', 0};
+    char * str_tr = transition_stringify(&tr);
+    cr_assert_eq(strcmp(str_tr, "1,2,99"), 0);
     free(str_tr);
 }
 
 Test(automaton, transition_stringify_2_digits)
 {
-    Transition tr = {12, 94, 'c'};
-    char * str_tr;
-    transition_stringify(tr, str_tr);
-    cr_assert_eq(strcmp(str_tr, "(12, 94, c)"), 0);
+    Transition tr = {12, 94, 'c', 0};
+    char * str_tr = transition_stringify(&tr);
+    cr_assert_eq(strcmp(str_tr, "12,94,99"), 0);
     free(str_tr);
 }
 
 Test(automaton, transition_stringify_epsilon)
 {
-    Transition tr = {1, 4, EPSILON_INDEX};
-    char * str_tr;
-    transition_stringify(tr, str_tr);
-    cr_assert_eq(strcmp(str_tr, "(1, 4, eps)"), 0);
+    Transition tr = {1, 4, 'e', 1};
+    char * str_tr = transition_stringify(&tr);
+    char * expected = calloc(_digit_count(EPSILON_INDEX) + 4 + 1, sizeof(char));
+    sprintf(expected, "1,4,%lu", (size_t)EPSILON_INDEX);
+    cr_assert_eq(strcmp(str_tr, expected), 0, "Got %s, expected %s", 
+        str_tr, expected);
+    free(expected);
     free(str_tr);
 }
-*/
+
 /*
     BONUS
 */

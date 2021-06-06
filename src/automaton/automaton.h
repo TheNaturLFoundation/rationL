@@ -92,15 +92,32 @@ typedef struct State
  * @author Argatu Vlad
  * @date 06/02/2021
  */
- /*
+
 typedef struct Transition
 {
-    size_t start;
-    size_t trg;
-    Letter value;
-
+    size_t old_src;
+    size_t old_dst;
+    Letter letter;
+    int is_epsilon;
 } Transition;
+
+/**
+ * @author Vlad Argatu
+ * @date 03/06/2021
+ * @param tr: A transition of an automaton.
+ * @param return An string allocated on the heap which should be freed.
 */
+char * transition_stringify(Transition * tr);
+
+/**
+ * @author Vlad Argatu
+ * @date 05/06/2021
+ * @param n: The number.
+ * @param return The number of digits in n.
+ * Should be used for internal purpose only.
+*/
+size_t _digit_count(size_t n);
+
 /**
  * @author Vlad Argatu
  * @date 07/03/2021
@@ -120,7 +137,7 @@ Automaton * automaton_create();
 
 /**
  * @author Vlad Argatu
- * @data 21/04/2021
+ * @date 21/04/2021
  * @param automatonn: the automaton.
  * @param state_id: the id of the state which is the source of the transition
  * @param value: the character of the transition.

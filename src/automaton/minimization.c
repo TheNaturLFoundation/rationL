@@ -5,13 +5,6 @@
 #include "delete_eps.h"
 #include "prune.h"
 
-typedef struct Transition
-{
-    size_t old_src;
-    size_t old_dst;
-    Letter letter;
-}Transition;
-
 Automaton *transpose(Automaton *source)
 {
     Automaton *automaton = automaton_create(source->size, 256);
@@ -80,6 +73,7 @@ void tr(Automaton *source)
                     transition.old_src = state_src->id;
                     transition.old_dst = state_dst->id;
                     transition.letter = i;
+                    transition.is_epsilon = (i == EPSILON_INDEX);
                     array_append(new_transitions, &transition);
                 }
             }

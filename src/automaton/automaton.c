@@ -462,3 +462,38 @@ void automaton_to_dot(Automaton *aut)
     puts("}");
 }
 // LCOV_EXCL_STOP
+
+/*
+Small function to count the number of digits
+*/
+
+size_t _digit_count(size_t n)
+{
+    if(n == 0)
+        return 1;
+    size_t count = 0;
+    while(n > 0)
+    {
+        n /= 10;
+        count++;
+    }
+
+    return count;
+}
+
+char * transition_stringify(Transition * tr)
+{
+    size_t letter_id = tr->letter;
+    if(tr->is_epsilon != 0)
+    {
+        letter_id = EPSILON_INDEX;
+    }
+    size_t str_len = _digit_count(tr->old_src) +
+        _digit_count(tr->old_dst) +
+        _digit_count(letter_id) +
+        2; // 2 is the number of ',' in the resultant string
+    
+    char * res = SAFECALLOC(str_len + 1, sizeof(char));
+    sprintf(res, "%lu,%lu,%lu", tr->old_src, tr->old_dst, letter_id);
+    return res;
+}
