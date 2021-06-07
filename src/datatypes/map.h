@@ -12,14 +12,27 @@
 
 #define Map(K, V, hash, compare) map_init(sizeof(K), sizeof(V), hash, compare)
 #define map_foreach_key(T, var, set, body)                                     \
+    T var; \
     arr_foreach(LinkedList *, __##set##_bucket, (set)->buckets)                \
     {                                                                          \
         list_foreach(MapNode *, __##set##_node, __##set##_bucket)                \
         {                                                                      \
-            T(var) = *(T *)__##set##_node->key;                                  \
+            var = *(T *)__##set##_node->key;                                  \
             body                                                               \
         }                                                                      \
     }
+
+#define map_foreach_value(VT, var, map, body)                                     \
+    VT var; \
+    arr_foreach(LinkedList *, __##map##_bucket, (map)->buckets)                \
+    {                                                                          \
+        list_foreach(MapNode *, __##map##_node, __##map##_bucket)                \
+        {                                                                      \
+            var = *(VT *)__##map##_node->value;                                  \
+            body                                                               \
+        }                                                                      \
+    }
+
 /**
  * @struct MapNode
  * @brief A simple key-value pair used in a hash map
@@ -145,6 +158,14 @@ uint64_t hash_size_t(const void *key);
 
 int compare_strings(const void *lhs, const void *rhs);
 uint64_t hash_string(const void *key);
+
+/**
+ * Hashes and compares transitions by turning them into strings
+ * and then calling the compare and hash_strings functions.
+*/
+
+uint64_t hash_transition(const void *key);
+int compare_transitions(const void *lhs, const void *rhs);
 
 /**
  * Compare two sets. If the first is less than, equal to, or greater than
