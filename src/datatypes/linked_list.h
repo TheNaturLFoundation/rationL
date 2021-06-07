@@ -131,6 +131,20 @@ LinkedList *list_get(LinkedList *list, ssize_t position);
 
 int list_free(LinkedList *list);
 
+
+/**
+ * Frees the portion of the list starting at the given pointer.
+ * The given pointer will also have its data and address freed.
+ * Please do not use this function on sentinels.
+ * This function should also be the only one used if you want to
+ * free a single LinkedList.
+ * @return 1 if the free is succesful 0 otherwise
+ * @author Vlad Argatu
+ * @date 07/06/2021
+ * */
+
+int list_free_from(LinkedList *list);
+
 /**
  * Pops the list at the end and returns a pointer to the value
  * stored in the list. This pointer will need to be freed manually
