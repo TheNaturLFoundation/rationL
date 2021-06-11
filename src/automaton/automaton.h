@@ -2,6 +2,7 @@
 
 #include "datatypes/array.h"
 #include "datatypes/matrix.h"
+#include "datatypes/map.h"
 #include "parsing/lexer.h"
 
 #define NUMBER_OF_SYMB 257
@@ -64,6 +65,10 @@ typedef struct
 
     int is_determined;
 
+    Map * entering_states;
+
+    Map * leaving_states;
+
 } Automaton;
 
 /**
@@ -99,6 +104,7 @@ typedef struct Transition
     size_t old_dst;
     Letter letter;
     int is_epsilon;
+
 } Transition;
 
 /**
@@ -238,3 +244,33 @@ void automaton_to_dot(Automaton* aut);
  * @return 0 if false, 1 if true.
  */
 int state_is_entry(Automaton * automaton, State * s);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The id of the source of the transition.
+ * @param dst The id of the destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group The number of group that this transition enters.
+ * This functions add the given transition to the map of entering transitions
+ */
+
+void automaton_mark_entering(Automaton * automaton, size_t src_id, size_t dst_id,
+    Letter value, int epsilon, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The id of the source of the transition.
+ * @param dst The id of the destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group The number of group that this transition leaves.
+ * This functions add the given transition to the map of leaving transitions
+ */
+
+void automaton_mark_leaving(Automaton * automaton, size_t src_id, size_t dst_id,
+    Letter value, int epsilon, size_t group);

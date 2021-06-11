@@ -180,3 +180,21 @@ Test(map, map_union_expand)
     map_free(map1);
     map_free(map2);
 }
+
+Test(map, map_delete_basic)
+{
+    Map * map1 = Map(int, int, hash_int, compare_ints);
+    int x = 42;
+    int k = 69;
+
+    map_set(map1, &k, &x);
+    
+    int * r = map_delete(map1, &k);
+
+    cr_assert_eq(map1->size, 0);
+    cr_assert_eq(*r, x);
+
+    free(r);
+
+    map_free(map1);
+}

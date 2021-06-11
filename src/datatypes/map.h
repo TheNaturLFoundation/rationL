@@ -124,6 +124,18 @@ void map_clear(Map *map);
 void *map_get(const Map *map, const void *key);
 
 /**
+ * Returns a pointer to the element associated to the key in the hash map.
+ * This element will be deleted from the hashmap, however the user
+ * has to free the returned pointer because it is allocated by map_set.
+ * @param map The map in which to look for the element.
+ * @param key A pointer to the key.
+ * @return If the key is present in the map, a pointer to the associated value,
+ *         else NULL.
+ */
+
+void * map_delete(Map * map, const void * key);
+
+/**
  * Associate a value to a key in a hash map.
  * If the key is already in the map, overwrite the value, else add it.
  * If the load factor exceeds the threshold, expand the map.

@@ -44,6 +44,10 @@ Automaton *automaton_create(size_t state_count, size_t letter_count)
         autom->lookup_table[i] = -1;
     autom->lookup_used = 0;
     autom->is_determined = 0;
+    
+    autom->entering_states = Map(Transition *, Map *, hash_transition, compare_transitions);
+    autom->leaving_states = Map(Transition *, size_t, hash_string, compare_transitions);
+    
     return autom;
 }
 
@@ -55,8 +59,36 @@ void automaton_free(Automaton *automaton)
     matrix_free(automaton->transition_table);
     array_free(automaton->starting_states);
     free(automaton->lookup_table);
+    
+    Map * cpy = automaton->entering_states;
+    //Need a foreach value in Map
+    map_foreach_value(
+        Map *, set, cpy,
+        {
+            map_free(set);
+        })
+    map_free(automaton->entering_states);
+    map_free(automaton->leaving_states);
+    
     free(automaton);
 }
+
+void _automaton_remove_transition_from_maps(Automaton * automaton, 
+    size_t src_id, size_t dst_id, Letter value,int epsilon)
+{
+    Transition tr = {src_id, dst_id, value, epsilon};
+    Transition * tr_ptr = &tr;
+    
+    Map ** group_set_ptr = map_delete(automaton->entering_states, &tr_ptr);
+    if(group_set_ptr != NULL)
+    {
+        map_free(*group_set_ptr);
+    }
+    free(group_set_ptr);
+
+    free(map_delete(automaton->leaving_states, &tr_ptr));
+}
+
 
 State *state_create(int is_terminal)
 {
@@ -114,6 +146,7 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
     LinkedList *start = get_matrix_elt(automaton, src->id, value, epsilon);
+    _automaton_remove_transition_from_maps(automaton, src->id, dst->id, value, epsilon);
     // Skip the sentinel
     if(start != NULL)
     {
@@ -128,11 +161,11 @@ int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                     trans->next->previous = trans->previous;
                 }
                 trans->next = NULL;
-                list_free(trans);
+                list_free_from(trans);
                 if(start->next == NULL)
                 {
                     size_t i = (epsilon != 0) ? EPSILON_INDEX : value;
-                    list_free(start);
+                    list_free_from(start);
                     matrix_set(automaton->transition_table, 
                         automaton->lookup_table[i], src->id, NULL);
                 }
@@ -496,4 +529,32 @@ char * transition_stringify(Transition * tr)
     char * res = SAFECALLOC(str_len + 1, sizeof(char));
     sprintf(res, "%lu,%lu,%lu", tr->old_src, tr->old_dst, letter_id);
     return res;
+}
+
+void automaton_mark_entering(Automaton * automaton, size_t src_id, size_t dst_id, 
+    Letter value, int epsilon, size_t group)
+{
+    Transition tr = {src_id, dst_id, value, epsilon};
+    Transition * ptr = &tr;
+
+    Map ** set_ptr = map_get(automaton->entering_states, &ptr);
+    Map * set;
+    if(set_ptr == NULL)
+    {
+        set = Set(size_t, hash_size_t, compare_size_t);
+        map_set(automaton->entering_states, &ptr, &set);
+    }
+    else
+    {
+        set = *set_ptr;
+    }
+    set_add(set, &group);
+}
+
+void automaton_mark_leaving(Automaton * automaton, size_t src_id, size_t dst_id,
+    Letter value, int epsilon, size_t group)
+{
+    Transition tr = {src_id, dst_id, value, epsilon};
+    Transition * ptr = &tr;
+    map_set(automaton->leaving_states, &ptr, &group);
 }

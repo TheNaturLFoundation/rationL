@@ -220,8 +220,8 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
         LinkedList *curr_str_list = list_pop_front(str_queue);
         char *curr_str = *(char **)curr_str_list->data;
 
-        list_free(curr_state_list);
-        list_free(curr_str_list);
+        list_free_from(curr_state_list);
+        list_free_from(curr_str_list);
 
         if (curr_state->terminal)
         {

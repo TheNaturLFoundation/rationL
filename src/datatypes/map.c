@@ -81,6 +81,28 @@ void *map_get(const Map *map, const void *key)
     return NULL;
 }
 
+void * map_delete(Map * map, const void * key)
+{
+    size_t index = map->hash(key) % map->buckets->size;
+    LinkedList *bucket = *(LinkedList **) array_get(map->buckets, index);
+    size_t list_index = 0;
+    void *cpy;
+    list_foreach(MapNode *, node, bucket)
+    {
+        if (map->compare(node->key, key) == 0)
+        {
+            cpy = node->value;
+            free(node->key);
+            list_free_from(list_pop_at(bucket, list_index));
+            free(node);
+            map->size--;
+            return cpy;
+        }
+        list_index++;
+    }
+
+    return NULL;
+}
 
 void map_set(Map *map, const void *key, const void *value)
 {
@@ -287,21 +309,21 @@ static void _map_set(Map *map, const void *key, const void *value)
 
 uint64_t hash_transition(const void *key)
 {
-    Transition * tr = (Transition * )key;
+    Transition * tr = *(Transition **)key;
     char * str_tr = transition_stringify(tr);
-    uint64_t hash = hash_string(str_tr);
+    uint64_t hash = hash_string(&str_tr);
     free(str_tr);
     return hash;
 }
 
 int compare_transitions(const void *lhs, const void *rhs)
 {
-    Transition * tr1 = (Transition *)lhs;
-    Transition * tr2 = (Transition *)lhs;
+    Transition * tr1 = *(Transition **)lhs;
+    Transition * tr2 = *(Transition **)lhs;
     char * str_tr1 = transition_stringify(tr1);
     char * str_tr2 = transition_stringify(tr2);
 
-    int result = compare_strings(str_tr1, str_tr2);
+    int result = compare_strings(&str_tr1, &str_tr2);
 
     free(str_tr1);
     free(str_tr2);
