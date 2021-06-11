@@ -570,7 +570,7 @@ Test(automaton, automaton_remove_transition_frees_from_entering)
 
     automaton_remove_transition(automaton, s1, s2, 'L', 0);
 
-    cr_assert_eq(automaton->entering_states->size, 0);
+    cr_assert_eq(automaton->entering_transitions->size, 0);
 
     automaton_free(automaton);
 }
@@ -588,7 +588,7 @@ Test(automaton, automaton_remove_transition_frees_from_leaving)
 
     automaton_remove_transition(automaton, s1, s2, 'L', 0);
 
-    cr_assert_eq(automaton->leaving_states->size, 0);
+    cr_assert_eq(automaton->leaving_transitions->size, 0);
 
     automaton_free(automaton);
 }
@@ -607,8 +607,8 @@ Test(automaton, automaton_remove_transition_frees_from_entering_and_leaving)
 
     automaton_remove_transition(automaton, s1, s2, 'L', 0);
 
-    cr_assert_eq(automaton->entering_states->size, 0);
-    cr_assert_eq(automaton->leaving_states->size, 0);
+    cr_assert_eq(automaton->entering_transitions->size, 0);
+    cr_assert_eq(automaton->leaving_transitions->size, 0);
 
     automaton_free(automaton);
 }
@@ -891,7 +891,7 @@ Test(automaton, mark_entering_basic)
 
     Transition tr = {s1->id, s2->id, 'A', 0};
     Transition * ptr = &tr;
-    Set * res_set = *(Set **)map_get(automaton->entering_states, &ptr);
+    Set * res_set = *(Set **)map_get(automaton->entering_transitions, &ptr);
 
     cr_assert_eq(res_set->size, 1, "Expected 1 element inside the set but got: %lu",
         res_set->size);
@@ -920,7 +920,7 @@ Test(automaton, mark_entering_epsilon)
 
     Transition tr = {s1->id, s2->id, 'A', 1};
     Transition * ptr = &tr;
-    Set * res_set = *(Set **)map_get(automaton->entering_states, &ptr);
+    Set * res_set = *(Set **)map_get(automaton->entering_transitions, &ptr);
 
     cr_assert_eq(res_set->size, 1, "Expected 1 element inside the set but got: %lu",
         res_set->size);
@@ -931,7 +931,7 @@ Test(automaton, mark_entering_epsilon)
 
     tr.is_epsilon = 0;
     
-    cr_assert_eq(map_get(automaton->entering_states, &ptr), NULL);
+    cr_assert_eq(map_get(automaton->entering_transitions, &ptr), NULL);
     
     automaton_free(automaton);
 }
@@ -956,7 +956,7 @@ Test(automaton, mark_entering_multiple_groups)
     Transition tr = {s1->id, s2->id, 'A', 0};
     Transition * ptr = &tr;
 
-    Set * res_set = *(Set **)map_get(automaton->entering_states, &ptr);    
+    Set * res_set = *(Set **)map_get(automaton->entering_transitions, &ptr);    
     cr_assert_eq(res_set->size, 2);
 
     cr_assert_neq(map_get(res_set, &g1), NULL);
@@ -987,9 +987,9 @@ Test(automaton, marking_leaving_basic)
     Transition tr = {s1->id, s2->id, 'A', 0};
     Transition * ptr = &tr;
 
-    size_t res = *(size_t *)map_get(automaton->leaving_states, &ptr);
+    size_t res = *(size_t *)map_get(automaton->leaving_transitions, &ptr);
 
-    cr_assert_eq(automaton->leaving_states->size, 1);
+    cr_assert_eq(automaton->leaving_transitions->size, 1);
     cr_assert_eq(res, g1);
 
     automaton_free(automaton);
@@ -1013,9 +1013,9 @@ Test(automaton, marking_leaving_epsilon)
     Transition tr = {s1->id, s2->id, 'A', 0};
     Transition * ptr = &tr;
 
-    size_t res = *(size_t *)map_get(automaton->leaving_states, &ptr);
+    size_t res = *(size_t *)map_get(automaton->leaving_transitions, &ptr);
 
-    cr_assert_eq(automaton->leaving_states->size, 1);
+    cr_assert_eq(automaton->leaving_transitions->size, 1);
     cr_assert_eq(res, g1);
 
     automaton_free(automaton);

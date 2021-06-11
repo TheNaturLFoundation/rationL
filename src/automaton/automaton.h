@@ -65,9 +65,9 @@ typedef struct
 
     int is_determined;
 
-    Map * entering_states;
+    Map * entering_transitions;
 
-    Map * leaving_states;
+    Map * leaving_transitions;
 
 } Automaton;
 

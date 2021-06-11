@@ -45,8 +45,8 @@ Automaton *automaton_create(size_t state_count, size_t letter_count)
     autom->lookup_used = 0;
     autom->is_determined = 0;
     
-    autom->entering_states = Map(Transition *, Map *, hash_transition, compare_transitions);
-    autom->leaving_states = Map(Transition *, size_t, hash_string, compare_transitions);
+    autom->entering_transitions = Map(Transition *, Map *, hash_transition, compare_transitions);
+    autom->leaving_transitions = Map(Transition *, size_t, hash_string, compare_transitions);
     
     return autom;
 }
@@ -60,15 +60,15 @@ void automaton_free(Automaton *automaton)
     array_free(automaton->starting_states);
     free(automaton->lookup_table);
     
-    Map * cpy = automaton->entering_states;
+    Map * cpy = automaton->entering_transitions;
     //Need a foreach value in Map
     map_foreach_value(
         Map *, set, cpy,
         {
             map_free(set);
         })
-    map_free(automaton->entering_states);
-    map_free(automaton->leaving_states);
+    map_free(automaton->entering_transitions);
+    map_free(automaton->leaving_transitions);
     
     free(automaton);
 }
@@ -79,14 +79,14 @@ void _automaton_remove_transition_from_maps(Automaton * automaton,
     Transition tr = {src_id, dst_id, value, epsilon};
     Transition * tr_ptr = &tr;
     
-    Map ** group_set_ptr = map_delete(automaton->entering_states, &tr_ptr);
+    Map ** group_set_ptr = map_delete(automaton->entering_transitions, &tr_ptr);
     if(group_set_ptr != NULL)
     {
         map_free(*group_set_ptr);
     }
     free(group_set_ptr);
 
-    free(map_delete(automaton->leaving_states, &tr_ptr));
+    free(map_delete(automaton->leaving_transitions, &tr_ptr));
 }
 
 
@@ -537,12 +537,12 @@ void automaton_mark_entering(Automaton * automaton, size_t src_id, size_t dst_id
     Transition tr = {src_id, dst_id, value, epsilon};
     Transition * ptr = &tr;
 
-    Map ** set_ptr = map_get(automaton->entering_states, &ptr);
+    Map ** set_ptr = map_get(automaton->entering_transitions, &ptr);
     Map * set;
     if(set_ptr == NULL)
     {
         set = Set(size_t, hash_size_t, compare_size_t);
-        map_set(automaton->entering_states, &ptr, &set);
+        map_set(automaton->entering_transitions, &ptr, &set);
     }
     else
     {
@@ -556,5 +556,5 @@ void automaton_mark_leaving(Automaton * automaton, size_t src_id, size_t dst_id,
 {
     Transition tr = {src_id, dst_id, value, epsilon};
     Transition * ptr = &tr;
-    map_set(automaton->leaving_states, &ptr, &group);
+    map_set(automaton->leaving_transitions, &ptr, &group);
 }
