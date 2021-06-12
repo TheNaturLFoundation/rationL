@@ -141,11 +141,106 @@ Array *search_nfa(const Automaton *automaton, const char *string)
     return matches;
 }
 
+Array *search_dfa(const Automaton *automaton, const char *string)
+{
+    typedef struct context
+    {
+        State *current_state;
+        const char *current_str;
+    } context;
+
+    Array *matches = Array(Match *);
+
+    context *last_final = NULL;
+    context ctx;
+    State *start = *(State **)array_get(automaton->starting_states, 0);
+    State *curr = start;
+    const char *string_start = string;  // This one won't move
+    const char *match_start = string;
+    while (*string != 0)
+    {
+        LinkedList *tr = get_matrix_elt(automaton, curr->id, *string, 0);
+        if (tr == NULL)
+        {
+            if (last_final != NULL)
+            {
+                string = last_final->current_str;
+                curr = last_final->current_state;
+                last_final = NULL;
+
+                Match *match = SAFEMALLOC(sizeof(Match));
+                match->string = string_start;
+                match->start = match_start - string_start;
+                match->length = string - match_start;
+                // TODO: Fix when groups are supported
+                match->nb_groups = 0;
+                match->groups = NULL;
+                array_append(matches, &match);
+            }
+            else if (curr == start)
+                string++;
+            else
+            {
+                match_start = string;
+                curr = start;
+            }
+
+            continue;
+        }
+        string++;
+        curr = *(State **)tr->next->data;
+        if (tr->data != NULL)
+        {
+            // If a final state was encountered, don't take a back transition
+            // that would move the start of the match
+            if (last_final != NULL)
+            {
+                string = last_final->current_str;
+                curr = last_final->current_state;
+                last_final = NULL;
+
+                Match *match = SAFEMALLOC(sizeof(Match));
+                match->string = string_start;
+                match->start = match_start - string_start;
+                match->length = string - match_start;
+                // TODO: Fix when groups are supported
+                match->nb_groups = 0;
+                match->groups = NULL;
+                array_append(matches, &match);
+                continue;
+            }
+            size_t offset = (size_t)tr->data;
+            match_start = string - offset;
+        }
+        if (curr->terminal)
+        {
+            ctx.current_state = curr;
+            ctx.current_str = string;
+            last_final = &ctx;
+        }
+    }
+
+    if (last_final != NULL)
+    {
+        string = last_final->current_str;
+        Match *match = SAFEMALLOC(sizeof(Match));
+        match->string = string_start;
+        match->start = match_start - string_start;
+        match->length = string - match_start;
+        // TODO: Fix when groups are supported
+        match->nb_groups = 0;
+        match->groups = NULL;
+        array_append(matches, &match);
+    }
+
+    return matches;
+}
 
 char *replace_nfa(const Automaton *automaton, const char *string,
-                   const char *replace)
+                  const char *replace)
 {
-    typedef struct {
+    typedef struct
+    {
         size_t start;
         size_t end;
     } match_bounds;
@@ -175,7 +270,7 @@ char *replace_nfa(const Automaton *automaton, const char *string,
 
     const char *start = string;
     char *final = SAFECALLOC(final_size + 1, sizeof(char));
-    char *result = final;  // Keep a pointer to the head of the string
+    char *result = final; // Keep a pointer to the head of the string
     size_t last_bound = 0;
     arr_foreach(match_bounds, bounds, matches)
     {
@@ -203,7 +298,7 @@ char *replace_nfa(const Automaton *automaton, const char *string,
  * @return The end pointer when the match ends if there is a match, else NULL.
  */
 static char *submatch_nfa_from_state(const Automaton *automaton,
-                                        const char *string, State *start)
+                                     const char *string, State *start)
 {
     char *max_str = NULL;
 
@@ -251,7 +346,8 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
         // Test the current letter
         if (*curr_str != 0)
         {
-            transition = get_matrix_elt(automaton, curr_state->id, *curr_str, 0);
+            transition =
+                get_matrix_elt(automaton, curr_state->id, *curr_str, 0);
             if (transition != NULL)
                 transition = transition->next;
             for (; transition != NULL; transition = transition->next)

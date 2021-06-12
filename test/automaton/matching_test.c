@@ -1,14 +1,15 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
+
 #include "automaton/automaton.h"
+#include "automaton/determine.h"
 #include "automaton/thompson.h"
-#include "datatypes/bin_tree.h"
 #include "datatypes/array.h"
-#include "parsing/parsing.h"
+#include "datatypes/bin_tree.h"
 #include "matching/matching.h"
+#include "parsing/parsing.h"
 
-
-#define assert_match_eq(expected, actual) \
+#define assert_match_eq(expected, actual)                                      \
     assert_match_eq_(expected, actual, __LINE__)
 
 static void assert_match_eq_(Match *expected, Match *actual, size_t line)
@@ -38,9 +39,10 @@ static void assert_match_eq_(Match *expected, Match *actual, size_t line)
 
     for (size_t i = 0; i < expected->nb_groups; i++)
     {
-        cr_assert_eq(expected->groups[i], actual->groups[i],
-                     "match groups at pos %zu: expected '%s', got '%s' (line %zu)",
-                     i, expected->groups[i], actual->groups[i], line);
+        cr_assert_eq(
+            expected->groups[i], actual->groups[i],
+            "match groups at pos %zu: expected '%s', got '%s' (line %zu)", i,
+            expected->groups[i], actual->groups[i], line);
     }
 }
 
@@ -51,13 +53,11 @@ Test(matching, abba)
 
     // abba
     match = match_nfa(abba, "abba");
-    Match expected = {
-        .string = "abba",
-        .start = 0,
-        .length = 4,
-        .nb_groups = 0,
-        .groups = NULL
-    };
+    Match expected = { .string = "abba",
+                       .start = 0,
+                       .length = 4,
+                       .nb_groups = 0,
+                       .groups = NULL };
     assert_match_eq(&expected, match);
     free(match);
 
@@ -87,11 +87,7 @@ Test(matching, a_or_b)
 
     match = match_nfa(a_or_b, "a");
     Match expected = {
-        .string = "a",
-        .start = 0,
-        .length = 1,
-        .nb_groups = 0,
-        .groups = NULL
+        .string = "a", .start = 0, .length = 1, .nb_groups = 0, .groups = NULL
     };
     assert_match_eq(&expected, match);
     free(match);
@@ -115,16 +111,13 @@ Test(matching, a_or_b)
 
 Test(matching, ab_or_cstar)
 {
-    Automaton *ab_or_cstar = automaton_from_daut(TEST_PATH "automaton/ab+cstar.daut", 9);
+    Automaton *ab_or_cstar =
+        automaton_from_daut(TEST_PATH "automaton/ab+cstar.daut", 9);
     Match *match;
 
     match = match_nfa(ab_or_cstar, "c");
     Match expected = {
-        .string = "c",
-        .start = 0,
-        .length = 1,
-        .nb_groups = 0,
-        .groups = NULL
+        .string = "c", .start = 0, .length = 1, .nb_groups = 0, .groups = NULL
     };
     assert_match_eq(&expected, match);
     free(match);
@@ -187,8 +180,7 @@ Test(matching, email)
 
 static void free_matches_array(Array *arr)
 {
-    arr_foreach(Match *, match, arr)
-        free_match(match);
+    arr_foreach(Match *, match, arr) free_match(match);
 
     array_free(arr);
 }
@@ -202,13 +194,11 @@ Test(substring, abba)
     matches = search_nfa(abba, "abba");
     cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
     match = *(Match **)array_get(matches, 0);
-    Match expected = {
-        .string = "abba",
-        .start = 0,
-        .length = 4,
-        .nb_groups = 0,
-        .groups = NULL
-    };
+    Match expected = { .string = "abba",
+                       .start = 0,
+                       .length = 4,
+                       .nb_groups = 0,
+                       .groups = NULL };
     assert_match_eq(&expected, match);
     free_matches_array(matches);
 
@@ -247,13 +237,11 @@ Test(substring, abstara)
     matches = search_nfa(aut, "abba");
     cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
     match = *(Match **)array_get(matches, 0);
-    Match expected = {
-        .string = "abba",
-        .start = 0,
-        .length = 4,
-        .nb_groups = 0,
-        .groups = NULL
-    };
+    Match expected = { .string = "abba",
+                       .start = 0,
+                       .length = 4,
+                       .nb_groups = 0,
+                       .groups = NULL };
     assert_match_eq(&expected, match);
     free_matches_array(matches);
 
@@ -316,6 +304,113 @@ Test(substring, abstara)
 
     automaton_free(aut);
 }
+
+Test(substring_dfa, abcdabd)
+{
+    Automaton *tmp = automaton_from_daut(TEST_PATH "automaton/abcdabd.daut", 7);
+    Automaton *aut = build_search_dfa(tmp);
+    automaton_free(tmp);
+    Array *matches;
+    Match *match;
+
+    matches = search_dfa(aut, "abcdabd");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    Match expected = {
+        .string = "abcdabd",
+        .start = 0,
+        .length = 7,
+        .nb_groups = 0,
+        .groups = NULL,
+    };
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "eaabcdabd");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "eaabcdabd";
+    expected.start = 2;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "ababcdabd");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "ababcdabd";
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "abcabcdabdd");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "abcabcdabdd";
+    expected.start = 3;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "abcdabcdab");
+    cr_assert_eq(matches->size, 0, "expected 0, got %zu", matches->size);
+    free_matches_array(matches);
+
+    automaton_free(aut);
+}
+
+Test(substring_dfa, astar_maybe_bc)
+{
+    Automaton *tmp = automaton_from_daut(TEST_PATH "automaton/a*(bc)?.daut", 7);
+    Automaton *aut = build_search_dfa(tmp);
+    automaton_free(tmp);
+    Array *matches;
+    Match *match;
+
+    matches = search_dfa(aut, "abc");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    Match expected = {
+        .string = "abc",
+        .start = 0,
+        .length = 3,
+        .nb_groups = 0,
+        .groups = NULL,
+    };
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "bbabc");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "bbabc";
+    expected.start = 2;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "aabcaaaabc");
+    cr_assert_eq(matches->size, 2, "expected 2, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "aabcaaaabc";
+    expected.start = 0;
+    expected.length = 4;
+    assert_match_eq(&expected, match);
+    match = *(Match **)array_get(matches, 1);
+    expected.start = 4;
+    expected.length = 6;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "baaabd");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "baaabd";
+    expected.start = 1;
+    expected.length = 3;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    automaton_free(aut);
+}
+
+// --------------------
 
 Test(replace, abstara)
 {

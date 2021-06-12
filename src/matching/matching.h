@@ -57,6 +57,16 @@ Match *match_nfa(const Automaton *automaton, const char *string);
 Array *search_nfa(const Automaton *automaton, const char *string);
 
 /**
+ * Return all matches in a string recognized by a given DFA.
+ * @author Rostan Tabet
+ * @date 28/05/2021
+ * @param automaton Some DFA.
+ * @param string The string to extract substrings from.
+ * @return An array containing all the matches.
+ */
+Array *search_dfa(const Automaton *automaton, const char *string);
+
+/**
  * Replace all substrings of a string recognized by a given NFA by another
  * string.
  * @author Rostan Tabet
