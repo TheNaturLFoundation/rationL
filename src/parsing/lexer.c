@@ -405,7 +405,7 @@ Array *tokenize(const char *string)
                 last_scope.end_index = tokens->size;
                 if (last_scope.start_char == '{')  // Capturing group
                     token.value = '}';
-                list_free(last_scope_node);
+                list_free_from(last_scope_node);
             }
             is_escapable = 1;
         }

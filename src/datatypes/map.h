@@ -12,14 +12,27 @@
 
 #define Map(K, V, hash, compare) map_init(sizeof(K), sizeof(V), hash, compare)
 #define map_foreach_key(T, var, set, body)                                     \
+    T var; \
     arr_foreach(LinkedList *, __##set##_bucket, (set)->buckets)                \
     {                                                                          \
         list_foreach(MapNode *, __##set##_node, __##set##_bucket)                \
         {                                                                      \
-            T(var) = *(T *)__##set##_node->key;                                  \
+            var = *(T *)__##set##_node->key;                                  \
             body                                                               \
         }                                                                      \
     }
+
+#define map_foreach_value(VT, var, map, body)                                     \
+    VT var; \
+    arr_foreach(LinkedList *, __##map##_bucket, (map)->buckets)                \
+    {                                                                          \
+        list_foreach(MapNode *, __##map##_node, __##map##_bucket)                \
+        {                                                                      \
+            var = *(VT *)__##map##_node->value;                                  \
+            body                                                               \
+        }                                                                      \
+    }
+
 /**
  * @struct MapNode
  * @brief A simple key-value pair used in a hash map
@@ -111,6 +124,18 @@ void map_clear(Map *map);
 void *map_get(const Map *map, const void *key);
 
 /**
+ * Returns a pointer to the element associated to the key in the hash map.
+ * This element will be deleted from the hashmap, however the user
+ * has to free the returned pointer because it is allocated by map_set.
+ * @param map The map in which to look for the element.
+ * @param key A pointer to the key.
+ * @return If the key is present in the map, a pointer to the associated value,
+ *         else NULL.
+ */
+
+void * map_delete(Map * map, const void * key);
+
+/**
  * Associate a value to a key in a hash map.
  * If the key is already in the map, overwrite the value, else add it.
  * If the load factor exceeds the threshold, expand the map.
@@ -145,6 +170,9 @@ uint64_t hash_size_t(const void *key);
 
 int compare_strings(const void *lhs, const void *rhs);
 uint64_t hash_string(const void *key);
+
+uint64_t hash_transition(const void *key);
+int compare_transitions(const void *lhs, const void *rhs);
 
 /**
  * Compare two sets. If the first is less than, equal to, or greater than

@@ -118,6 +118,20 @@ int list_free(LinkedList *list)
     return 1;
 }
 
+int list_free_from(LinkedList *list)
+{
+    if (list == NULL)
+        return 0;
+    while (list != NULL)
+    {
+        LinkedList *next = list->next;
+        free(list->data);
+        free(list);
+        list = next;
+    }
+    return 1;
+}
+
 void *list_pop_value(LinkedList* list)
 {
     LinkedList *popped = list_pop(list);

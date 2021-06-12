@@ -2,6 +2,7 @@
 
 #include "datatypes/array.h"
 #include "datatypes/matrix.h"
+#include "datatypes/map.h"
 #include "parsing/lexer.h"
 
 #define NUMBER_OF_SYMB 257
@@ -64,6 +65,10 @@ typedef struct
 
     int is_determined;
 
+    Map * entering_transitions;
+
+    Map * leaving_transitions;
+
 } Automaton;
 
 /**
@@ -85,6 +90,32 @@ typedef struct State
     int terminal;
 } State;
 
+
+/**
+ * @struct State
+ * @brief Representation of transiton, used to store maps of transitions.
+ * @author Argatu Vlad
+ * @date 06/02/2021
+ */
+
+typedef struct Transition
+{
+    size_t old_src;
+    size_t old_dst;
+    Letter letter;
+    int is_epsilon;
+
+} Transition;
+
+/**
+ * @author Vlad Argatu
+ * @date 05/06/2021
+ * @param n: The number.
+ * @param return The number of digits in n.
+ * Should be used for internal purpose only.
+*/
+size_t _digit_count(size_t n);
+
 /**
  * @author Vlad Argatu
  * @date 07/03/2021
@@ -104,7 +135,7 @@ Automaton * automaton_create();
 
 /**
  * @author Vlad Argatu
- * @data 21/04/2021
+ * @date 21/04/2021
  * @param automatonn: the automaton.
  * @param state_id: the id of the state which is the source of the transition
  * @param value: the character of the transition.
@@ -205,3 +236,37 @@ void automaton_to_dot(Automaton* aut);
  * @return 0 if false, 1 if true.
  */
 int state_is_entry(Automaton * automaton, State * s);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group The number of group that this transition enters.
+ * This functions add the given transition to the map of entering transitions
+ * If src or dst is NULL, it is considered to be a transition from or to outside
+ * the automaton.
+ */
+
+void automaton_mark_entering(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group The number of group that this transition leaves.
+ * This functions add the given transition to the map of leaving transitions.
+ * If src or dst is NULL, it is considered to be a transition from or to outside
+ * the automaton.
+ */
+
+void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon, size_t group);

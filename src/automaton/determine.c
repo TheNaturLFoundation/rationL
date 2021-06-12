@@ -36,8 +36,9 @@ Automaton *determine(const Automaton *source)
         Set *current_set = *(Set **)list_pop_front_value(set_queue);
         size_t current_id = *(size_t *)map_get(powersets, &current_set);
         State *src_state = *(State **)array_get(automaton->states, current_id);
-
+        
         map_clear(state_sets);
+        
         // Initialize the `state_sets` dict
         map_foreach_key(
             size_t, state_id, current_set,

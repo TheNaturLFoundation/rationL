@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "utils/memory_utils.h"
+#include "automaton/automaton.h"
 
 #define STR_HASH_MAGIC_NUMBER 5381
 #define INT_HASH_ADD_MAGIC_NUMBER 4355467
@@ -80,6 +81,28 @@ void *map_get(const Map *map, const void *key)
     return NULL;
 }
 
+void * map_delete(Map * map, const void * key)
+{
+    size_t index = map->hash(key) % map->buckets->size;
+    LinkedList *bucket = *(LinkedList **) array_get(map->buckets, index);
+    size_t list_index = 0;
+    void *cpy;
+    list_foreach(MapNode *, node, bucket)
+    {
+        if (map->compare(node->key, key) == 0)
+        {
+            cpy = node->value;
+            free(node->key);
+            list_free_from(list_pop_at(bucket, list_index));
+            free(node);
+            map->size--;
+            return cpy;
+        }
+        list_index++;
+    }
+
+    return NULL;
+}
 
 void map_set(Map *map, const void *key, const void *value)
 {
@@ -282,4 +305,45 @@ static void _map_set(Map *map, const void *key, const void *value)
     list_push_front(bucket, &new_node);
 
     map->size++;
+}
+
+uint64_t hash_transition(const void *key)
+{
+    Transition * tr = (Transition *)key;
+    
+    uint64_t hash = hash_number(tr->old_src);
+    hash += (uint64_t)(tr->old_dst);
+    hash = hash_number((size_t)(hash));
+
+    hash += (uint64_t)(tr->letter);
+    hash = hash_number((size_t)(hash));
+
+    hash += (uint64_t)(tr->is_epsilon);
+    hash = hash_number((size_t)(hash));
+
+    return hash;
+}
+
+int compare_transitions(const void *lhs, const void *rhs)
+{
+    Transition * tr1 = (Transition *)lhs;
+    Transition * tr2 = (Transition *)rhs;
+
+    if(tr1->old_src > tr2->old_src)
+        return 1;
+    if(tr1->old_src < tr2->old_src)
+        return -1;
+    
+    if(tr1->old_dst > tr2->old_dst)
+        return 2;
+    if(tr1->old_dst < tr2->old_dst)
+        return -2;
+
+    if(tr1->letter != tr2->letter)
+        return tr1->letter - tr2->letter;
+    
+    if(tr1->is_epsilon != tr2->is_epsilon)
+        return tr1->is_epsilon - tr2->is_epsilon;
+    
+    return 0;
 }
