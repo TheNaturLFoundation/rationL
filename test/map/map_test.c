@@ -198,3 +198,20 @@ Test(map, map_delete_basic)
 
     map_free(map1);
 }
+
+Test(map, map_delete_not_present)
+{
+    Map * map1 = Map(int, int, hash_int, compare_ints);
+    int x = 42;
+    int k = 69;
+
+    map_set(map1, &k, &x);
+    
+    k = 88;
+    int * r = map_delete(map1, &k);
+
+    cr_assert_eq(map1->size, 1);
+    cr_assert_eq(r, NULL);
+
+    map_free(map1);
+}

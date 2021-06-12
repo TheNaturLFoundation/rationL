@@ -309,10 +309,9 @@ static void _map_set(Map *map, const void *key, const void *value)
 
 uint64_t hash_transition(const void *key)
 {
-    Transition * tr = *(Transition **)key;
+    Transition * tr = (Transition *)key;
     
     uint64_t hash = hash_number(tr->old_src);
-
     hash += (uint64_t)(tr->old_dst);
     hash = hash_number((size_t)(hash));
 
@@ -321,20 +320,24 @@ uint64_t hash_transition(const void *key)
 
     hash += (uint64_t)(tr->is_epsilon);
     hash = hash_number((size_t)(hash));
-    
+
     return hash;
 }
 
 int compare_transitions(const void *lhs, const void *rhs)
 {
-    Transition * tr1 = *(Transition **)lhs;
-    Transition * tr2 = *(Transition **)lhs;
+    Transition * tr1 = (Transition *)lhs;
+    Transition * tr2 = (Transition *)rhs;
 
-    if(tr1->old_src != tr2->old_src)
-        return tr1->old_src - tr2->old_src;
+    if(tr1->old_src > tr2->old_src)
+        return 1;
+    if(tr1->old_src < tr2->old_src)
+        return -1;
     
-    if(tr1->old_dst != tr2->old_dst)
-        return tr1->old_dst - tr2->old_dst;
+    if(tr1->old_dst > tr2->old_dst)
+        return 2;
+    if(tr1->old_dst < tr2->old_dst)
+        return -2;
 
     if(tr1->letter != tr2->letter)
         return tr1->letter - tr2->letter;
