@@ -330,16 +330,17 @@ int compare_transitions(const void *lhs, const void *rhs)
     Transition * tr1 = *(Transition **)lhs;
     Transition * tr2 = *(Transition **)lhs;
 
+    if(tr1->old_src != tr2->old_src)
+        return tr1->old_src - tr2->old_src;
+    
+    if(tr1->old_dst != tr2->old_dst)
+        return tr1->old_dst - tr2->old_dst;
+
+    if(tr1->letter != tr2->letter)
+        return tr1->letter - tr2->letter;
+    
     if(tr1->is_epsilon != tr2->is_epsilon)
-    {
-        if(tr1->is_epsilon != 0)
-        {
-            return 1;
-        }
-        else
-        {
-            return -1;
-        }
-    }
-    return tr1->letter - tr2->letter;
+        return tr1->is_epsilon - tr2->is_epsilon;
+    
+    return 0;
 }
