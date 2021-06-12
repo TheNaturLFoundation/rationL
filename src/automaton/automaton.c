@@ -6,6 +6,7 @@
 
 #include "datatypes/array.h"
 #include "utils/memory_utils.h"
+#include "utils/errors.h"
 
 LinkedList *get_matrix_elt(const Automaton *automaton, size_t state_id,
                            Letter value, int is_epsilon)
@@ -399,41 +400,58 @@ static int map_state(Array *mapping, size_t alias, size_t real)
  * @param line The line from the .daut file.
  * @param mapping An array allowing mapping from states in the .daut file
  * to the actual state numbers in the automaton
+ * @return -1 if there is an errno and sets the naturl_errno accordingly
  */
-static void parse_daut_line(Automaton *automaton, const char *line,
+static int parse_daut_line(Automaton *automaton, const char *line,
                             Array *mapping)
 {
     // Get the source state
     if (!move_to_next(&line))
-        return; // Ignore if empty
+        return 0; // Ignore if empty
 
     char *source_symbol = get_symbol(&line);
     size_t source = atol(source_symbol);
     int is_entry = strcmp(source_symbol, "$") == 0;
+
     if (!is_entry && source == 0 && strcmp(source_symbol, "0") != 0)
-        errx(EXIT_FAILURE, // LCOV_EXCL_LINE
-             "Invalid state: %s: only integers are supported for now",
-             source_symbol); // LCOV_EXCL_LINE
+    {
+        free(source_symbol);
+        rationl_errno = EBADFMT;
+        return -1;
+    }
     free(source_symbol);
 
     // Get the middle arrow
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected '->' after state"); // LCOV_EXCL_LINE
+    {
+        rationl_errno = EBADFMT;
+        return -1;
+    }
     char *arrow_symbol = get_symbol(&line);
     if (strcmp(arrow_symbol, "->") != 0)
-        errx(EXIT_FAILURE, "Expected '->' after state"); // LCOV_EXCL_LINE
+    {
+        free(arrow_symbol);
+        rationl_errno = EBADFMT;
+        return -1;
+    }
     free(arrow_symbol);
 
     // Get the target state
     if (!move_to_next(&line))
-        errx(EXIT_FAILURE, "Expected a target state"); // LCOV_EXCL_LINE
+    {
+        rationl_errno = EBADFMT;
+        return -1;
+    }
+
     char *target_symbol = get_symbol(&line);
     size_t target = atol(target_symbol);
     int is_terminal = strcmp(target_symbol, "$") == 0;
     if (!is_terminal && target == 0 && strcmp(target_symbol, "0") != 0)
-        errx(EXIT_FAILURE, // LCOV_EXCL_LINE
-             "Invalid state: %s: only integers are supported for now",
-             target_symbol); // LCOV_EXCL_LINE
+    {
+        free(target_symbol);
+        rationl_errno = EBADFMT;
+        return -1;
+    }
     free(target_symbol);
 
     // Get the value of the transition
@@ -482,20 +500,26 @@ static void parse_daut_line(Automaton *automaton, const char *line,
     if (!is_terminal && !is_entry)
         automaton_add_transition(automaton, src_state, dst_state, value,
                                  is_epsilon);
+
+    return 0;
 }
 
 Automaton *automaton_from_daut(const char *filename, size_t size)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
-        err(EXIT_FAILURE, "Couldn't open %s", filename); // LCOV_EXCL_LINE
+    {
+        rationl_errno = ENOFILE;
+        return NULL;
+    }
     Automaton *automaton = Automaton(size, NUMBER_OF_SYMB);
 
     char *line = NULL;
     size_t linecap = 0;
     Array *mapping = Array(size_t);
     while (getline(&line, &linecap, file) > 0)
-        parse_daut_line(automaton, line, mapping);
+        if (parse_daut_line(automaton, line, mapping) == -1)
+            return NULL;
     free(line);
     fclose(file);
     array_free(mapping);
