@@ -558,7 +558,7 @@ int automaton_is_transition(Automaton * automaton, State * src, State * dst,
         return _check_state(automaton, dst);
     if(dst == NULL)
         return _check_state(automaton, src);
-        
+
     size_t letter = (epsilon != 0) ? EPSILON_INDEX : value;
     int index = automaton->lookup_table[letter];
     if(index == -1)
@@ -608,4 +608,23 @@ void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
     _check_transiton_in_automaton(automaton, src, dst, value, epsilon);
     Transition tr = _generate_transition(src, dst, value, epsilon);
     map_set(automaton->leaving_transitions, &tr, &group);
+}
+
+Map * get_entering_groups(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon)
+{
+    Transition tr = _generate_transition(src, dst, value, epsilon);
+    Map ** ptr = map_get(automaton->entering_transitions, &tr);
+    
+    if(ptr == NULL)
+        return NULL;
+    
+    return *ptr;
+}
+
+size_t * get_leaving_group(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon)
+{
+    Transition tr = _generate_transition(src, dst, value, epsilon);
+    return map_get(automaton->leaving_transitions, &tr);
 }

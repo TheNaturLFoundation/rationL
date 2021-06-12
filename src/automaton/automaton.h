@@ -274,7 +274,7 @@ void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
  * returns 0 if the transition is in the automaton.
 */
 
-Transition _generate_transition(State * src, State * dst, Letter value,int epsilon);
+Transition _generate_transition(State * src, State * dst, Letter value, int epsilon);
 
 /**
  * @author Vlad Argatu
@@ -288,4 +288,32 @@ Transition _generate_transition(State * src, State * dst, Letter value,int epsil
 */
 
 int automaton_is_transition(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns the resulting set
+*/
+
+Map * get_entering_groups(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
+
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns the resulting size_t
+*/
+size_t * get_leaving_group(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon);
