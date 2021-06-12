@@ -80,6 +80,9 @@ Transition _generate_transition(State * src, State * dst, Letter value,int epsil
     if((dst == NULL) || (src == NULL))
     {
         epsilon = 1;
+    }
+    if(epsilon != 0)
+    {
         value = 0;
     }
 
@@ -160,8 +163,8 @@ void automaton_add_transition(Automaton *automaton, State *src, State *dst,
 int automaton_remove_transition(Automaton *automaton, State *src, State *dst,
                                 Letter value, int epsilon)
 {
-    LinkedList *start = get_matrix_elt(automaton, src->id, value, epsilon);
     _automaton_remove_transition_from_maps(automaton, src, dst, value, epsilon);
+    LinkedList *start = get_matrix_elt(automaton, src->id, value, epsilon);
     // Skip the sentinel
     if(start != NULL)
     {
@@ -206,6 +209,7 @@ void automaton_remove_state(Automaton *automaton, State *state)
 {
     // Remove all transitions pointing to it
     State * src;
+    LinkedList * tr_list;
     for(size_t symb = 0; symb < NUMBER_OF_SYMB; symb ++)
     {
         for(size_t i = 0; i < state->id; i++)
@@ -234,21 +238,24 @@ void automaton_remove_state(Automaton *automaton, State *state)
         antoine++;
     }
 
-    // Remove from states array
-    for (size_t k = state->id + 1; k < automaton->states->size; k++)
-    {
-        State *another_state = *(State **)array_get(automaton->states, k);
-        another_state->id -= 1;
-    }
-
     if(automaton->transition_table != NULL)
     {
         //Deal with matrix
-            //We start by freeing the lists of the line we want to delete
-        for (size_t x = 0; x < automaton->transition_table->width; x++)
-            list_free(matrix_get(automaton->transition_table, x, state->id));
-            
-            //Then, we shift the matrix below the deleted line by one line
+        //We start by freeing the lists of the line we want to delete
+        for (size_t symb = 0; symb < NUMBER_OF_SYMB; symb++)
+        {
+            if(automaton->lookup_table[symb] != -1)
+            {
+                tr_list = matrix_get(automaton->transition_table, automaton->lookup_table[symb], state->id);
+                list_foreach(State *, trg, tr_list)
+                {
+                    _automaton_remove_transition_from_maps(automaton, state, trg, symb, symb == EPSILON_INDEX);
+                }
+                list_free(tr_list);
+            }
+        }
+        
+        //Then, we shift the matrix below the deleted line by one line
         for (size_t k = state->id; k < automaton->states->size - 1; k++)
         {
             for (size_t x = 0; x < automaton->transition_table->width; x++)
@@ -276,6 +283,13 @@ void automaton_remove_state(Automaton *automaton, State *state)
         to be a fixed sized automaton, however the code of add_automaton_allows to go over that
         number
         */
+    }
+
+    // Remove from states array
+    for (size_t k = state->id + 1; k < automaton->states->size; k++)
+    {
+        State *another_state = *(State **)array_get(automaton->states, k);
+        another_state->id -= 1;
     }
 
     array_remove(automaton->states, state->id);
@@ -523,22 +537,10 @@ void automaton_to_dot(Automaton *aut)
 }
 // LCOV_EXCL_STOP
 
-/*
-Small function to count the number of digits
-*/
-
-size_t _digit_count(size_t n)
+int automaton_is_transition(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon)
 {
-    if(n == 0)
-        return 1;
-    size_t count = 0;
-    while(n > 0)
-    {
-        n /= 10;
-        count++;
-    }
-
-    return count;
+    
 }
 
 void automaton_mark_entering(Automaton * automaton, State * src, State * dst, 
