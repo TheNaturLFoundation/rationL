@@ -545,7 +545,6 @@ Test(automaton, automaton_remove_transition_fail3)
 
     automaton_free(automaton);
 }
-
 Test(automaton, automaton_remove_transition_frees_from_entering)
 {
     Automaton *automaton = Automaton(2, 1);
@@ -778,7 +777,6 @@ Test(automaton, automaton_remove_state_check_matrix_size_changed_oversized)
 
     automaton_free(automaton);
 }
-
 Test(automaton, automaton_remove_state_tr_from_leaving_single)
 {
     Automaton *automaton = Automaton(2, 1);
@@ -920,7 +918,6 @@ Test(automaton, automaton_remove_entering_leaving_gettingin_eps)
 
     automaton_free(automaton);
 }
-
 
 Test(automaton, automaton_remove_entry_marked_as_entering)
 {
@@ -1128,6 +1125,7 @@ Test(automaton, mark_entering_multiple_groups)
     automaton_free(automaton);
 }
 
+
 Test(automaton, mark_entering_entry_state)
 {
     Automaton * automaton = Automaton(2, 1);
@@ -1146,7 +1144,6 @@ Test(automaton, mark_entering_entry_state)
 
     automaton_free(automaton);
 }
-
 /*
     mark_leaving test
 */
@@ -1166,10 +1163,10 @@ Test(automaton, marking_leaving_basic)
     automaton_add_transition(automaton, s1, s2, 'A', 0);
     automaton_mark_leaving(automaton, s1, s2, 'A', 0, g1);
 
-    size_t * res = get_leaving_group(automaton, s1, s2, 'A', 0);
+    Map * res = get_leaving_group(automaton, s1, s2, 'A', 0);
 
     cr_assert_eq(automaton->leaving_transitions->size, 1);
-    cr_assert_eq(*res, g1);
+    cr_assert_neq(map_get(res, &g1), NULL);
 
     automaton_free(automaton);
 }
@@ -1189,10 +1186,10 @@ Test(automaton, marking_leaving_epsilon)
     automaton_add_transition(automaton, s1, s2, 'A', 1);
     automaton_mark_leaving(automaton, s1, s2, 'A', 1, g1);
 
-    size_t * res = get_leaving_group(automaton, s1, s2, 'D', 1);
+    Map * res = get_leaving_group(automaton, s1, s2, 'D', 1);
 
     cr_assert_eq(automaton->leaving_transitions->size, 1);
-    cr_assert_eq(*res, g1);
+    cr_assert_neq(map_get(res, &g1), NULL);
 
     automaton_free(automaton);
 }

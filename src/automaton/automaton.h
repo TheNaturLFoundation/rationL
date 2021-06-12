@@ -317,5 +317,5 @@ Map * get_entering_groups(Automaton * automaton, State * src, State * dst,
  * @param epsilon A booleen indicating wether the transition is epsilon or not.
  * returns the resulting size_t
 */
-size_t * get_leaving_group(Automaton * automaton, State * src, State * dst,
+Map * get_leaving_group(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon);

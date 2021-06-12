@@ -1,7 +1,20 @@
 #include "delete_eps.h"
 #include "err.h"
 
-void transfer_all_transitions(Automaton * automaton, State * src, State * new_src)
+void add_entering_groups_to_src(Automaton * automaton, State * src, State * dst, 
+    Letter value, int epsilon, Map * set)
+{
+
+}
+
+void add_leaving_group_to_src(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon, size_t * grp)
+{
+
+}
+
+void transfer_all_transitions(Automaton * automaton, State * src, 
+    State * new_src)
 {
     LinkedList * src_list;
     State * trg;
@@ -40,8 +53,6 @@ void transfer_all_transitions(Automaton * automaton, State * src, State * new_sr
 
 void automaton_delete_epsilon_tr(Automaton * automaton)
 {
-    //TODO
-    //I guess you will be able to do it in place...
     LinkedList * eps_list;
     State * dst;
 
@@ -54,7 +65,7 @@ void automaton_delete_epsilon_tr(Automaton * automaton)
             while(eps_list != NULL)
             {
                 dst = *(State **)eps_list->data;
-
+ 
                 transfer_all_transitions(automaton, dst, s);
                 eps_list = eps_list->next;
                 automaton_remove_transition(automaton, s, dst, 'e', 1);
