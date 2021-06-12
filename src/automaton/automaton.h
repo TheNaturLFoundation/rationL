@@ -215,6 +215,8 @@ void automaton_free(Automaton * automaton);
  * @date 24/03/2021
  * @param filename Path to the .daut file.
  * @param size The number of states in the automaton
+ * @return The new automaton.
+ * If there is an error, return NULL and set errno accordingly.
  */
 Automaton *automaton_from_daut(const char *filename, size_t size);
 
