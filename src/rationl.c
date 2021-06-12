@@ -80,7 +80,12 @@ match *regex_match(reg_t re, char* str)
 
 size_t regex_search(reg_t re, char *str, match **groups[])
 {
-    Array *arr = search_nfa(re.aut, str);
+    Array *arr;
+    if (re.aut->is_determined)
+        arr = search_dfa(re.aut, str);
+    else
+        arr = search_nfa(re.aut, str);
+
     size_t n = arr->size;
     *groups = SAFEMALLOC(n * sizeof(char *));
 

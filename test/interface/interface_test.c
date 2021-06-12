@@ -95,6 +95,9 @@ Test(interface_test, search_numbers)
         .groups = NULL,
     };
 
+    //printf("match 1: '%.*s'\n", (int)matches[0]->length,
+    //       matches[0]->string + matches[0]->start);
+
     expected.start = 1;
     expected.length = 1;
     assert_match_eq(&expected, matches[0]);

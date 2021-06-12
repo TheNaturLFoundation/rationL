@@ -155,7 +155,7 @@ Array *search_dfa(const Automaton *automaton, const char *string)
     context ctx;
     State *start = *(State **)array_get(automaton->starting_states, 0);
     State *curr = start;
-    const char *string_start = string;  // This one won't move
+    const char *string_start = string; // This one won't move
     const char *match_start = string;
     while (*string != 0)
     {
@@ -177,12 +177,13 @@ Array *search_dfa(const Automaton *automaton, const char *string)
                 match->groups = NULL;
                 array_append(matches, &match);
             }
-            else if (curr == start)
-                string++;
             else
             {
+                if (curr == start)
+                    string++;
+                else
+                    curr = start;
                 match_start = string;
-                curr = start;
             }
 
             continue;

@@ -410,6 +410,37 @@ Test(substring_dfa, astar_maybe_bc)
     automaton_free(aut);
 }
 
+Test(substring_dfa, astar)
+{
+    Automaton *tmp = automaton_from_daut(TEST_PATH "automaton/a*.daut", 1);
+    Automaton *aut = build_search_dfa(tmp);
+    automaton_free(tmp);
+    Array *matches;
+    Match *match;
+
+    matches = search_dfa(aut, "a");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    Match expected = {
+        .string = "a",
+        .start = 0,
+        .length = 1,
+        .nb_groups = 0,
+        .groups = NULL,
+    };
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    matches = search_dfa(aut, "baaab");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    expected.string = "baaab";
+    expected.start = 1;
+    expected.length = 3;
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+}
+
 // --------------------
 
 Test(replace, abstara)
