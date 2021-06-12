@@ -949,7 +949,7 @@ Test(automaton, automaton_remove_entry_marked_as_entering_multiple)
 
     automaton_add_state(automaton, s1, 1);
     automaton_add_state(automaton, s2, 0);
-   // automaton_add_transition(automaton, s2, s1, '0', 1);
+    automaton_add_transition(automaton, s2, s1, '3', 1);
 
     automaton_mark_entering(automaton, NULL, s1, '0', 1, 4);
     automaton_mark_entering(automaton, s2, s1, '0', 1, 4);
@@ -1215,18 +1215,44 @@ Test(automaton, marking_leaving_epsilon)
 /*
     Test automaton_is_transition
 */
-/*
-Test(automaton, automaton_is_transition_true_not_eps)
+
+Test(automaton, automaton_is_transition)
 {
-    Automaton *automaton = Automaton(2, 1);
+    Automaton *automaton = Automaton(4, 3);
     
     State *s1 = State(0);
     State *s2 = State(0);
     State *s3 = State(0);
     State *s4 = State(0);
 
+    State * s5 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_state(automaton, s3, 0);
+    automaton_add_state(automaton, s4, 0);
+
     automaton_add_transition(automaton, s1, s2, 'A', 0);
     automaton_add_transition(automaton, s2, s4, 'A', 1);
     automaton_add_transition(automaton, s3, s2, 'G', 0);
+
+    //State is not in:
+    cr_assert_eq(automaton_is_transition(automaton, s5, s1, 'A', 0), 0);
+    cr_assert_eq(automaton_is_transition(automaton, s1, s5, 'A', 0), 0);
+    cr_assert_eq(automaton_is_transition(automaton, s5, s1, 'A', 1), 0);
+
+
+    //Transition Letter does not exist:
+    cr_assert_eq(automaton_is_transition(automaton, s1, s2, 'L', 0), 0);
+    cr_assert_eq(automaton_is_transition(automaton, s3, s2, 'M', 0), 0);
+    cr_assert_eq(automaton_is_transition(automaton, s1, s2, 'A', 1), 0);
+
+    //Transition is in not_epsilon
+    cr_assert_eq(automaton_is_transition(automaton, s1, s2, 'A', 0), 1);
+
+    //Transition is in epsilon
+    cr_assert_eq(automaton_is_transition(automaton, s2, s4, 'L', 1), 1);
+
+    free(s5);
+    automaton_free(automaton);
 }
-*/

@@ -284,7 +284,7 @@ Transition _generate_transition(State * src, State * dst, Letter value,int epsil
  * @param dst The destination of the transition.
  * @param value The value of the transiton. Note that this is ignored of epsilon is set.
  * @param epsilon A booleen indicating wether the transition is epsilon or not.
- * returns 0 if the transition is in the automaton.
+ * returns 1 if the transition is in the automaton 0 otherwise.
 */
 
 int automaton_is_transition(Automaton * automaton, State * src, State * dst,

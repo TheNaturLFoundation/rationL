@@ -537,15 +537,56 @@ void automaton_to_dot(Automaton *aut)
 }
 // LCOV_EXCL_STOP
 
+int _check_state(Automaton * automaton, State * s)
+{
+    int is_in = 0;
+    arr_foreach(State *, state, automaton->states)
+    {
+        if(state == s)
+        {
+            is_in = 1;
+            break;
+        }
+    }
+    return is_in;
+}
+
 int automaton_is_transition(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon)
 {
+    if(src == NULL)
+        return _check_state(automaton, dst);
+    if(dst == NULL)
+        return _check_state(automaton, src);
+        
+    size_t letter = (epsilon != 0) ? EPSILON_INDEX : value;
+    int index = automaton->lookup_table[letter];
+    if(index == -1)
+        return 0;
     
+    if(_check_state(automaton, src) != 1 || _check_state(automaton, dst) != 1)
+        return 0;
+
+    LinkedList * list = matrix_get(automaton->transition_table, index, src->id);
+    list_foreach(State *, pdst, list)
+    {
+        if(pdst == dst)
+            return 1;
+    }
+    return 0;
+}
+
+void _check_transiton_in_automaton(Automaton * automaton, State * src, State * dst, 
+    Letter value, int epsilon)
+{
+    if(automaton_is_transition(automaton, src, dst, value, epsilon) != 1)
+        errx(1, "You know what ? shit happens");
 }
 
 void automaton_mark_entering(Automaton * automaton, State * src, State * dst, 
     Letter value, int epsilon, size_t group)
 {
+    _check_transiton_in_automaton(automaton, src, dst, value, epsilon);
     Transition tr = _generate_transition(src, dst, value, epsilon);
     Map ** set_ptr = map_get(automaton->entering_transitions, &tr);
     Map * set;
@@ -564,6 +605,7 @@ void automaton_mark_entering(Automaton * automaton, State * src, State * dst,
 void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon, size_t group)
 {
+    _check_transiton_in_automaton(automaton, src, dst, value, epsilon);
     Transition tr = _generate_transition(src, dst, value, epsilon);
     map_set(automaton->leaving_transitions, &tr, &group);
 }
