@@ -17,7 +17,7 @@ compile_commands.json
 *.stamp
 *.log
 *.trs
-
+*.pc
 #Weird tmp files
 *~
 
