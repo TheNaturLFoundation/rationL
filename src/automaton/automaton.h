@@ -109,15 +109,6 @@ typedef struct Transition
 
 /**
  * @author Vlad Argatu
- * @date 05/06/2021
- * @param n: The number.
- * @param return The number of digits in n.
- * Should be used for internal purpose only.
-*/
-size_t _digit_count(size_t n);
-
-/**
- * @author Vlad Argatu
  * @date 07/03/2021
  * @param is_terminal: booleen indicating if the state is terminal or not.
  * @return The heap allocated state.
@@ -272,3 +263,31 @@ void automaton_mark_entering(Automaton * automaton, State * src, State * dst,
 
 void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon, size_t group);
+
+
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns 0 if the transition is in the automaton.
+*/
+
+Transition _generate_transition(State * src, State * dst, Letter value,int epsilon);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns 1 if the transition is in the automaton 0 otherwise.
+*/
+
+int automaton_is_transition(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
