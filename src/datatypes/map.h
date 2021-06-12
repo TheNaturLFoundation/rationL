@@ -171,11 +171,6 @@ uint64_t hash_size_t(const void *key);
 int compare_strings(const void *lhs, const void *rhs);
 uint64_t hash_string(const void *key);
 
-/**
- * Hashes and compares transitions by turning them into strings
- * and then calling the compare and hash_strings functions.
-*/
-
 uint64_t hash_transition(const void *key);
 int compare_transitions(const void *lhs, const void *rhs);
 
