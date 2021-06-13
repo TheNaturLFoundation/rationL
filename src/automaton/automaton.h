@@ -238,6 +238,32 @@ int state_is_entry(Automaton * automaton, State * s);
  * @param dst The destination of the transition.
  * @param value The value of the transiton. Note that this is ignored of epsilon is set.
  * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group Primitive function for _mark_to_map.
+ */
+void _mark_tr_to_map(Map * map, Transition * tr, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group Primitive function for marking entering and leaving.
+ */
+
+void _mark_to_map(Map * map, State * src, State * dst, Letter value, 
+    int epsilon, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
  * @param group The number of group that this transition enters.
  * This functions add the given transition to the map of entering transitions
  * If src or dst is NULL, it is considered to be a transition from or to outside

@@ -32,6 +32,14 @@ void _assert_list_content(LinkedList * list, size_t n_args, ...)
     }
 }
 
+void _assert_tr_eq(Transition * tr, size_t src_id, size_t dst_id, Letter value, int epsilon)
+{
+    cr_assert_eq(tr->old_src, src_id, "got %lu, expected %lu", tr->old_src, src_id);
+    cr_assert_eq(tr->old_dst, dst_id, "got %lu, expected %lu", tr->old_dst, dst_id);
+    cr_assert_eq(tr->letter, value, "got %d, expected %d", tr->letter, value);
+    cr_assert_eq(tr->is_epsilon, epsilon);
+}
+
 void _assert_non_eps_integrity(Automaton * automaton, Automaton * automaton_int)
 {
     State * t;
@@ -79,8 +87,8 @@ Test(delete_eps, test_transfer_all_transitions_into_empty)
     automaton_add_state(automaton, s3, 0);
 
     automaton_add_transition(automaton, s1, s3, 'A', 0);
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     LinkedList * list;
     State * trg;
@@ -97,6 +105,79 @@ Test(delete_eps, test_transfer_all_transitions_into_empty)
     list = get_matrix_elt(automaton, s2->id, 'A', 0);
     _assert_list_content(list, 1, s3);
 
+    free_pred_lists(pred_lists);
+    automaton_free(automaton);
+}
+
+Test(delete_eps, pred_lists_acctualisation)
+{
+    Automaton * automaton = Automaton(3, 1);
+
+    State * s1 = State(0);
+    State * s2 = State(0);
+    State * s3 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_state(automaton, s3, 0);
+
+    automaton_add_transition(automaton, s1, s3, 'A', 0);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
+
+    LinkedList * list = *(LinkedList **)array_get(pred_lists, s3->id);
+    Transition * tr = list->next->data;
+    
+    _assert_tr_eq(tr, s2->id + 1, s3->id + 1, 'A', 0);
+    list = list->next;
+
+    tr = list->next->data;
+    _assert_tr_eq(tr, s1->id + 1, s3->id + 1, 'A', 0);
+    cr_assert_eq(list->next->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, s1->id);
+    cr_assert_eq(list->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, s2->id);
+    cr_assert_eq(list->next, NULL);
+
+    free_pred_lists(pred_lists);
+    automaton_free(automaton);
+}
+
+Test(delete_eps, pred_lists_acctualisation_epsilon)
+{
+    Automaton * automaton = Automaton(3, 1);
+
+    State * s1 = State(0);
+    State * s2 = State(0);
+    State * s3 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+    automaton_add_state(automaton, s3, 0);
+
+    automaton_add_transition(automaton, s1, s3, 'A', 1);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
+
+    LinkedList * list = *(LinkedList **)array_get(pred_lists, s3->id);
+    Transition * tr = list->next->data;
+    
+    _assert_tr_eq(tr, s2->id + 1, s3->id + 1, 0, 1);
+    list = list->next;
+
+    tr = list->next->data;
+    _assert_tr_eq(tr, s1->id + 1, s3->id + 1, 0, 1);
+    cr_assert_eq(list->next->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, s1->id);
+    cr_assert_eq(list->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, s2->id);
+    cr_assert_eq(list->next, NULL);
+
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -114,8 +195,8 @@ Test(delete_eps, test_transfer_all_transitions_into_non_empty)
 
     automaton_add_transition(automaton, s1, s3, 'A', 0);
     automaton_add_transition(automaton, s2, s1, 'A', 0);
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     LinkedList * list;
     State * trg;
@@ -132,7 +213,7 @@ Test(delete_eps, test_transfer_all_transitions_into_non_empty)
     //check the good copy in empty s2:
     list = get_matrix_elt(automaton, s2->id, 'A', 0);
     _assert_list_content(list, 2, s1, s3);
-
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -149,8 +230,8 @@ Test(delete_eps, test_transfer_all_transitions_into_empty_epsilon)
     automaton_add_state(automaton, s3, 0);
 
     automaton_add_transition(automaton, s1, s3, 'A', 1);
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     LinkedList * list;
     State * trg;
@@ -166,7 +247,7 @@ Test(delete_eps, test_transfer_all_transitions_into_empty_epsilon)
     //check the good copy in empty s2:
     list = get_matrix_elt(automaton, s2->id, 'A', 1);
     _assert_list_content(list, 1, s3);
-
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -184,8 +265,8 @@ Test(delete_eps, test_transfer_all_transitions_into_non_empty_epsilon)
 
     automaton_add_transition(automaton, s1, s3, 'A', 1);
     automaton_add_transition(automaton, s2, s1, 'A', 1);
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     LinkedList * list;
     State * trg;
@@ -202,7 +283,7 @@ Test(delete_eps, test_transfer_all_transitions_into_non_empty_epsilon)
     //check the good copy in empty s2:
     list = get_matrix_elt(automaton, s2->id, 'A', 1);
     _assert_list_content(list, 2, s1, s3);
-
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -222,12 +303,12 @@ Test(delete_eps, transfer_multiple_elt_in_tr_list)
 
     automaton_add_transition(automaton, s1, s3, 'A', 0);
     automaton_add_transition(automaton, s1, s4, 'A', 0);
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     LinkedList * list = get_matrix_elt(automaton, s2->id, 'A', 0);
     _assert_list_content(list, 2, s3, s4);
-
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -247,15 +328,15 @@ Test(delete_eps, transfer_one_tr_into_multiple_check_integrity_of_reciever)
 
     automaton_add_transition(automaton, s1, s3, 'A', 0);
     automaton_add_transition(automaton, s2, s4, 'B', 1);
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     LinkedList * list = get_matrix_elt(automaton, s2->id, 'A', 0);
     _assert_list_content(list, 1, s3);
 
     list = get_matrix_elt(automaton, s2->id, 'A', 1);
     _assert_list_content(list, 1, s4);
-
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -277,8 +358,8 @@ Test(delete_eps, transfer_multiple_lists)
     {
         automaton_add_transition(automaton, s1, s3, i, i == EPSILON_INDEX);
     }
-
-    transfer_all_transitions(automaton, s1, s2);
+    Array * pred_lists = build_pred_lists(automaton);
+    transfer_all_transitions(automaton, s1, s2, NULL, pred_lists);
 
     for(size_t i = 0; i < NUMBER_OF_SYMB; i++)
     {
@@ -286,7 +367,7 @@ Test(delete_eps, transfer_multiple_lists)
         list = get_matrix_elt(automaton, s2->id, i, i == EPSILON_INDEX);
         _assert_list_content(list, 1, s3);
     }
-
+    free_pred_lists(pred_lists);
     automaton_free(automaton);
 }
 
@@ -420,4 +501,235 @@ Test(delete_eps, after_easy_thompson)
     automaton_free(automaton);
     array_free(arr);
     bintree_free(b);
+}
+
+/*
+    Test build_pred_lists
+*/
+
+Test(delete_eps, build_pred_lists_simple_as_hell)
+{
+    Automaton * automaton = Automaton(2, 1);
+
+    State * s0 = State(0);
+    State * s1 = State(1);
+
+    automaton_add_state(automaton, s0, 0);
+    automaton_add_state(automaton, s1, 1);
+
+    automaton_add_transition(automaton, s1, s0, 'K', 0);
+
+    Array * pred_lists = build_pred_lists(automaton);
+    LinkedList * list;
+
+    list = *(LinkedList **)array_get(pred_lists, 1);
+    cr_assert_eq(list->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, 0);
+    cr_assert_neq(list->next, NULL);
+
+    Transition * tr = list->next->data;
+    _assert_tr_eq(tr, s1->id + 1, s0->id + 1, 'K', 0);
+
+    free_pred_lists(pred_lists);
+    automaton_free(automaton);
+}
+
+Test(delete_eps, build_pred_lists_multiple_preds)
+{
+    Automaton * automaton = automaton_from_daut("automaton/multiple.daut", 4);
+
+    LinkedList * list;
+    Array * pred_lists = build_pred_lists(automaton);
+
+    State * s[4];
+    for(int i = 0; i < 4; i++)
+    {
+        s[i] = *(State **)array_get(pred_lists, i);
+    }
+
+    list = *(LinkedList **)array_get(pred_lists, 0);
+    cr_assert_eq(list->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, 1);
+    cr_assert_eq(list->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, 2);
+    cr_assert_eq(list->next, NULL);
+
+    list = *(LinkedList **)array_get(pred_lists, 3);
+    _assert_tr_eq(list->next->data, 3, 4, 'b', 0);
+    list = list->next;
+    
+    _assert_tr_eq(list->next->data, 2, 4, 'a', 0);
+    list = list->next;
+
+    _assert_tr_eq(list->next->data, 1, 4, 0, 1);
+    cr_assert_eq(list->next->next, NULL);
+    
+    free_pred_lists(pred_lists);
+    automaton_free(automaton);
+}
+
+/*
+    Testing group transfer
+*/
+Test(delete_eps, basic_moving_entries)
+{
+    Automaton * automaton = automaton_from_daut("automaton/basic_test.daut", 5);
+
+    size_t g1 = 1;
+    Map * set;
+    //retrieving states:
+    State * s[5];
+    for(int i = 0; i < 5; i++)
+    {
+        s[i] = *(State **)array_get(automaton->states, i);
+    }
+
+    //mark the groups on the automaton:
+    automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
+    automaton_mark_leaving(automaton, s[2], s[3], 0, 1, g1);
+
+    automaton_delete_epsilon_tr(automaton);
+
+    cr_assert_eq(get_entering_groups(automaton, s[2], s[4], 'b', 0), NULL);
+    cr_assert_eq(get_entering_groups(automaton, s[3], s[4], 'b', 0), NULL);
+
+    set = get_entering_groups(automaton, s[0], s[2], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_entering_groups(automaton, NULL, s[1], 0, 1);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    automaton_free(automaton);
+}
+
+Test(delete_eps, basic_moving_leaving)
+{
+    Automaton * automaton = automaton_from_daut("automaton/basic_test.daut", 5);
+
+    size_t g1 = 1;
+    Map * set;
+    //retrieving states:
+    State * s[5];
+    for(int i = 0; i < 5; i++)
+    {
+        s[i] = *(State **)array_get(automaton->states, i);
+    }
+    automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
+    automaton_mark_leaving(automaton, s[2], s[3], 0, 1, g1);
+
+    automaton_delete_epsilon_tr(automaton);
+
+    cr_assert_eq(get_leaving_group(automaton, s[2], s[4], 'b', 0), NULL);
+    cr_assert_eq(get_leaving_group(automaton, s[3], s[4], 'b', 0), NULL);
+
+    set = get_leaving_group(automaton, s[0], s[2], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_leaving_group(automaton, s[1], s[2], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    automaton_free(automaton);
+}
+
+Test(delete_eps, moving_entering_eps_entering)
+{
+    Automaton * automaton = automaton_from_daut("automaton/entering_eps.daut", 5);
+
+    size_t g1 = 1;
+    Map * set;
+    //retrieving states:
+    State * s[5];
+    for(int i = 0; i < 5; i++)
+    {
+        s[i] = *(State **)array_get(automaton->states, i);
+    }
+
+    automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
+    automaton_mark_leaving(automaton, s[3], s[4], 0, 1, g1);
+    automaton_delete_epsilon_tr(automaton);
+
+    cr_assert_eq(get_entering_groups(automaton, NULL, s[0], 0, 1), NULL);
+    cr_assert_eq(get_entering_groups(automaton, s[1], s[3], 'a', 0), NULL);
+    cr_assert_eq(get_entering_groups(automaton, s[2], s[3], 'a', 0), NULL);
+    
+    set = get_entering_groups(automaton, s[0], s[3], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_entering_groups(automaton, NULL, s[1], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_entering_groups(automaton, NULL, s[2], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    automaton_free(automaton);
+}
+
+Test(delete_eps, test_moving_leaving_back)
+{
+    Automaton * automaton = automaton_from_daut("automaton/entering_eps.daut", 5);
+
+    size_t g1 = 1;
+    Map * set;
+    //retrieving states:
+    State * s[5];
+    for(int i = 0; i < 5; i++)
+    {
+        s[i] = *(State **)array_get(automaton->states, i);
+    }
+    
+    automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
+    automaton_mark_leaving(automaton, s[3], s[4], 0, 1, g1);
+    automaton_delete_epsilon_tr(automaton);
+
+    set = get_leaving_group(automaton, s[0], s[3], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_leaving_group(automaton, s[1], s[3], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_leaving_group(automaton, s[2], s[3], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    automaton_free(automaton);
+}
+
+Test(delete_eps, test_jump_leaving)
+{
+    Automaton * automaton = automaton_from_daut("automaton/jump_leaving.daut", 5);
+
+    size_t g1 = 1;
+    Map * set;
+    //retrieving states:
+    State * s[3];
+    for(int i = 0; i < 3; i++)
+    {
+        s[i] = *(State **)array_get(automaton->states, i);
+    }
+
+    automaton_mark_leaving(automaton, s[1], s[2], 'a', 0, g1);
+
+    automaton_delete_epsilon_tr(automaton);
+
+    set = get_leaving_group(automaton, s[0], s[2], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    set = get_leaving_group(automaton, s[1], s[2], 'a', 0);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &g1), NULL);
+
+    automaton_free(automaton);
 }

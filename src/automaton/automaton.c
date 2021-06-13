@@ -584,13 +584,12 @@ void automaton_to_dot(Automaton *aut)
 int _check_state(Automaton * automaton, State * s)
 {
     int is_in = 0;
-    arr_foreach(State *, state, automaton->states)
+    State * maybe_s;
+    if(s->id < automaton->size)
     {
-        if(state == s)
-        {
+        maybe_s = *(State **)array_get(automaton->states, s->id);
+        if(maybe_s == s)
             is_in = 1;
-            break;
-        }
     }
     return is_in;
 }
@@ -627,22 +626,27 @@ void _check_transiton_in_automaton(Automaton * automaton, State * src, State * d
         errx(1, "You know what ? shit happens");
 }
 
-void _mark_to_map(Map * map, State * src, State * dst, Letter value, 
-    int epsilon, size_t group)
+void _mark_tr_to_map(Map * map, Transition * tr, size_t group)
 {
-    Transition tr = _generate_transition(src, dst, value, epsilon);
-    Map ** set_ptr = map_get(map, &tr);
+    Map ** set_ptr = map_get(map, tr);
     Map * set;
     if(set_ptr == NULL)
     {
         set = Set(size_t, hash_size_t, compare_size_t);
-        map_set(map, &tr, &set);
+        map_set(map, tr, &set);
     }
     else
     {
         set = *set_ptr;
     }
     set_add(set, &group);
+}
+
+void _mark_to_map(Map * map, State * src, State * dst, Letter value, 
+    int epsilon, size_t group)
+{
+    Transition tr = _generate_transition(src, dst, value, epsilon);
+    _mark_tr_to_map(map, &tr, group);
 }
 
 void automaton_mark_entering(Automaton * automaton, State * src, State * dst, 
