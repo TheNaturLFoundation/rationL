@@ -1,25 +1,74 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
+#include "datatypes/array.h"
 #include "parsing/lexer.h"
+#include "parsing/parsing.h"
 #include <stdio.h>
 
 #define assert_eq_token(actual, expected)                                      \
     assert_eq_token_(actual, expected, __LINE__)
 
+Token generate_group_token(char* string)
+{
+    Token tok;
+    tok.type = CLASS;
+    tok.value.letters = Array(char);
+    while(*string)
+    {
+        array_append(tok.value.letters, &(*string));
+        string++;
+    }
+    return tok;
+}
+
+void assert_eq_class(Array* actual, Array* expected)
+{
+    cr_assert_eq(actual->size, expected->size,
+                 "expected a caracter class of size %zu but got a size of %zu",
+                 expected->size, actual->size);
+    for(size_t i = 0; i < actual->size; i++)
+    {
+        char actual_char = *(char*) array_get(actual, i);
+        char expected_char = *(char*) array_get(expected, i);
+        cr_assert_eq(actual_char, expected_char,
+                 "expected a caracter %c but got %c", actual_char, expected_char);
+    }
+}
+
 void assert_eq_token_(Token *actual, Token *expected, size_t line)
 {
     cr_assert_eq(actual->type, expected->type, "expected %s, got %s (line %zu).",
-                 expected->type == PUNCTUATION ? "PUNCTUATION" : "LITERAL",
-                 actual->type == PUNCTUATION ? "PUNCTUATION" : "LITERAL",
+                 expected->type == PUNCTUATION ? "PUNCTUATION" : expected->type == LITERAL ? "LITERAL" : "CLASS",
+                 actual->type == PUNCTUATION ? "PUNCTUATION" : expected->type == LITERAL ? "LITERAL" : "CLASS",
                  line);
-    cr_assert_eq(actual->value, expected->value, "expected '%c', got '%c' (line %zu).",
-                 expected->value, actual->value, line);
+    if(actual->type == LITERAL || actual->type == PUNCTUATION)
+        cr_assert_eq(actual->value.letter, expected->value.letter, "expected'%c', got '%c' (line %zu).",
+                     expected->value.letter, actual->value.letter, line);
+    else
+        assert_eq_class(actual->value.letters, expected->value.letters);
 }
+
+void print_class(Array* letters)
+{
+    printf("CLASS(");
+    arr_foreach(char, letter, letters)
+    {
+        printf("%c", letter);
+    }
+    printf(")");
+}
+
 // NC = (), C = {}
 void print_tokens(Array *tokens)
 {
     for (size_t i = 0; i < tokens->size; i++)
-        printf("%c", ((Token *)array_get(tokens, i))->value);
+    {
+        Token tok = * (Token*) array_get(tokens, i);
+        if(tok.type == PUNCTUATION || tok.type == LITERAL)
+            printf("%c", tok.value.letter);
+        else
+            print_class(tok.value.letters);
+    }
     puts("");
 }
 
@@ -27,11 +76,9 @@ Test(lexer, simple_single)
 {
     char *regexp = "a";
     Array *tokens = tokenize(regexp);
-
     cr_assert_eq(tokens->size, 1);
     Token expected = Literal('a');
     assert_eq_token(array_get(tokens, 0), &expected);
-
     array_free(tokens);
 }
 
@@ -125,35 +172,24 @@ Test(lexer, simple_group)
 {
     char *regexp = "[abcd]";
     Array *tokens = tokenize(regexp);
+    Token expected = generate_group_token("abcd");
 
-    Token expected_tokens[] = {
-        Punctuation('('),
-        Literal('a'),
-        Punctuation('|'),
-        Literal('b'),
-        Punctuation('|'),
-        Literal('c'),
-        Punctuation('|'),
-        Literal('d'),
-        Punctuation(')')
-    };
+    cr_assert_eq(tokens->size, 3, "expected %zu", tokens->size);
 
-    cr_assert_eq(tokens->size, 9);
-    for (size_t i = 0; i < tokens->size; i++)
-    {
-        Token *actual = array_get(tokens, i);
-        Token expected = expected_tokens[i];
-        assert_eq_token(actual, &expected);
-    }
+    assert_eq_token((Token*)array_get(tokens, 0), &(Token)Punctuation('('));
+    assert_eq_token((Token*)array_get(tokens, 1), &expected);
+    assert_eq_token((Token*)array_get(tokens, 2), &(Token)Punctuation(')'));
 
-    array_free(tokens);
+    array_free(expected.value.letters);
+
+    free_tokens(tokens);
 }
 
 Test(lexer, group_concat)
 {
     char *regexp = "(ab)[ab](ab)";
     Array *tokens = tokenize(regexp);
-
+    Token ab_group = generate_group_token("ab");
     Token expected_tokens[] = {
         Punctuation('{'),
         Literal('a'),
@@ -162,9 +198,7 @@ Test(lexer, group_concat)
         Punctuation('}'),
         Punctuation('.'),
         Punctuation('('),
-        Literal('a'),
-        Punctuation('|'),
-        Literal('b'),
+        ab_group,
         Punctuation(')'),
         Punctuation('.'),
         Punctuation('{'),
@@ -174,7 +208,7 @@ Test(lexer, group_concat)
         Punctuation('}'),
     };
 
-    cr_assert_eq(tokens->size, 17);
+    cr_assert_eq(tokens->size, 15);
     for (size_t i = 0; i < tokens->size; i++)
     {
         Token *actual = array_get(tokens, i);
@@ -182,37 +216,23 @@ Test(lexer, group_concat)
         assert_eq_token(actual, &expected);
     }
 
-    array_free(tokens);
+    array_free(ab_group.value.letters);
+
+    free_tokens(tokens);
 }
 
 Test(lexer, implicit_groups)
 {
     char *regexp = "[ac-e2-5z]";
     Array *tokens = tokenize(regexp);
-
+    Token expected_group = generate_group_token("acde2345z");
     Token expected_tokens[] = {
         Punctuation('('),
-        Literal('a'),
-        Punctuation('|'),
-        Literal('c'),
-        Punctuation('|'),
-        Literal('d'),
-        Punctuation('|'),
-        Literal('e'),
-        Punctuation('|'),
-        Literal('2'),
-        Punctuation('|'),
-        Literal('3'),
-        Punctuation('|'),
-        Literal('4'),
-        Punctuation('|'),
-        Literal('5'),
-        Punctuation('|'),
-        Literal('z'),
+        expected_group,
         Punctuation(')')
     };
 
-    cr_assert_eq(tokens->size, 19);
+    cr_assert_eq(tokens->size, 3);
     for (size_t i = 0; i < tokens->size; i++)
     {
         Token *actual = array_get(tokens, i);
@@ -220,43 +240,42 @@ Test(lexer, implicit_groups)
         assert_eq_token(actual, &expected);
     }
 
-    array_free(tokens);
+    array_free(expected_group.value.letters);
+    free_tokens(tokens);
 }
 
 Test(lexer, simple_dot)
 {
     char *regexp = ".";
     Array *tokens = tokenize(regexp);
+    cr_assert_eq(tokens->size, 3);
 
-    size_t expected_size =
-        (ASCII_LAST_CONTROL - ASCII_FIRST_CONTROL + 1 +
-         ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 1;
-    cr_assert_eq(tokens->size, expected_size);
-    cr_assert_eq(((Token *)array_get(tokens, 0))->value, '(');
-
-    Token or_token = Punctuation('|');
-    size_t i = 1;
     Token token;
-    token.type = LITERAL;
-    for (token.value = ASCII_FIRST_CONTROL; token.value <= ASCII_LAST_CONTROL;
-         token.value++)
+    token.type = CLASS;
+    token.value.letters = Array(char);
+    for (char c = ASCII_FIRST_CONTROL; c <= ASCII_LAST_CONTROL;
+         c++)
     {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
+        array_append(token.value.letters, &c);
     }
-    for (token.value = ASCII_FIRST_PRINTABLE; token.value < ASCII_LAST_PRINTABLE;
-         token.value++)
+    for (char c = ASCII_FIRST_PRINTABLE; c <= ASCII_LAST_PRINTABLE;
+         c++)
     {
-        Token *actual = array_get(tokens, i++);
-        assert_eq_token(actual, &token);
-
-        Token *actual_or = array_get(tokens, i++);
-        assert_eq_token(actual_or, &or_token);
+        array_append(token.value.letters, &c);
     }
-    assert_eq_token(array_get(tokens, i), &token);
-    cr_assert_eq(((Token *)array_get(tokens, i + 1))->value, ')');
-
-    array_free(tokens);
+    Token expected_tokens[] = {
+        Punctuation('('),
+        token,
+        Punctuation(')')
+    };
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+    array_free(token.value.letters);
+    free_tokens(tokens);
 }
 
 Test(lexer, escaping)
@@ -295,121 +314,115 @@ Test(lexer, digit_special)
     char *regexp = "\\d\\D";
     Array *tokens = tokenize(regexp);
 
-    size_t expected_size =
-        (ASCII_LAST_CONTROL - ASCII_FIRST_CONTROL + 1 +
-         ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 3;
-    cr_assert_eq(tokens->size, expected_size);
+    cr_assert_eq(tokens->size, 7);
 
-    Token or_token = Punctuation('|');
-    Token concat_token = Punctuation('.');
-    Token open_par_token = Punctuation('(');
-    Token close_par_token = Punctuation(')');
+    Token little_d = generate_group_token("0123456789");
 
-    Token token;
-    token.type = LITERAL;
-    size_t i = 1;
-    for (token.value = '0'; token.value < '9'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &close_par_token);
-    assert_eq_token(array_get(tokens, i++), &concat_token);
-    assert_eq_token(array_get(tokens, i++), &open_par_token);
-    for (token.value = ASCII_FIRST_CONTROL; token.value <= ASCII_LAST_CONTROL; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = ASCII_FIRST_PRINTABLE; token.value < '0'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = '9' + 1; token.value < ASCII_LAST_PRINTABLE; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &close_par_token);
+    Token big_d;
+    big_d.type = CLASS;
+    big_d.value.letters = Array(char);
 
-    array_free(tokens);
+    for (char c = ASCII_FIRST_CONTROL; c <= ASCII_LAST_CONTROL;
+         c++)
+    {
+        array_append(big_d.value.letters, &c);
+    }
+    for (char c = ASCII_FIRST_PRINTABLE; c <= '0' - 1;
+         c++)
+    {
+        array_append(big_d.value.letters, &c);
+    }
+    for (char c = '9' + 1; c <= ASCII_LAST_PRINTABLE;
+         c++)
+    {
+        array_append(big_d.value.letters, &c);
+    }
+
+    Token expected_tokens[] = {
+        Punctuation('('),
+        little_d,
+        Punctuation(')'),
+        Punctuation('.'),
+        Punctuation('('),
+        big_d,
+        Punctuation(')'),
+    };
+
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+
+    array_free(little_d.value.letters);
+
+    array_free(big_d.value.letters);
+
+    free_tokens(tokens);
 }
 
 Test(lexer, word_special)
 {
     char *regexp = "\\w\\W";  // \w <=> [a-zA-Z0-9_]
     Array *tokens = tokenize(regexp);
+    Token little_w = generate_group_token(
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_");
+    Token big_w;
+    big_w.type = CLASS;
+    big_w.value.letters = Array(char);
+    for (char c = ASCII_FIRST_CONTROL; c <= ASCII_LAST_CONTROL;
+         c++)
+    {
+        array_append(big_w.value.letters, &c);
+    }
+    for (char c = ASCII_FIRST_PRINTABLE; c <= '0' - 1;
+         c++)
+    {
+        array_append(big_w.value.letters, &c);
+    }
+    for (char c = '9' + 1; c <= 'A' - 1;
+         c++)
+    {
+        array_append(big_w.value.letters, &c);
+    }
+    for (char c = 'Z' + 1; c <= '_' - 1;
+         c++)
+    {
+        array_append(big_w.value.letters, &c);
+    }
+    for (char c = '_' + 1; c <= 'a' - 1;
+         c++)
+    {
+        array_append(big_w.value.letters, &c);
+    }
+    for (char c = 'z' + 1; c <= ASCII_LAST_PRINTABLE;
+         c++)
+    {
+        array_append(big_w.value.letters, &c);
+    }
+    Token expected_tokens[] = {
+        Punctuation('('),
+        little_w,
+        Punctuation(')'),
+        Punctuation('.'),
+        Punctuation('('),
+        big_w,
+        Punctuation(')'),
+    };
 
-    size_t expected_size =
-        (ASCII_LAST_CONTROL - ASCII_FIRST_CONTROL + 1 +
-         ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 3;
-    cr_assert_eq(tokens->size, expected_size);
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
 
-    Token or_token = Punctuation('|');
-    Token concat_token = Punctuation('.');
-    Token open_par_token = Punctuation('(');
-    Token close_par_token = Punctuation(')');
+    array_free(little_w.value.letters);
 
-    Token token;
-    token.type = LITERAL;
-    size_t i = 1;
-    for (token.value = 'a'; token.value <= 'z'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = 'A'; token.value <= 'Z'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = '0'; token.value <= '9'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    token.value = '_';
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &close_par_token);
-    assert_eq_token(array_get(tokens, i++), &concat_token);
-    assert_eq_token(array_get(tokens, i++), &open_par_token);
-    for (token.value = ASCII_FIRST_CONTROL; token.value <= ASCII_LAST_CONTROL; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = ASCII_FIRST_PRINTABLE; token.value < '0'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = '9' + 1; token.value < 'A'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = 'Z' + 1; token.value < '_'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = '_' + 1; token.value < 'a'; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = 'z' + 1; token.value < ASCII_LAST_PRINTABLE; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &close_par_token);
+    array_free(big_w.value.letters);
 
-    array_free(tokens);
+    free_tokens(tokens);
 }
 
 Test(lexer, space_special)
@@ -417,63 +430,55 @@ Test(lexer, space_special)
     char *regexp = "\\s\\S";  // \s <=> [ \n\r\t\f]
     Array *tokens = tokenize(regexp);
 
-    size_t expected_size =
-        (ASCII_LAST_CONTROL - ASCII_FIRST_CONTROL + 1 +
-         ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1) * 2 + 3;
-    cr_assert_eq(tokens->size, expected_size);
+    cr_assert_eq(tokens->size, 7);
 
-    Token or_token = Punctuation('|');
-    Token concat_token = Punctuation('.');
-    Token open_par_token = Punctuation('(');
-    Token close_par_token = Punctuation(')');
+    Token little_s = generate_group_token(
+        " \t\n\v\f\r");
 
-    Token token;
-    token.type = LITERAL;
-    size_t i = 1;
-    token.value = ' ';
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &or_token);
-    for (token.value = ASCII_FIRST_CONTROL; token.value < ASCII_LAST_CONTROL; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &close_par_token);
-    assert_eq_token(array_get(tokens, i++), &concat_token);
-    assert_eq_token(array_get(tokens, i++), &open_par_token);
-    for (token.value = ASCII_FIRST_PRINTABLE; token.value < ' '; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    for (token.value = ' ' + 1; token.value < ASCII_LAST_PRINTABLE; token.value++)
-    {
-        assert_eq_token(array_get(tokens, i++), &token);
-        assert_eq_token(array_get(tokens, i++), &or_token);
-    }
-    assert_eq_token(array_get(tokens, i++), &token);
-    assert_eq_token(array_get(tokens, i++), &close_par_token);
+    Token big_s;
+    big_s.type = CLASS;
+    big_s.value.letters = Array(char);
 
-    array_free(tokens);
+    // First printable caracter is ' '
+    for (char c = ' ' + 1; c <= ASCII_LAST_PRINTABLE;
+         c++)
+    {
+        array_append(big_s.value.letters, &c);
+    }
+
+    Token expected_tokens[] = {
+        Punctuation('('),
+        little_s,
+        Punctuation(')'),
+        Punctuation('.'),
+        Punctuation('('),
+        big_s,
+        Punctuation(')'),
+    };
+
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *actual = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(actual, &expected);
+    }
+
+    array_free(little_s.value.letters);
+
+    array_free(big_s.value.letters);
+
+    free_tokens(tokens);
 }
 
 Test(lexer, special_concat)
 {
     char *regexp = "a\\d\\w\\s.";
     Array *tokens = tokenize(regexp);
-
+    size_t expected = 17;
     // Only test the size, trust actual values according to previous tests
-    size_t expected = ('9' - '0' + 1) * 2 + 2
-        + ('z' - 'a' + 2 + 'Z' - 'A' + 2 + '9' - '0' + 1) * 2 + 2
-        + (ASCII_LAST_CONTROL - ASCII_FIRST_CONTROL + 1) * 2 + 2
-        + (ASCII_LAST_PRINTABLE - ASCII_FIRST_PRINTABLE + 1 + ASCII_LAST_CONTROL
-           - ASCII_FIRST_CONTROL + 1)
-            * 2 + 1
-        + 2;
     cr_assert_eq(tokens->size, expected, "expected %zu, got %zu", expected, tokens->size);
 
-    array_free(tokens);
+    free_tokens(tokens);
 }
 
 Test(lexer, simple_repeat)
@@ -514,10 +519,19 @@ Test(lexer, simple_repeat)
     array_free(tokens);
 }
 
+Test(lexer, repeat_free)
+{
+    char *regexp = "[ab]{3}";
+    Array *tokens = tokenize(regexp);
+    free_tokens(tokens);
+}
+
 Test(lexer, braces_repeat)
 {
     char *regexp = "a{2}[ab]{1,3}(ab){2,}";
     Array *tokens = tokenize(regexp);
+
+    Token ab = generate_group_token("ab");
 
     Token expected_tokens[] = {
         Literal('a'),
@@ -525,22 +539,16 @@ Test(lexer, braces_repeat)
         Literal('a'),
         Punctuation('.'),
         Punctuation('('),
-        Literal('a'),
-        Punctuation('|'),
-        Literal('b'),
+        ab,
         Punctuation(')'),
         Punctuation('.'),
         Punctuation('('),
-        Literal('a'),
-        Punctuation('|'),
-        Literal('b'),
+        ab,
         Punctuation(')'),
         Punctuation('?'),
         Punctuation('.'),
         Punctuation('('),
-        Literal('a'),
-        Punctuation('|'),
-        Literal('b'),
+        ab,
         Punctuation(')'),
         Punctuation('?'),
         Punctuation('.'),
@@ -558,7 +566,7 @@ Test(lexer, braces_repeat)
         Punctuation('+')
     };
 
-    cr_assert_eq(tokens->size, 36);
+    cr_assert_eq(tokens->size, 30);
 
     for (size_t i = 0; i < tokens->size; i++)
     {
@@ -567,8 +575,11 @@ Test(lexer, braces_repeat)
         assert_eq_token(actual, &expected);
     }
 
-    array_free(tokens);
+    array_free(ab.value.letters);
+    free_tokens(tokens);
 }
+
+
 
 Test(lexer, braces_no_repeat)
 {

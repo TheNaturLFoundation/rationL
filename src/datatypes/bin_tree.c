@@ -213,9 +213,13 @@ int bintree_compare(BinTree *a, BinTree *b)
         {
             return (bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right));
         }
-        if (s_a.value.operator == s_b.value.operator && s_a.group == s_b.group)
+        else if (s_a.type == OPERATOR && s_a.value.operator == s_b.value.operator && s_a.group == s_b.group)
         {
             return (bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right));
+        }
+        else if (s_a.type == CHARACTER_CLASS)
+        {
+            return bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right);
         }
     }
     return 0;

@@ -8,7 +8,8 @@
 #define ASCII_LAST_CONTROL 13
 
 #define Literal(val) { .type = LITERAL, .value = (val) }
-#define Punctuation(val) { .type = PUNCTUATION, .value = (val) }
+
+#define Punctuation(val) { .type = PUNCTUATION, .value = (Letter) (val) }
 
 /**
  * Type used to represent letters in regular expressions.
@@ -28,8 +29,16 @@ typedef unsigned char Letter;
 typedef enum TokenType
 {
     LITERAL,
-    PUNCTUATION
+    PUNCTUATION,
+    CLASS,
 } TokenType;
+
+
+typedef union TokenValue
+{
+    Letter letter;
+    Array* letters;
+} TokenValue;
 
 /**
  * Representation of tokens returned by the lexer.
@@ -40,7 +49,7 @@ typedef enum TokenType
 typedef struct Token
 {
     TokenType type;
-    Letter value;
+    TokenValue value;
 } Token;
 
 /**
@@ -51,3 +60,12 @@ typedef struct Token
  * @warning The array needs to be freed.
  */
 Array *tokenize(const char *string);
+
+/**
+ * Carefully frees an array of tokens.
+ * Also frees the content of the caracter classes.
+ * @author Simon Scatton
+ * @date 12/06/2021
+ * @param tokens The array of tokens to be freed.
+ */
+void free_tokens(Array *tokens);

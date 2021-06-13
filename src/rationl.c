@@ -43,7 +43,7 @@ reg_t regex_compile(char* pattern)
     re.pattern = malloc((strlen(pattern) + 1) * sizeof(char));
     strcpy(re.pattern, pattern);
     bintree_free(tree);
-    array_free(arr);
+    free_tokens(arr);
     return re;
 }
 
