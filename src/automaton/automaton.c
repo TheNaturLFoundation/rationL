@@ -557,8 +557,20 @@ void automaton_to_dot(Automaton *aut)
         printf("  node [shape = point ]; q%zu\n", start->id);
 
     puts("  node [shape = doublecircle];");
-    arr_foreach(State *, state, aut->states) if (state->terminal)
-        printf("  %zu;\n", state->id);
+    arr_foreach(State *, state, aut->states)
+    { 
+        if (state->terminal)
+        {
+            entering_str = stringify_set(get_entering_groups(aut,
+                state, NULL, 0, 1), 'E');
+            leaving_str = stringify_set(get_leaving_group(aut,
+                state, NULL, 0, 1), 'S');
+            printf("  %zu[xlabel=\"%s %s\"];\n", state->id, entering_str,
+                leaving_str);
+            free(entering_str);
+            free(leaving_str);
+        }
+    }
     puts("  node [shape = circle];");
     arr_foreach(State *, state_2, aut->starting_states)
     {
@@ -703,4 +715,12 @@ Map * get_leaving_group(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon)
 {
     return _get_set_from_tr(automaton->leaving_transitions, src, dst, value, epsilon);
+}
+
+void automaton_clear_state_terminal(Automaton * automaton, State * state)
+{
+    if(state->terminal == 0)
+        return;
+    _automaton_remove_transition_from_maps(automaton, state, NULL, 0, 1);
+    state->terminal = 0;
 }
