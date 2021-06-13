@@ -345,3 +345,5 @@ Map * get_entering_groups(Automaton * automaton, State * src, State * dst,
 */
 Map * get_leaving_group(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon);
+
+void automaton_clear_state_terminal(Automaton * automaton, State * state);
