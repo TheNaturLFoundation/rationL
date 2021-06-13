@@ -708,3 +708,43 @@ Test(lexer, nested_groups)
 
     array_free(tokens);
 }
+
+Test(lexer, not_range)
+{
+    char *regexp = "[^&-y]";
+    Array *tokens = tokenize(regexp);
+    Token expected_group = generate_group_token(" !\"#$%z{|}~");
+    Token expected_tokens[] = {
+    Punctuation('('),
+    expected_group,
+    Punctuation(')')
+    };
+
+    /*
+    Token *tok = (Token *)array_get(tokens, 0);
+    char c = tok->value.letter;
+    printf("\n\n%c\n", c);
+
+    tok = (Token *)array_get(tokens, 1);
+    Array *arr = (Array *)(tok->value.letters);
+    for (size_t i = 0; i < arr->size; i++)
+    {
+        printf("char : %c\n", *(char *)array_get(arr, i));
+    }
+
+    tok = (Token *)array_get(tokens, 2);
+    c = tok->value.letter;
+    printf("%c\n\n", c);
+*/
+
+    cr_assert_eq(tokens->size, 3);
+    for (size_t i = 0; i < tokens->size; i++)
+    {
+        Token *got = array_get(tokens, i);
+        Token expected = expected_tokens[i];
+        assert_eq_token(got, &expected);
+    }
+
+    array_free(expected_group.value.letters);
+    free_tokens(tokens);
+}

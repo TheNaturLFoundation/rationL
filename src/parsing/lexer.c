@@ -59,6 +59,18 @@ static void add_range(Array *letters, char lower, char upper)
     }
 }
 
+static void add_range_except(Array *letters, char lower, char upper)
+{
+    for (int c = ASCII_FIRST_PRINTABLE; c < lower; c++)
+    {
+        array_append(letters, &c);
+    }
+    for (int c = upper+1; c <= ASCII_LAST_PRINTABLE; c++)
+    {
+        array_append(letters, &c);
+    }
+}
+
 static void add_literal(Array *tokens, char literal)
 {
     const Token token = Literal(literal);
@@ -79,17 +91,38 @@ static void tokenize_group(const char **string, Array *tokens)
     Token tok;
     tok.type = CLASS;
     (*string)++;
-    while (!is_group_last(*string))
+
+    if (**string == '^')
     {
-        char range_lower, range_upper;
-        if (!is_group_last(*string)
-            && get_group_range(string, &range_lower, &range_upper))
-            add_range(letters, range_lower, range_upper);
-        else
-        {
-            array_append(letters, &(**string));
-        }
         (*string)++;
+        while(!is_group_last(*string))
+        {
+            char range_lower, range_upper;
+            if (!is_group_last(*string)
+                && get_group_range(string, &range_lower, &range_upper))
+                add_range_except(letters, range_lower, range_upper);
+            else
+            {
+                add_range_except(letters, **string, *(*string+2));
+                *string +=2;
+            }
+            (*string)++;
+        }
+    }
+    else
+    {
+        while (!is_group_last(*string))
+        {
+            char range_lower, range_upper;
+            if (!is_group_last(*string)
+                && get_group_range(string, &range_lower, &range_upper))
+                add_range(letters, range_lower, range_upper);
+            else
+            {
+                array_append(letters, &(**string));
+            }
+            (*string)++;
+        }
     }
     tok.value.letters = letters;
     array_append(tokens, &tok);
