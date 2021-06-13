@@ -57,8 +57,6 @@ Test(paranthesis_more, paranthesis_random)
 Test(paranthesis_more, a_or_b_star_c)
 {
     Array *arr = tokenize("a|b*c");
-    BinTree *b = parse_symbols(arr);
-    bin_tree_to_dot(b, stdout);
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a_or_b_star_c.dot");
     array_free(arr);
 }
