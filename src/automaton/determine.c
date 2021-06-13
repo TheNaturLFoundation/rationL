@@ -37,9 +37,9 @@ Automaton *determine(const Automaton *source)
         Set *current_set = *(Set **)list_pop_front_value(set_queue);
         size_t current_id = *(size_t *)map_get(powersets, &current_set);
         State *src_state = *(State **)array_get(automaton->states, current_id);
-        
+
         map_clear(state_sets);
-        
+
         // Initialize the `state_sets` dict
         map_foreach_key(
             size_t, state_id, current_set,
@@ -84,9 +84,9 @@ Automaton *determine(const Automaton *source)
                             terminal = 1;
                             // map_foreach_key uses two loops, break isn't
                             // enough
-                            goto out86;
+                            goto out89;
                         }
-                    }) out86:;
+                    }) out89:;
                     dst_state = State(terminal);
                     automaton_add_state(automaton, dst_state, 0);
                     map_set(powersets, &set, &dst_state->id);

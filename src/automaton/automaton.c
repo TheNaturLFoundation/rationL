@@ -475,13 +475,44 @@ static int parse_daut_line(Automaton *automaton, const char *line,
     free(target_symbol);
 
     // Get the value of the transition
+    const char *before = line;
     int is_epsilon = !move_to_next(&line);
     Letter value = 0;
-    if (!is_epsilon)
+    if ((*line == '<' || *line == '>' && line) && line[1])
+        line = before;
+    else if (!is_epsilon)
         value = *(line++);
 
+    // Test if the transition is marked as entering/leaving
+    Array *entering = Array(int);
+    Array *leaving = Array(int);
+    while (move_to_next(&line))
+    {
+        switch (*(line++))
+        {
+        case '>': {
+            char *no_symbol = get_symbol(&line);
+            int no = atol(no_symbol); // Assume it's right
+            free(no_symbol);
+            array_append(entering, &no);
+            break;
+        }
+        case '<': {
+            char *no_symbol = get_symbol(&line);
+            int no = atol(no_symbol);
+            free(no_symbol);
+            array_append(leaving, &no);
+            break;
+        }
+        default:
+            printf("Got '%c'\n", *(line - 1));
+            rationl_errno = EBADFMT;
+            return -1;
+        }
+    }
+
     // Get the states, add them if it they don't exist yet
-    State *src_state;
+    State *src_state = NULL;
     if (!is_entry && map_state(mapping, source, automaton->size))
     {
         src_state = State(is_terminal);
@@ -493,7 +524,7 @@ static int parse_daut_line(Automaton *automaton, const char *line,
         src_state = *(State **)array_get(automaton->states, *index);
         src_state->terminal = src_state->terminal || is_terminal;
     }
-    State *dst_state;
+    State *dst_state = NULL;
     if (!is_terminal && map_state(mapping, target, automaton->size))
     {
         dst_state = State(0);
@@ -520,6 +551,13 @@ static int parse_daut_line(Automaton *automaton, const char *line,
     if (!is_terminal && !is_entry)
         automaton_add_transition(automaton, src_state, dst_state, value,
                                  is_epsilon);
+
+    arr_foreach(int, entering_no, entering)
+        automaton_mark_entering(automaton, src_state, dst_state, value,
+                                is_epsilon, entering_no);
+    arr_foreach(int, leaving_no, leaving)
+        automaton_mark_leaving(automaton, src_state, dst_state, value,
+                               is_epsilon, leaving_no);
 
     return 0;
 }
