@@ -6,17 +6,27 @@
 #include "parsing/lexer.h"
 #include "parsing/parsing.h"
 
-void concatenate(Automaton *aut)
+void concatenate(Automaton *aut, int left_grp, int right_grp)
 {
     State *entry_to_patch = *(State **)array_get(
         aut->starting_states, aut->starting_states->size - 2);
     for (int i = aut->states->size - 1; i >= 0; i--)
     {
         State *end_to_patch = *(State **)array_get(aut->states, i);
-        if (end_to_patch->terminal)
+        if (end_to_patch->terminal) //? why this check, in which case is this needed ?
         {
             automaton_add_transition(aut, end_to_patch, entry_to_patch, 'e', 1);
             end_to_patch->terminal = 0;
+            if(right_grp > left_grp)
+            {
+                automaton_mark_entering(aut, end_to_patch, entry_to_patch,
+                    'e', 1, right_grp);
+            }
+            else if (right_grp < left_grp)
+            {
+                automaton_mark_leaving(aut, end_to_patch, entry_to_patch,
+                    'e', 1, left_grp);
+            }
             break;
         }
     }
@@ -126,11 +136,22 @@ void maybe(Automaton *aut)
 
 void thompson_recur(BinTree *tree, Automaton *aut)
 {
+    int left_grp, right_grp;
     if (tree->left == NULL && tree->right == NULL)
     {
         State *entry_state = State(0);
         State *letter_state = State(1);
+        //I wanna mark letter_state to out but I need it to be deleted
+        //When I turn letter_state back to not terminal if I do it.
+        //I also need to be carefull because if the terminal is leaving,
+        //The new transition will also be leavings
         automaton_add_state(aut, entry_state, 1);
+        right_grp = ((Symbol *)(tree->data))->group;
+        if(right_grp > 0)
+        {
+            automaton_mark_entering(aut, NULL, entry_state, 0, 1,
+                right_grp);
+        }
         automaton_add_state(aut, letter_state, 0);
         Symbol sym = *(Symbol *)tree->data;
         if (sym.type == LETTER)
@@ -156,7 +177,10 @@ void thompson_recur(BinTree *tree, Automaton *aut)
     case CONCATENATION: {
         thompson_recur(tree->right, aut);
         thompson_recur(tree->left, aut);
-        concatenate(aut);
+        left_grp = ((Symbol *)(tree->left->data))->group;
+        right_grp = ((Symbol *)(tree->right->data))->group;
+        concatenate(aut, left_grp, right_grp);
+        ((Symbol *)(tree->data))->group = left_grp;
         break;
     }
     case UNION: {
