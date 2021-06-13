@@ -190,3 +190,10 @@ typedef Map Set;
 
 #define Set(T, hash, compare) map_init(sizeof(T), 0, hash, compare)
 #define set_add(set, key) map_set(set, key, NULL)
+
+/**
+ * Turns a set into a heap allocated string that wants to be free.
+ * @param set: has to be a set of size_t, otherwise UB.
+*/
+
+char * stringify_set(Map * set, char pref);

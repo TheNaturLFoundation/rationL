@@ -619,6 +619,7 @@ Test(delete_eps, basic_moving_leaving)
     {
         s[i] = *(State **)array_get(automaton->states, i);
     }
+
     automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
     automaton_mark_leaving(automaton, s[2], s[3], 0, 1, g1);
 
@@ -730,6 +731,31 @@ Test(delete_eps, test_jump_leaving)
     set = get_leaving_group(automaton, s[1], s[2], 'a', 0);
     cr_assert_eq(set->size, 1);
     cr_assert_neq(map_get(set, &g1), NULL);
+
+    automaton_free(automaton);
+}
+
+Test(delete_eps, flex)
+{
+    Automaton * automaton = automaton_from_daut("automaton/hardcore_el.daut", 9);
+
+    State * s[9];
+    for(int i = 0; i < 9; i++)
+    {
+        s[i] = *(State **)array_get(automaton->states, i);
+    }
+
+    automaton_mark_entering(automaton, s[7], s[3], 0, 1, 1);
+    automaton_mark_entering(automaton, s[3], s[4], 0, 1, 2);
+
+    automaton_mark_leaving(automaton, s[6], s[0], 0, 1, 2);
+    automaton_mark_leaving(automaton, s[0], s[1], 0, 1, 1);
+
+    automaton_to_dot(automaton);
+
+    automaton_delete_epsilon_tr(automaton);
+
+    automaton_to_dot(automaton);
 
     automaton_free(automaton);
 }

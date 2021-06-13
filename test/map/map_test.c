@@ -1,5 +1,6 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
+#include <string.h>
 #include "datatypes/map.h"
 
 static uint64_t stupid_hash(const void *x)
@@ -214,4 +215,19 @@ Test(map, map_delete_not_present)
     cr_assert_eq(r, NULL);
 
     map_free(map1);
+}
+
+Test(map, stringify_set_)
+{
+    Map * set = Set(size_t,  hash_size_t, compare_size_t);
+    for(size_t i = 0; i < 5; i++)
+    {
+        set_add(set, &i);
+    }
+    char * result = stringify_set(set, 'S');
+    cr_assert_neq(result, NULL);
+    cr_assert_eq(strcmp(result, "S,2,1,0,3,4"), 0, 
+        "Expected '0,1,2,3,4' but got '%s'", result);
+    free(result);
+    map_free(set);
 }

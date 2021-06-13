@@ -1,6 +1,7 @@
 #include "map.h"
 
 #include <printf.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "utils/memory_utils.h"
@@ -346,4 +347,50 @@ int compare_transitions(const void *lhs, const void *rhs)
         return tr1->is_epsilon - tr2->is_epsilon;
     
     return 0;
+}
+
+size_t _digit_count(size_t n)
+{
+    //trust me
+    if(n == 0)
+        return 1;
+    size_t count = 0;
+    while(n > 0)
+    {
+        n /= 10;
+        count++;
+    }
+
+    return count;
+}
+
+char * stringify_set(Map * set, char pref)
+{
+    size_t n = 0;
+    char * result = malloc(sizeof(char));
+    result[0] = 0;
+    if(set != NULL)
+    {
+        map_foreach_key(
+            size_t, grp, set,
+            {
+                n += _digit_count(grp) + 1;
+            }
+        )    
+    }
+    if(n != 0)
+    {
+        free(result);
+        result = malloc(sizeof(char) * (n + 2));
+        result[0] = pref;
+        result[1] = 0;
+        map_foreach_key(
+            size_t, grp, set,
+            {
+                sprintf(result, "%s,%lu", result, grp);
+            }
+        )
+    }
+
+    return result;
 }

@@ -549,6 +549,9 @@ Automaton *automaton_from_daut(const char *filename, size_t size)
 // LCOV_EXCL_START
 void automaton_to_dot(Automaton *aut)
 {
+    char * entering_str;
+    char * leaving_str;
+    State * s;
     puts("digraph{\n  rankdir=LR;");
     arr_foreach(State *, start, aut->starting_states)
         printf("  node [shape = point ]; q%zu\n", start->id);
@@ -558,8 +561,13 @@ void automaton_to_dot(Automaton *aut)
         printf("  %zu;\n", state->id);
     puts("  node [shape = circle];");
     arr_foreach(State *, state_2, aut->starting_states)
-        printf("  q%zu -> %zu\n", state_2->id, state_2->id);
-
+    {
+        entering_str = stringify_set(get_entering_groups(aut,
+                    NULL, state_2, 0, 1), 'E');
+        printf("  q%zu -> %zu[label=\"%s\"]\n", state_2->id, state_2->id, 
+            entering_str);
+        free(entering_str);
+    }
     for (size_t src = 0; src < aut->size; src++)
     {
         const Letter eps_index = 0;
@@ -573,8 +581,18 @@ void automaton_to_dot(Automaton *aut)
             else
                 transition_str[0] = c;
             list_foreach(State *, target, list)
-                printf("  %zu -> %zu[label=\"%s\"]\n", src, target->id,
-                       transition_str);
+            {
+                s = *(State **)array_get(aut->states, src);
+                entering_str = stringify_set(get_entering_groups(aut,
+                    s, target, c, c == eps_index), 'E');
+                leaving_str = stringify_set(get_leaving_group(aut,
+                    s, target, c, c == eps_index), 'S');
+                printf("  %zu -> %zu[label=\"%s %s %s\"]\n", src, target->id,
+                       transition_str, entering_str, leaving_str);
+                
+                free(entering_str);
+                free(leaving_str);
+            }
         }
     }
     puts("}");
