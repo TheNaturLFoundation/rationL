@@ -212,7 +212,8 @@ Automaton *thompson(BinTree *tree)
     size_t size = 0;
     size_t letter_count = 0;
     count_symbols(tree, &size, &letter_count);
-    Automaton *aut = Automaton(2 * size, letter_count + 1);
+    Automaton *aut = Automaton(2 * size,
+                               letter_count + 1 > 256 ? 256 : letter_count + 1);
     thompson_recur(tree, aut);
     return aut;
 }
