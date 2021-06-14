@@ -1240,3 +1240,52 @@ Test(automaton, automaton_is_transition)
     free(s5);
     automaton_free(automaton);
 }
+
+Test(automaton, automaton_clear_state_terminal_test)
+{
+    Automaton *automaton = Automaton(4, 3);
+    
+    State *s1 = State(1);
+    State *s2 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+    automaton_add_transition(automaton, s2, s1, 'B', 0);
+
+    automaton_mark_leaving(automaton, s1, NULL, 0, 1, 23);
+    automaton_mark_leaving(automaton, s1, s2, 'A', 0, 22);
+    automaton_mark_entering(automaton, s1, NULL, 0, 1, 65);
+
+    automaton_clear_state_terminal(automaton, s1);
+
+    Map * set;
+    cr_assert_eq(get_leaving_group(automaton, s1, NULL, 0, 1), NULL);
+    cr_assert_eq(get_entering_groups(automaton, s1, NULL, 0, 1), NULL);
+
+    cr_assert_neq(get_leaving_group(automaton, s1, s2, 'A', 0), NULL);
+    cr_assert_eq(s1->terminal, 0);
+    automaton_free(automaton);
+}
+
+Test(automaton, _mark_to_map_)
+{
+    Automaton *automaton = Automaton(4, 3);
+    
+    State *s1 = State(1);
+    State *s2 = State(0);
+
+    automaton_add_state(automaton, s1, 0);
+    automaton_add_state(automaton, s2, 0);
+
+    automaton_add_transition(automaton, s1, s2, 'A', 0);
+    automaton_add_transition(automaton, s2, s1, 'B', 0);
+    size_t grp = 1;
+    automaton_mark_leaving(automaton, s1, NULL, 0, 1, grp);
+
+    Set * set = get_leaving_group(automaton, s1, NULL, 0, 1);
+    cr_assert_neq(set, NULL);
+    cr_assert_eq(set->size, 1);
+    cr_assert_neq(map_get(set, &grp), NULL);
+}

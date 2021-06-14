@@ -341,9 +341,11 @@ Map * get_entering_groups(Automaton * automaton, State * src, State * dst,
  * @param dst The destination of the transition.
  * @param value The value of the transiton. Note that this is ignored of epsilon is set.
  * @param epsilon A booleen indicating wether the transition is epsilon or not.
- * returns the resulting size_t
+ * returns the resulting set
 */
 Map * get_leaving_group(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon);
 
 void automaton_clear_state_terminal(Automaton * automaton, State * state);
+
+void automaton_clear_state_entry(Automaton * automaton, size_t index);
