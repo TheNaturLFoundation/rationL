@@ -1,4 +1,4 @@
-AC_INIT([rationL], [v0.1.0], [simon.scatton@epita.fr])
+AC_INIT([rationL], [v0.2.0], [simon.scatton@epita.fr])
 
 AC_CONFIG_SRCDIR([src/])
 
@@ -62,6 +62,6 @@ AH_TEMPLATE([DEBUG],
             [Define to 1 if debug is enabled, 0 otherwise])
 
 AC_CONFIG_HEADERS([include/config.h])
-AC_CONFIG_FILES([Makefile include/Makefile test/Makefile docs/Makefile ])
+AC_CONFIG_FILES([Makefile include/Makefile test/Makefile docs/Makefile rationl.pc])
 # Output the files
 AC_OUTPUT

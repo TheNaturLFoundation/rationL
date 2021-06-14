@@ -1,7 +1,7 @@
 SUBDIRS = include . test docs
 EXTRA_DIST = docs test
 AM_CPPFLAGS = -I$(top_srcdir)/src/  -include $(top_srcdir)/include/config.h
-AM_LDFLAGS = -shared -O3
+AM_LDFLAGS = -shared -Ofast
 man3_MANS =	\
 	docs/man/regex_compile.man \
 	docs/man/regex_free.man \
@@ -20,25 +20,39 @@ source_files = \
 	src/automaton/automaton.c \
 	src/datatypes/linked_list.c \
 	src/datatypes/array.c \
+	src/datatypes/map.c \
 	src/datatypes/matrix.c \
+	src/utils/errors.c \
 	src/utils/memory_utils.c\
 	src/datatypes/bin_tree.c \
 	src/parsing/lexer.c \
 	src/parsing/parsing.c \
 	src/matching/matching.c \
-	src/automaton/thompson.c
+	src/automaton/thompson.c \
+	src/automaton/prune.c \
+	src/automaton/delete_eps.c \
+	src/automaton/determine.c \
+	src/automaton/minimization.c \
+    src/automaton/stringify.c
 
 header_files = \
 	src/automaton/automaton.h \
 	src/datatypes/linked_list.h \
 	src/datatypes/array.h \
+	src/datatypes/map.h \
 	src/datatypes/matrix.h \
+	src/utils/errors.h \
 	src/utils/memory_utils.h\
 	src/datatypes/bin_tree.h \
 	src/parsing/lexer.h \
 	src/parsing/parsing.h \
 	src/matching/matching.h \
-	src/automaton/thompson.h
+	src/automaton/thompson.h \
+	src/automaton/delete_eps.h \
+	src/automaton/prune.h \
+	src/automaton/determine.h \
+    src/automaton/minimization.h \
+	src/automaton/stringify.h
 
 librationl_la_SOURCES = $(source_files) $(header_files)
 

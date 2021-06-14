@@ -1,5 +1,8 @@
-#include <string.h>
 #include "matching/matching.h"
+
+#include <printf.h>
+#include <string.h>
+
 #include "utils/memory_utils.h"
 /*
  * Recursive function that has been replaced by an iterative one (see below)
@@ -88,20 +91,32 @@ static int match_nfa_from_state(const Automaton *automaton, const char *string,
 
 static char *submatch_nfa_from_state(const Automaton *, const char *, State *);
 
-int match_nfa(const Automaton *automaton, const char *string)
+Match *match_nfa(const Automaton *automaton, const char *string)
 {
     arr_foreach(State *, start, automaton->starting_states)
     {
         char *end = submatch_nfa_from_state(automaton, string, start);
-        if (end != NULL && *end == 0)
-            return 1;
+        if (end != NULL)
+        {
+            Match *match = SAFEMALLOC(sizeof(Match));
+            match->string = string;
+            match->start = 0;
+            match->length = end - string;
+
+            // TODO: Fix when groups are supported
+            match->nb_groups = 0;
+            match->groups = NULL;
+
+            return match;
+        }
     }
-    return 0;
+    return NULL;
 }
 
 Array *search_nfa(const Automaton *automaton, const char *string)
 {
-    Array *substrings = Array(char *);
+    Array *matches = Array(Match *);
+    const char *string_start = string;
     for (; *string != 0; string++)
     {
         arr_foreach(State *, start, automaton->starting_states)
@@ -109,24 +124,301 @@ Array *search_nfa(const Automaton *automaton, const char *string)
             char *end = submatch_nfa_from_state(automaton, string, start);
             if (end != NULL)
             {
-                size_t length = end - string;
-                char *copy = SAFECALLOC(length + 1, sizeof(char));
-                memcpy(copy, string, length);
-                // Add the string to the array
-                array_append(substrings, &copy);
+                Match *match = SAFEMALLOC(sizeof(Match));
+                match->string = string_start;
+                match->start = string - string_start;
+                match->length = end - string;
+                // TODO: Fix when groups are supported
+                match->nb_groups = 0;
+                match->groups = NULL;
+                array_append(matches, &match);
                 string = end - 1;
                 break;
             }
         }
     }
-    return substrings;
+
+    return matches;
 }
 
+Array *search_dfa(const Automaton *automaton, const char *string)
+{
+    typedef struct context
+    {
+        State *current_state;
+        const char *current_str;
+        LinkedList *queue_top;
+    } context;
+
+    // The queue can contain two types of integers:
+    // * If it is positive, it is simply a letter.
+    // * If it is negative, it is a marker.
+    //   - If the marker is odd (-2n), it indicates an entering
+    //     transition into the group n.
+    //   - If it is even (-2n - 1), it indicates of leaving
+    //      transition from the group n.
+    LinkedList *queue = LinkedList(int);
+    Array *matches = Array(Match *);
+
+    context *last_final = NULL;
+    context ctx;
+    State *start = *(State **)array_get(automaton->starting_states, 0);
+    State *curr = start;
+    const char *string_start = string; // This one won't move
+    const char *match_start = string;
+    while (*string != 0)
+    {
+        LinkedList *tr = get_matrix_elt(automaton, curr->id, *string, 0);
+        if (tr == NULL)
+        {
+            if (last_final != NULL)
+            {
+                string = last_final->current_str;
+                curr = last_final->current_state;
+
+                Match *match = SAFEMALLOC(sizeof(Match));
+                match->string = string_start;
+                match->start = match_start - string_start;
+                match->length = string - match_start;
+                match->nb_groups = automaton->nb_groups;
+                if (match->nb_groups == 0)
+                    match->groups = NULL;
+                else
+                    match->groups =
+                        SAFECALLOC(sizeof(char *), match->nb_groups);
+
+                Array **arrays = SAFECALLOC(sizeof(Array *), automaton->nb_groups);
+                for (LinkedList *list_elt = queue->next;
+                     list_elt != last_final->queue_top->next && list_elt != NULL;
+                     list_elt = list_elt->next)
+                {
+                    int *value = list_elt->data;
+                    if (*value > 0)
+                    {
+                        for (size_t i = 0; i < automaton->nb_groups; i++)
+                            if (arrays[i] != NULL)
+                                array_append(arrays[i], value);
+                    }
+                    else
+                    {
+                        int mark = -*value;
+                        int group = mark / 2;
+                        if (mark % 2 == 0)
+                            arrays[group] = Array(char);
+                        else
+                        {
+                            char end_char = 0;
+                            array_append(arrays[group], &end_char);
+                            match->groups[group] = arrays[group]->data;
+                            match->groups[group] = SAFEREALLOC(
+                                match->groups[group], arrays[group]->size);
+                            free(arrays[group]);
+                            arrays[group] = NULL;
+                        }
+                    }
+                }
+                free(arrays);
+
+                last_final = NULL;
+                array_append(matches, &match);
+            }
+            else
+            {
+                if (curr == start)
+                    string++;
+                else
+                    curr = start;
+                match_start = string;
+            }
+
+            continue;
+        }
+        string++;
+        State *prev_curr = curr;
+        curr = *(State **)tr->next->data;
+        // Adding elements to the queue
+        Set *leaving = get_leaving_group((Automaton *)automaton,
+                                         prev_curr, curr, *(string - 1), 0);
+        if (leaving != NULL)
+        {
+            map_foreach_key(size_t, group, leaving, {
+                int mark = -(2 * group + 1);
+                list_push_back(queue, &mark);
+            })
+        }
+        leaving = get_leaving_group((Automaton *)automaton,
+                                    prev_curr, NULL, *(string - 1), 0);
+
+        if (leaving != NULL)
+        {
+            map_foreach_key(size_t, group, leaving, {
+                int mark = -(2 * group + 1);
+                list_push_back(queue, &mark);
+            })
+        }
+        Set *entering = get_entering_groups((Automaton *)automaton, NULL,
+                                            prev_curr, *(string - 1), 0);
+        if (entering != NULL)
+        {
+            map_foreach_key(size_t, group, entering, {
+                int mark = -2 * group;
+                list_push_back(queue, &mark);
+            })
+        }
+
+        {
+            int mark = (unsigned char)*(string - 1);
+            list_push_back(queue, &mark);
+        }
+        entering = get_entering_groups((Automaton *)automaton,
+                                            prev_curr, curr, *(string - 1), 0);
+        if (entering != NULL)
+        {
+            map_foreach_key(size_t, group, entering, {
+                int mark = -2 * group;
+                list_push_back(queue, &mark);
+            })
+        }
+
+        if (tr->data != NULL)
+        {
+            // If a final state was encountered, don't take a back transition
+            // that would move the start of the match
+            if (last_final != NULL)
+            {
+                string = last_final->current_str;
+                curr = last_final->current_state;
+
+                Match *match = SAFEMALLOC(sizeof(Match));
+                match->string = string_start;
+                match->start = match_start - string_start;
+                match->length = string - match_start;
+                match->nb_groups = automaton->nb_groups;
+                if (match->nb_groups == 0)
+                    match->groups = NULL;
+                else
+                    match->groups =
+                        SAFECALLOC(sizeof(char *), match->nb_groups);
+
+                Array **arrays = SAFECALLOC(sizeof(Array *), automaton->nb_groups);
+                for (LinkedList *list_elt = queue->next;
+                     list_elt != last_final->queue_top->next && list_elt != NULL;
+                     list_elt = list_elt->next)
+                {
+                    int *value = list_elt->data;
+                    if (*value > 0)
+                    {
+                        for (size_t i = 0; i < automaton->nb_groups; i++)
+                            if (arrays[i] != NULL)
+                                array_append(arrays[i], value);
+                    }
+                    else
+                    {
+                        int mark = -*value;
+                        int group = mark / 2;
+                        if (mark % 2 == 0)
+                            arrays[group] = Array(char);
+                        else
+                        {
+                            char end_char = 0;
+                            array_append(arrays[group], &end_char);
+                            match->groups[group] = arrays[group]->data;
+                            match->groups[group] = SAFEREALLOC(
+                                match->groups[group], arrays[group]->size);
+                            // Don't use array_free since the data field
+                            // is used elsewhere
+                            free(arrays[group]);
+                            arrays[group] = NULL;
+                        }
+                    }
+                }
+                free(arrays);
+
+                last_final = NULL;
+                array_append(matches, &match);
+                continue;
+            }
+            size_t offset = (size_t)tr->data;
+            match_start = string - offset;
+        }
+
+        if (curr->terminal)
+        {
+            Set *groups = get_leaving_group((Automaton *)automaton, curr, NULL, 0, 0);
+            if (groups != NULL)
+            {
+                map_foreach_key(size_t, group, groups, {
+                    int mark = -(2 * group + 1);
+                    list_push_back(queue, &mark);
+                })
+            }
+            ctx.current_state = curr;
+            ctx.current_str = string;
+            ctx.queue_top = queue;
+            while (ctx.queue_top->next != NULL)
+                ctx.queue_top = ctx.queue_top->next;
+            last_final = &ctx;
+        }
+    }
+
+    if (last_final != NULL)
+    {
+        string = last_final->current_str;
+        Match *match = SAFEMALLOC(sizeof(Match));
+        match->string = string_start;
+        match->start = match_start - string_start;
+        match->length = string - match_start;
+        match->nb_groups = automaton->nb_groups;
+        if (match->nb_groups == 0)
+            match->groups = NULL;
+        else
+            match->groups =
+                SAFECALLOC(sizeof(char *), match->nb_groups);
+
+        Array **arrays = SAFECALLOC(sizeof(Array *), automaton->nb_groups);
+        for (LinkedList *list_elt = queue->next;
+             list_elt != last_final->queue_top->next && list_elt != NULL;
+             list_elt = list_elt->next)
+        {
+            int *value = list_elt->data;
+            if (*value > 0)
+            {
+                for (size_t i = 0; i < automaton->nb_groups; i++)
+                    if (arrays[i] != NULL)
+                        array_append(arrays[i], value);
+            }
+            else
+            {
+                int mark = -*value;
+                int group = mark / 2;
+                if (mark % 2 == 0)
+                    arrays[group] = Array(char);
+                else
+                {
+                    char end_char = 0;
+                    array_append(arrays[group], &end_char);
+                    match->groups[group] = arrays[group]->data;
+                    match->groups[group] = SAFEREALLOC(
+                        match->groups[group], arrays[group]->size);
+                    free(arrays[group]);
+                    arrays[group] = NULL;
+                }
+            }
+        }
+        free(arrays);
+
+        last_final = NULL;
+        array_append(matches, &match);
+    }
+
+    return matches;
+}
 
 char *replace_nfa(const Automaton *automaton, const char *string,
-                   const char *replace)
+                  const char *replace)
 {
-    typedef struct {
+    typedef struct
+    {
         size_t start;
         size_t end;
     } match_bounds;
@@ -156,7 +448,7 @@ char *replace_nfa(const Automaton *automaton, const char *string,
 
     const char *start = string;
     char *final = SAFECALLOC(final_size + 1, sizeof(char));
-    char *result = final;  // Keep a pointer to the head of the string
+    char *result = final; // Keep a pointer to the head of the string
     size_t last_bound = 0;
     arr_foreach(match_bounds, bounds, matches)
     {
@@ -184,7 +476,7 @@ char *replace_nfa(const Automaton *automaton, const char *string,
  * @return The end pointer when the match ends if there is a match, else NULL.
  */
 static char *submatch_nfa_from_state(const Automaton *automaton,
-                                        const char *string, State *start)
+                                     const char *string, State *start)
 {
     char *max_str = NULL;
 
@@ -201,8 +493,8 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
         LinkedList *curr_str_list = list_pop_front(str_queue);
         char *curr_str = *(char **)curr_str_list->data;
 
-        list_free(curr_state_list);
-        list_free(curr_str_list);
+        list_free_from(curr_state_list);
+        list_free_from(curr_str_list);
 
         if (curr_state->terminal)
         {
@@ -216,9 +508,11 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
             }
         }
 
-        // Test transition transitions
+        // Test epsilon transitions
         LinkedList *transition =
-            matrix_get(automaton->transition_table, 0, curr_state->id)->next;
+            get_matrix_elt(automaton, curr_state->id, 0, 1);
+        if (transition != NULL)
+            transition = transition->next;
         for (; transition != NULL; transition = transition->next)
         {
             State *state = *(State **)transition->data;
@@ -230,8 +524,10 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
         // Test the current letter
         if (*curr_str != 0)
         {
-            transition = matrix_get(automaton->transition_table, *curr_str,
-                                    curr_state->id)->next;
+            transition =
+                get_matrix_elt(automaton, curr_state->id, *curr_str, 0);
+            if (transition != NULL)
+                transition = transition->next;
             for (; transition != NULL; transition = transition->next)
             {
                 State *state = *(State **)transition->data;
@@ -244,4 +540,15 @@ static char *submatch_nfa_from_state(const Automaton *automaton,
     list_free(state_queue);
     list_free(str_queue);
     return max_str;
+}
+
+void free_match(Match *match)
+{
+    if (match != NULL && match->groups != NULL)
+    {
+        for (size_t i = 0; i < match->nb_groups; i++)
+            free(match->groups[i]);
+        free(match->groups);
+    }
+    free(match);
 }

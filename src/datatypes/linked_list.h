@@ -7,11 +7,13 @@
 
 #define list_foreach(T, var, sentinel)                                         \
     T var;                                                                     \
-    if (sentinel->next != NULL)                                                \
-        var = *(T *)sentinel->next->data;                                      \
-    for (LinkedList *_l = sentinel->next; _l != NULL;                          \
-         var = _l->next == NULL ? *(T *)_l->data : *(T*)_l->next->data,             \
-                    _l = _l->next)
+    if ((sentinel) != NULL && (sentinel)->next != NULL)                        \
+        (var) = *(T *)(sentinel)->next->data;                                  \
+    if ((sentinel) != NULL)                                                    \
+        for (LinkedList *l_##var = (sentinel)->next; l_##var != NULL;          \
+             (var) = l_##var->next == NULL ? *(T *)l_##var->data               \
+                                           : *(T *)l_##var->next->data,        \
+                        l_##var = l_##var->next)
 
 /**
  * @struct LinkedList
@@ -53,6 +55,18 @@ LinkedList *list_create(size_t size);
  * @version 1.0.1
  */
 int list_push_back(LinkedList *list, void *data);
+
+/**
+ * Allocates memory for a new element of the list and
+ * pushes the data passed as parameter in this new element
+ * that is then placed in the first position in the list
+ * @param list The list you wish to push_back to.
+ * @param data The data to be pushed back.
+ * @author Rostan Tabet
+ * @date 08/04/2020
+ * @return true(1) if the push_back was successful false(0) otherwise
+ */
+int list_push_front(LinkedList *list, void *data);
 
 /**
  * Removes the last element of the linked list and returns it.
@@ -116,6 +130,20 @@ LinkedList *list_get(LinkedList *list, ssize_t position);
  * */
 
 int list_free(LinkedList *list);
+
+
+/**
+ * Frees the portion of the list starting at the given pointer.
+ * The given pointer will also have its data and address freed.
+ * Please do not use this function on sentinels.
+ * This function should also be the only one used if you want to
+ * free a single LinkedList.
+ * @return 1 if the free is succesful 0 otherwise
+ * @author Vlad Argatu
+ * @date 07/06/2021
+ * */
+
+int list_free_from(LinkedList *list);
 
 /**
  * Pops the list at the end and returns a pointer to the value

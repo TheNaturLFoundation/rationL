@@ -1,0 +1,9 @@
+digraph {
+  94681361592688[label="." xlabel="0" peripheries="2"]
+  94681361592608[label="*" xlabel="0" peripheries="2"]
+  94681361592688  ->  94681361592608
+  94681361592768[label="b" xlabel="0" peripheries="1"]
+  94681361592688  ->  94681361592768
+  94681361592528[label="a" xlabel="0" peripheries="1"]
+  94681361592608  ->  94681361592528
+}

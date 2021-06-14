@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: rationl
+Description: An expressive regular expression library
+Version: 0.1.0
+Cflags: -I${includedir}/rationl
+Libs: -L${libdir} -lrationl

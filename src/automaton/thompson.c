@@ -1,185 +1,267 @@
 #include "automaton/thompson.h"
 
+#include "automaton/automaton.h"
 #include "datatypes/array.h"
 #include "datatypes/linked_list.h"
+#include "datatypes/map.h"
+#include "parsing/lexer.h"
 #include "parsing/parsing.h"
 
-int is_state_entry(Automaton *aut, State *state)
+int _leaves_self(Automaton * aut, State * src, size_t grp)
 {
-    arr_foreach(State *, entry_state, aut->starting_states)
-    {
-        if (state == entry_state)
-            return 1;
-    }
+    Set * set = get_leaving_group(aut, src, NULL, 0, 1);
+    if(set != NULL)
+        return (map_get(set, &grp) != NULL);
     return 0;
 }
 
-// Connects two automatons and returns a correspondance
-// table between ids of b and the new state in a
-Array *connect_automatons(Automaton *a, Automaton *b, int remap_entries)
+void _transfer_leaving_set_to(Automaton * aut, Set * set, State * src, State * dst)
 {
-    Array *states_b_htab = Array(State *);
-    arr_foreach(State *, state_b, b->states)
+    //CAREFULL ONLY WITH EPSILONS
+    if(set != NULL)
     {
-        State *state = State(state_b->terminal);
-        state->id = a->size;
-        array_append(states_b_htab, &state);
-        automaton_add_state(a, state,
-                            remap_entries ? 0 : is_state_entry(b, state_b));
-    }
-    for (size_t i = 0; i < b->size; i++)
-        for (size_t j = 0; j < b->transition_table->width; j++)
-        {
-            LinkedList *targets = matrix_get(b->transition_table, j, i);
-            if (!list_empty(targets))
+        map_foreach_key(
+            size_t, grp, set,
             {
-                State *src = *(State **)array_get(states_b_htab, i);
-                list_foreach(State *, dst, targets)
+                automaton_mark_leaving(aut, src, dst, 
+                        0, 1, grp);
+            }
+        )
+    }
+}
+
+void _transfer_entering_set_to(Automaton * aut, Set * set, State * src, State * dst)
+{
+    //CAREFULL ONLY WITH EPSILONS
+    if(set != NULL)
+    {
+        map_foreach_key(
+            size_t, grp, set,
+            {
+                automaton_mark_entering(aut, src, dst, 
+                        0, 1, grp);
+            }
+        )
+    }
+}
+
+void _build_epsilon(Automaton * aut, State * src, State * dst, int src_grp, size_t dst_grp)
+{
+    automaton_add_transition(aut, src, dst, 'e', 1);
+    Map * set;
+    int dst_n = dst_grp;
+    if(src_grp != dst_n)
+    {
+        if(src_grp > dst_n)
+        {
+            set = get_leaving_group(aut, src, NULL, 0, 1);
+            _transfer_leaving_set_to(aut, set, src, dst);
+        }
+        if(src_grp < dst_n)
+        {
+            set = get_entering_groups(aut, NULL, dst, 0, 1);
+            _transfer_entering_set_to(aut, set, src, dst);
+        }
+    }
+}
+
+void concatenate(Automaton *aut, size_t left_grp, size_t right_grp, size_t current_grp)
+{
+    State *entry_to_patch = *(State **)array_get(
+        aut->starting_states, aut->starting_states->size - 2);
+    Set * set;
+    for (int i = aut->states->size - 1; i >= 0; i--)
+    {
+        State *end_to_patch = *(State **)array_get(aut->states, i);
+        if (end_to_patch->terminal)
+        {
+            _build_epsilon(aut, end_to_patch, entry_to_patch, left_grp, right_grp);
+            if((left_grp < right_grp) && (current_grp != right_grp) && (current_grp != left_grp))
+            {
+                set = get_leaving_group(aut, end_to_patch, NULL, 0, 1);
+                _transfer_leaving_set_to(aut, set, end_to_patch, entry_to_patch);
+            }
+            else if(left_grp < right_grp)
+            {
+                end_to_patch->terminal = 0;
+                set = get_leaving_group(aut, end_to_patch, NULL, 0, 1);
+                if(set != NULL)
                 {
-                    State *real_dst =
-                        *(State **)array_get(states_b_htab, dst->id);
-                    automaton_add_transition(a, src, real_dst, j, j == 0);
-                }
+                    State * trg;
+                    for (int i = aut->states->size - 1; i >= 0; i--)
+                    {
+                        trg = *(State **)array_get(aut->states, i);
+                        if(trg->terminal != 0)
+                            break;
+                    }
+                    _transfer_leaving_set_to(aut, set, trg, NULL);
+                }  
+                end_to_patch->terminal = 1; 
             }
-        }
-    return states_b_htab;
-}
-
-void concatenate(Automaton *a, Automaton *b)
-{
-    Array *terminal_states = Array(State *);
-    arr_foreach(State *, state_a, a->states)
-    {
-        if (state_a->terminal)
-        {
-            array_append(terminal_states, &state_a);
-            state_a->terminal = 0;
+            automaton_clear_state_terminal(aut, end_to_patch);
+            break;
         }
     }
-    Array *states_b_htab = connect_automatons(a, b, 1);
-    arr_foreach(State *, a_states, terminal_states)
-    {
-        arr_foreach(State *, entry_state, b->starting_states)
-        {
-            State *dst = *(State **)array_get(states_b_htab, entry_state->id);
-            automaton_add_transition(a, a_states, dst, 'e', 1);
-        }
-    }
-    array_free(terminal_states);
-    array_free(states_b_htab);
+    automaton_clear_state_entry(aut, aut->starting_states->size - 2);
 }
 
-State *add_new_entry(Automaton *a)
+void unite(Automaton *aut, int curr_grp, int first_grp, int second_grp)
 {
-    State *new_entry = State(0);
-    automaton_add_state(a, new_entry, 0);
-    arr_foreach(State *, entry, a->starting_states)
-    {
-        automaton_add_transition(a, new_entry, entry, 'e', 1);
-    }
-    array_clear(a->starting_states);
-    array_append(a->starting_states, &new_entry);
-    return new_entry;
-}
-
-void unite(Automaton *a, Automaton *b)
-{
-    Array *states_b_htab = connect_automatons(a, b, 0);
-    add_new_entry(a);
+    State *new_start = State(0);
     State *new_end = State(0);
-    automaton_add_state(a, new_end, 0);
-    arr_foreach(State *, state, a->states)
-    {
-        if (state->terminal)
-        {
-            automaton_add_transition(a, state, new_end, 'e', 1);
-            state->terminal = 0;
-        }
-    }
-    new_end->terminal = 1;
-    array_free(states_b_htab);
-}
+    int grps[] = {first_grp, second_grp};
+    State *first_start = *(State **)array_get(aut->starting_states,
+                                              aut->starting_states->size - 1);
+    State *second_start = *(State **)array_get(aut->starting_states,
+                                               aut->starting_states->size - 2);
 
-void kleene(Automaton *a)
-{
-    State *new_end = State(0);
-    State *new_entry = State(0);
-    automaton_add_state(a, new_entry, 0);
-    automaton_add_state(a, new_end, 0);
-    automaton_add_transition(a, new_entry, new_end, 'e', 1);
-    arr_foreach(State *, state, a->states)
-    {
-        if (state->terminal)
-        {
-            arr_foreach(State *, entry, a->starting_states)
-            {
-                automaton_add_transition(a, state, entry, 'e', 1);
-            }
-            automaton_add_transition(a, state, new_end, 'e', 1);
-            state->terminal = 0;
-        }
-    }
-    arr_foreach(State *, entries, a->starting_states)
-    {
-        automaton_add_transition(a, new_entry, entries, 'e', 1);
-    }
-    array_clear(a->starting_states);
-    array_append(a->starting_states, &new_entry);
-    new_end->terminal = 1;
-}
-
-void maybe(Automaton *aut)
-{
-    State *new_entry = add_new_entry(aut);
-    State *new_end = State(0);
+    automaton_add_state(aut, new_start, 0);
     automaton_add_state(aut, new_end, 0);
-    arr_foreach(State *, state, aut->states)
+    int count = 0;
+    for (int i = aut->states->size - 1; i >= 0; i--)
     {
+        State *state = *(State **)array_get(aut->states, i);
         if (state->terminal)
         {
-            automaton_add_transition(aut, state, new_end, 'e', 1);
-            state->terminal = 0;
+            //automaton_add_transition(aut, state, new_end, 'e', 1);
+            _build_epsilon(aut, state, new_end, grps[count], curr_grp);
+            automaton_clear_state_terminal(aut, state);
+            if (count == 1)
+                break;
+            else
+                count++;
         }
     }
+    //automaton_add_transition(aut, new_start, first_start, 'e', 1);
+    _build_epsilon(aut, new_start, first_start, curr_grp, first_grp);
+    //automaton_add_transition(aut, new_start, second_start, 'e', 1);
+    _build_epsilon(aut, new_start, second_start, curr_grp, second_grp);
+    if(curr_grp > 0)
+    {
+        automaton_mark_leaving(aut, new_end, NULL, 0, 1, curr_grp);
+        automaton_mark_entering(aut, NULL, new_start, 0, 1, curr_grp);
+    }
+    automaton_clear_state_entry(aut, aut->starting_states->size - 1);
+    automaton_clear_state_entry(aut, aut->starting_states->size - 1);
+    array_append(aut->starting_states, &new_start);
     new_end->terminal = 1;
-    automaton_add_transition(aut, new_entry, new_end, 'e', 1);
+}
+
+void kleene(Automaton *aut)
+{
+    State *new_start = State(0);
+    State *new_end = State(0);
+    State *current_start = *(State **)array_get(aut->starting_states,
+                                                aut->starting_states->size - 1);
+    Set * set;
+    automaton_add_state(aut, new_start, 0);
+    automaton_add_state(aut, new_end, 0);
+    for (int i = aut->states->size - 1; i >= 0; i--)
+    {
+        State *state = *(State **)array_get(aut->states, i);
+        if (state->terminal)
+        {
+            automaton_add_transition(aut, state, current_start, 'e', 1);
+            automaton_add_transition(aut, state, new_end, 'e', 1);
+            set = get_leaving_group(aut, state, NULL, 0, 1);
+            _transfer_leaving_set_to(aut, set, new_end, NULL);
+            automaton_clear_state_terminal(aut, state);
+            break;
+        }
+    }
+    automaton_add_transition(aut, new_start, current_start, 'e', 1);
+    automaton_add_transition(aut, new_start, new_end, 'e', 1);
+    set = get_entering_groups(aut, NULL, current_start, 0, 1);
+    _transfer_entering_set_to(aut, set, NULL, new_start);
+    automaton_clear_state_entry(aut, aut->starting_states->size - 1);
+    array_append(aut->starting_states, &new_start);
+    new_end->terminal = 1;
 }
 
 void exists(Automaton *aut)
 {
     State *new_end = State(0);
+    State *current_start = *(State **)array_get(aut->starting_states,
+                                                aut->starting_states->size - 1);
+    Set * set;
     automaton_add_state(aut, new_end, 0);
-    arr_foreach(State *, state, aut->states)
+    automaton_add_transition(aut, new_end, current_start, 'e', 1);
+    for (int i = aut->states->size - 1; i >= 0; i--)
     {
+        State *state = *(State **)array_get(aut->states, i);
         if (state->terminal)
         {
             automaton_add_transition(aut, state, new_end, 'e', 1);
-            state->terminal = 0;
+            set = get_leaving_group(aut, state, NULL, 0, 1);
+            _transfer_leaving_set_to(aut, set, new_end, NULL);
+            automaton_clear_state_terminal(aut, state);
+            break;
         }
-    }
-    arr_foreach(State *, starting_state, aut->starting_states)
-    {
-        automaton_add_transition(aut, new_end, starting_state, 'e', 1);
     }
     new_end->terminal = 1;
 }
 
-Automaton *thompson(BinTree *tree)
+void maybe(Automaton *aut)
 {
-    if(tree == NULL)
-        return NULL;
+    State *new_start = State(0);
+    State *new_end = State(0);
+    State *start = *(State **)array_get(aut->starting_states,
+                                        aut->starting_states->size - 1);
+    Set * set;
+    automaton_add_state(aut, new_start, 0);
+    automaton_add_state(aut, new_end, 0);
+    for (int i = aut->states->size - 1; i >= 0; i--)
+    {
+        State *state = *(State **)array_get(aut->states, i);
+        if (state->terminal)
+        {
+            automaton_add_transition(aut, state, new_end, 'e', 1);
+            set = get_leaving_group(aut, state, NULL, 0, 1);
+            _transfer_leaving_set_to(aut, set, new_end, NULL);
+            automaton_clear_state_terminal(aut, state);
+            break;
+        }
+    }
+    automaton_add_transition(aut, new_start, start, 'e', 1);
+    set = get_entering_groups(aut, NULL, start, 0, 1);
+    _transfer_entering_set_to(aut, set, NULL, new_start);
+    automaton_clear_state_entry(aut, aut->starting_states->size - 1);
+    array_append(aut->starting_states, &new_start);
+    new_end->terminal = 1;
+    automaton_add_transition(aut, new_start, new_end, 'e', 1);
+}
+
+void thompson_recur(BinTree *tree, Automaton *aut)
+{
+    int left_grp, right_grp, curr_grp;
     if (tree->left == NULL && tree->right == NULL)
     {
+        curr_grp = ((Symbol *)(tree->data))->group;
         State *entry_state = State(0);
-        entry_state->id = 0;
         State *letter_state = State(1);
-        letter_state->id = 1;
-        Automaton *aut = Automaton(2);
         automaton_add_state(aut, entry_state, 1);
         automaton_add_state(aut, letter_state, 0);
-        automaton_add_transition(aut, entry_state, letter_state,
-                                 ((Symbol *)(tree->data))->value.letter, 0);
-        return aut;
+        if(curr_grp > 0)
+        {
+            automaton_mark_leaving(aut, letter_state, NULL, 0, 1, curr_grp);
+            automaton_mark_entering(aut, NULL, entry_state, 0, 1,
+                curr_grp);
+        }
+        Symbol sym = *(Symbol *)tree->data;
+        if (sym.type == LETTER)
+        {
+            automaton_add_transition(aut, entry_state, letter_state,
+                                     sym.value.letter, 0);
+        }
+        else
+        {
+            arr_foreach(Letter, c, sym.value.letters)
+            {
+                automaton_add_transition(aut, entry_state, letter_state,
+                                         c, 0);
+            }
+        }
+        return;
     }
 
     Operator operator=((Symbol *)tree->data)->value.operator;
@@ -187,35 +269,76 @@ Automaton *thompson(BinTree *tree)
     switch (operator)
     {
     case CONCATENATION: {
-        Automaton *left = thompson(tree->left);
-        Automaton *right = thompson(tree->right);
-        concatenate(left, right);
-        automaton_free(right);
-        return left;
+        thompson_recur(tree->right, aut);
+        thompson_recur(tree->left, aut);
+        left_grp = ((Symbol *)(tree->left->data))->group;
+        right_grp = ((Symbol *)(tree->right->data))->group;
+        curr_grp = ((Symbol *)(tree->data))->group;
+        concatenate(aut, left_grp, right_grp, curr_grp);
+        ((Symbol *)(tree->data))->group = left_grp;
+        break;
     }
     case UNION: {
-        Automaton *left = thompson(tree->left);
-        Automaton *right = thompson(tree->right);
-        unite(left, right);
-        automaton_free(right);
-        return left;
+        thompson_recur(tree->left, aut);
+        thompson_recur(tree->right, aut);
+        left_grp = ((Symbol *)(tree->left->data))->group;
+        right_grp = ((Symbol *)(tree->right->data))->group;
+        curr_grp = ((Symbol *)(tree->data))->group;
+        unite(aut, curr_grp, right_grp, left_grp);
+        break;
     }
     case KLEENE_STAR: {
-        Automaton *child = thompson(tree->left);
-        kleene(child);
-        return child;
+        thompson_recur(tree->left, aut);
+        kleene(aut);
+        ((Symbol *)(tree->data))->group = ((Symbol *)(tree->left->data))->group;
+        break;
     }
     case MAYBE: {
-        Automaton *child = thompson(tree->left);
-        maybe(child);
-        return child;
+        thompson_recur(tree->left, aut);
+        maybe(aut);
+        ((Symbol *)(tree->data))->group = ((Symbol *)(tree->left->data))->group;
+        break;
     }
     case EXISTS: {
-        Automaton *child = thompson(tree->left);
-        exists(child);
-        return child;
+        thompson_recur(tree->left, aut);
+        exists(aut);
+        ((Symbol *)(tree->data))->group = ((Symbol *)(tree->left->data))->group;
+        break;
     }
     }
+}
 
-    return NULL; //LCOV_EXCL_LINE
+void count_symbols(BinTree *tree, size_t *size, size_t *letter_count)
+{
+    if (tree->left == NULL && tree->right == NULL)
+    {
+        Symbol sym = *(Symbol*)tree->data;
+        if(sym.type == LETTER)
+            *letter_count += 1;
+        else
+            *letter_count += sym.value.letters->size;
+        *size += 1;
+    }
+    else
+    {
+        if (((Symbol *)tree->data)->value.operator!= CONCATENATION)
+            *size += 1;
+    }
+    if (tree->left)
+        count_symbols(tree->left, size, letter_count);
+    if (tree->right)
+        count_symbols(tree->right, size, letter_count);
+}
+
+Automaton *thompson(BinTree *tree)
+{
+    if (tree == NULL)
+        return NULL;
+    size_t size = 0;
+    size_t letter_count = 0;
+    count_symbols(tree, &size, &letter_count);
+    Automaton *aut = Automaton(2 * size,
+                               letter_count + 1 > 256 ? 256 : letter_count + 1);
+    thompson_recur(tree, aut);
+    return aut;
 }

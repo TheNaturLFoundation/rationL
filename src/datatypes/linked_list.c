@@ -30,6 +30,22 @@ int list_push_back(LinkedList *list, void *data)
     return 1;
 }
 
+int list_push_front(LinkedList *list, void *data)
+{
+    if (list == NULL)
+        return 0;
+    LinkedList *newList = SAFEMALLOC(sizeof(LinkedList));
+    newList->data = SAFEMALLOC(list->size);
+    memcpy(newList->data, data, list->size);
+    newList->next = list->next;
+    if (list->next)
+        list->next->previous = newList;
+    newList->previous = list;
+    newList->size = list->size;
+    list->next = newList;
+    return 1;
+}
+
 LinkedList *list_pop_at(LinkedList *list, ssize_t position)
 {
     if (position < -1 || list == NULL)
@@ -89,6 +105,23 @@ int list_free(LinkedList *list)
 {
     if (list == NULL)
         return 0;
+    LinkedList *start = list;
+    list = list->next;
+    free(start);
+    while (list != NULL)
+    {
+        LinkedList *next = list->next;
+        free(list->data);
+        free(list);
+        list = next;
+    }
+    return 1;
+}
+
+int list_free_from(LinkedList *list)
+{
+    if (list == NULL)
+        return 0;
     while (list != NULL)
     {
         LinkedList *next = list->next;
@@ -131,5 +164,5 @@ void *list_get_value(LinkedList* list, ssize_t position)
 
 int list_empty(LinkedList* list)
 {
-    return list->next == NULL;
+    return list == NULL || list->next == NULL;
 }

@@ -54,6 +54,8 @@ struct TreeSerializeData
     size_t index;
     char content;
     BinTree *tree;
+    SymbolType type;
+    int group;
 };
 
 Operator __parse_op(char c)
@@ -80,14 +82,28 @@ BinTree *dot_to_bin_tree(const char *path)
     if (file == NULL)
         return NULL;
 
+    int type_check;
     // TODO secure scanf calls
     if (fscanf(file, "%*[^\n]") == -1)
         errx(1, "fscanf failed"); //LCOV_EXCL_LINE
     Array *corresp_table = Array(struct TreeSerializeData);
     struct TreeSerializeData top_data;
-    if (fscanf(file, "  %zu[label=\"%c\"]\n", &top_data.index, &top_data.content) == -1)
+    if (fscanf(file, "  %zu[label=\"%c\" xlabel=\"%i\" peripheries=\"%i\"]\n",
+               &top_data.index, &top_data.content, &top_data.group, &type_check) == -1)
         errx(1, "fscanf failed"); //LCOV_EXCL_LINE
-    Symbol top = { .type = LETTER, .value = { .letter = top_data.content } };
+    Symbol top;
+    if (type_check == 2)
+    {
+        top.type = OPERATOR;
+        top.value.operator = __parse_op(top_data.content);
+        top.group = top_data.group;
+    }
+    else
+    {
+        top.type = LETTER;
+        top.value.letter = top_data.content;
+        top.group = top_data.group;
+    }
     BinTree *top_node = BinTree(Symbol, &top, .left = NULL, .right = NULL);
     top_data.tree = top_node;
     array_append(corresp_table, &top_data);
@@ -96,9 +112,22 @@ BinTree *dot_to_bin_tree(const char *path)
     {
         ungetc(result, file);
         struct TreeSerializeData d;
-        if (fscanf(file, " %zu[label=\"%c\"]\n", &d.index, &d.content) == -1)
+        if (fscanf(file, " %zu[label=\"%c\" xlabel=\"%i\" peripheries=\"%i\"]\n",
+                   &d.index, &d.content, &d.group, &type_check) == -1)
             errx(1, "fscanf failed"); //LCOV_EXCL_LINE
-        Symbol symbol = { .type = LETTER, .value = { .letter = d.content } };
+        Symbol symbol;
+        if (type_check == 2)
+        {
+            symbol.type = OPERATOR;
+            symbol.value.operator = __parse_op(d.content);
+            symbol.group = d.group;
+        }
+        else
+        {
+            symbol.type = LETTER;
+            symbol.value.letter = d.content;
+            symbol.group = d.group;
+        }
         BinTree *node = BinTree(Symbol, &symbol, .left = NULL, .right = NULL);
         d.tree = node;
         array_append(corresp_table, &d);
@@ -113,6 +142,7 @@ BinTree *dot_to_bin_tree(const char *path)
                     data.tree->left = node;
                 else
                     data.tree->right = node;
+
                 ((Symbol *)data.tree->data)->type = OPERATOR;
                 ((Symbol *)data.tree->data)->value =
                     (SymbolValue){ .operator= __parse_op(data.content) };
@@ -131,9 +161,11 @@ void bin_tree_to_dot(BinTree *tree, FILE *file)
     LinkedList *queue = LinkedList(BinTree *);
     if (tree)
     {
+        int group = ((Symbol *)(tree->data))->group;
+        int peripheries = (((Symbol *)(tree->data))->type == OPERATOR) + 1;
         list_push_back(queue, &tree);
-        fprintf(file, "  %zu[label=\"%c\"]\n", (size_t)tree,
-                __get_symbol_value(tree->data));
+        fprintf(file, "  %zu[label=\"%c\" xlabel=\"%i\" peripheries=\"%i\"]\n", (size_t)tree,
+                __get_symbol_value(tree->data), group, peripheries);
     }
     while (queue->next)
     {
@@ -141,15 +173,19 @@ void bin_tree_to_dot(BinTree *tree, FILE *file)
         BinTree *node = *(BinTree **)(node_list->data);
         if (node->left)
         {
-            fprintf(file, "  %zu[label=\"%c\"]\n", (size_t)node->left,
-                    __get_symbol_value(node->left->data));
+            int group = ((Symbol *)(node->left->data))->group;
+            int peripheries = (((Symbol *)(node->left->data))->type == OPERATOR) + 1;
+            fprintf(file, "  %zu[label=\"%c\" xlabel=\"%i\" peripheries=\"%i\"]\n", (size_t)node->left,
+                    __get_symbol_value(node->left->data), group, peripheries);
             fprintf(file, "  %zu  ->  %zu\n", (size_t)node, (size_t)node->left);
             list_push_back(queue, &node->left);
         }
         if (node->right)
         {
-            fprintf(file, "  %zu[label=\"%c\"]\n", (size_t)node->right,
-                    __get_symbol_value(node->right->data));
+            int group = ((Symbol *)(node->right->data))->group;
+            int peripheries = (((Symbol *)(node->right->data))->type == OPERATOR) + 1;
+            fprintf(file, "  %zu[label=\"%c\" xlabel=\"%i\" peripheries=\"%i\"]\n", (size_t)node->right,
+                    __get_symbol_value(node->right->data), group, peripheries);
             fprintf(file, "  %zu  ->  %zu\n", (size_t)node,
                     (size_t)node->right);
             list_push_back(queue, &node->right);
@@ -173,13 +209,17 @@ int bintree_compare(BinTree *a, BinTree *b)
     Symbol s_b = *(Symbol *)(b->data);
     if(s_a.type == s_b.type)
     {
-        if (s_a.type == LETTER && s_a.value.letter == s_b.value.letter)
+        if (s_a.type == LETTER && s_a.value.letter == s_b.value.letter && s_a.group == s_b.group)
         {
             return (bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right));
         }
-        if (s_a.value.operator == s_b.value.operator)
+        else if (s_a.type == OPERATOR && s_a.value.operator == s_b.value.operator && s_a.group == s_b.group)
         {
             return (bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right));
+        }
+        else if (s_a.type == CHARACTER_CLASS)
+        {
+            return bintree_compare(a->left, b->left) && bintree_compare(a->right, b->right);
         }
     }
     return 0;

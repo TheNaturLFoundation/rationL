@@ -12,7 +12,8 @@
 typedef enum SymbolType
 {
     OPERATOR,
-    LETTER
+    LETTER,
+    CHARACTER_CLASS,
 } SymbolType;
 
 /**
@@ -44,6 +45,7 @@ typedef union SymbolValue
 {
     Operator operator;
     Letter letter;
+    Array *letters;
 } SymbolValue;
 
 /**
@@ -57,6 +59,7 @@ typedef struct Symbol
 {
     SymbolType type;
     SymbolValue value;
+    int group;
 } Symbol;
 
 

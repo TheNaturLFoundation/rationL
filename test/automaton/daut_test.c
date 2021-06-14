@@ -1,86 +1,6 @@
 #include <criterion/criterion.h>
 #include <criterion/internal/assert.h>
-#include "automaton/automaton.h"
-
-#define ASSERT_AUTOMATON_EQ(a1, a2) assert_automaton_eq(__LINE__, a1, a2)
-
-void assert_automaton_eq(size_t line, Automaton *a1, Automaton *a2)
-{
-    // Test starting states
-    cr_assert_eq(a1->starting_states->size, a2->starting_states->size,
-                 "First automaton has %zu starting states, "
-                 "second has %zu (line %zu)",
-                 a1->starting_states->size, a2->starting_states->size, line);
-    for (size_t i = 0; i < a1->starting_states->size; i++)
-    {
-        State *s1 = *(State **)array_get(a1->starting_states, i);
-        int found = 0;
-        arr_foreach(State *, s2, a2->starting_states)
-            if (s2->id == s1->id)
-            {
-                found = 1;
-                break;
-            }
-        cr_assert(found, "First automaton has state %zu as a starting state,"
-                      " second hasn't (line %zu)", s1->id, line);
-    }
-    cr_assert_eq(a1->states->size, a2->states->size,
-                 "First automaton has %zu states, second has %zu (line %zu)",
-                 a1->states->size, a2->states->size, line);
-
-    size_t terminal1 = 0;
-    size_t terminal2 = 0;
-    arr_foreach(State *, s1, a1->states)
-        terminal1 += s1->terminal;
-    arr_foreach(State *, s2, a2->states)
-        terminal2 += s2->terminal;
-    cr_assert_eq(terminal1, terminal2,
-                 "First automaton has %zu terminal states, "
-                 "second has %zu (line %zu)",
-                 terminal1, terminal2, line);
-    for (size_t i = 0; i < a1->states->size; i++)
-    {
-        State *s1 = *(State **)array_get(a1->states, i);
-        if (!s1->terminal)
-            continue;
-        int found = 0;
-        arr_foreach(State *, s2, a2->states)
-            if (s2->terminal && s2->id == s1->id)
-            {
-                found = 1;
-                break;
-            }
-        cr_assert(found, "First automaton has state %zu as a terminal state,"
-                         " second hasn't (line %zu)", s1->id, line);
-    }
-
-    cr_assert_eq(a1->size, a2->size,
-                 "First automaton has size %zu, second has size %zu (line %zu)",
-                 a1->size, a2->size, line);
-
-    cr_assert_eq(a1->transition_table->width, a2->transition_table->width,
-                 "First table has width %zu, second has width %zu (line %zu)",
-                 a1->transition_table->width, a2->transition_table->width, line);
-
-    // Check if the two transition tables are equal
-    for (size_t x = 0; x < a1->transition_table->width; x++)
-        for (size_t y = 0; y < a1->size; y++)
-        {
-            LinkedList *list1 = matrix_get(a1->transition_table, x, y)->next;
-            LinkedList *list2 = matrix_get(a2->transition_table, x, y)->next;
-            while (list1 != NULL && list2 != NULL)
-            {
-                State *s1 = *(State **)list1->data;
-                State *s2 = *(State **)list2->data;
-                cr_assert_eq(s1->id, s2->id);
-                cr_assert_eq(s1->terminal, s2->terminal);
-
-                list1 = list1->next;
-                list2 = list2->next;
-            }
-            cr_assert_eq(list1, list2);
-        }
-}
+#include "utils.h"
 
 Test(daut, a_or_b)
 {
@@ -91,7 +11,7 @@ Test(daut, a_or_b)
      *     \  b
      *      \--- 2->
      */
-    Automaton *expected = Automaton(3);
+    Automaton *expected = Automaton(3, 2);
     State *q0 = State(0);
     State *q1 = State(1);
     State *q2 = State(1);
@@ -101,20 +21,22 @@ Test(daut, a_or_b)
     automaton_add_transition(expected, q0, q1, 'a', 0);
     automaton_add_transition(expected, q0, q2, 'b', 0);
 
-    Automaton *a_or_b = automaton_from_daut(TEST_PATH "automaton/a+b.daut");
+    Automaton *a_or_b = automaton_from_daut(TEST_PATH "automaton/a+b.daut", 3);
     ASSERT_AUTOMATON_EQ(a_or_b, expected);
 
     automaton_free(expected);
     automaton_free(a_or_b);
 }
 
+
 Test(daut, abba)
 {
     /*
-     *       a    b    b    a
-     *  -> 0 -> 1 -> 2 -> 3 -> 4 ->
+     *    ε    a    b    b    a
+     *  0 -> 1 -> 2 -> 3 -> 4 -> 5 ->
+     *       ^
      */
-    Automaton *expected = Automaton(6);
+    Automaton *expected = Automaton(6, 3);
     State *q0 = State(0);
     State *q1 = State(0);
     State *q2 = State(0);
@@ -133,9 +55,75 @@ Test(daut, abba)
     automaton_add_transition(expected, q3, q4, 'b', 0);
     automaton_add_transition(expected, q4, q5, 'a', 0);
 
-    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut");
+    Automaton *abba = automaton_from_daut(TEST_PATH "automaton/abba.daut", 6);
     ASSERT_AUTOMATON_EQ(abba, expected);
 
     automaton_free(expected);
     automaton_free(abba);
+}
+
+static void assert_set_eq(Set *s1, Set *s2)
+{
+    if (s1 == NULL || s2 == NULL)
+        cr_assert_eq(s1, s2, "s1 == %p, s2 == %p", s1, s2);
+    cr_assert_eq(s1->buckets->size, s2->buckets->size);
+
+    for (size_t i = 0; i < s1->buckets->size; i++)
+    {
+        LinkedList *bucket1 = *(LinkedList **)array_get(s1->buckets, i);
+        LinkedList *bucket2 = *(LinkedList **)array_get(s2->buckets, i);
+        while (bucket1->next != NULL && bucket2->next != NULL)
+        {
+            MapNode *node1 = *(MapNode **)bucket1->next->data;
+            MapNode *node2 = *(MapNode **)bucket2->next->data;
+
+            size_t *x1 = node1->key;
+            size_t *x2 = node2->key;
+            cr_assert_eq(*x1, *x2);
+
+            bucket1 = bucket1->next;
+            bucket2 = bucket2->next;
+        }
+    }
+}
+
+Test(daut, special_transitions)
+{
+    Automaton *expected = Automaton(4, 3);
+    State *q0 = State(0);
+    State *q1 = State(0);
+    State *q2 = State(0);
+    State *q3 = State(1);
+    automaton_add_state(expected, q0, 1);
+    automaton_add_state(expected, q1, 0);
+    automaton_add_state(expected, q2, 0);
+    automaton_add_state(expected, q3, 0);
+    automaton_add_transition(expected, q0, q1, 'a', 0);
+    automaton_add_transition(expected, q1, q2, 'b', 0);
+    automaton_add_transition(expected, q2, q3, 'c', 0);
+    automaton_mark_entering(expected, NULL, q0, 0, 0, 0);
+    automaton_mark_entering(expected, q0, q1, 'a', 0, 1);
+    automaton_mark_entering(expected, q1, q2, 'b', 0, 2);
+    automaton_mark_leaving(expected, q3, NULL, 0, 0, 0);
+    automaton_mark_leaving(expected, q3, NULL, 0, 0, 1);
+    automaton_mark_leaving(expected, q3, NULL, 0, 0, 2);
+
+    Automaton *aut = automaton_from_daut(TEST_PATH "automaton/(a(b(c))).daut", 4);
+    State *r0 = *(State **)array_get(aut->states, 0);
+    State *r1 = *(State **)array_get(aut->states, 1);
+    State *r2 = *(State **)array_get(aut->states, 2);
+    State *r3 = *(State **)array_get(aut->states, 3);
+
+    cr_assert_eq(aut->nb_groups, 3, "Expected 3, got %zu\n", aut->nb_groups);
+
+    assert_set_eq(get_entering_groups(expected, NULL, q0, 0, 0),
+                      get_entering_groups(aut, NULL, r0, 0, 0));
+    assert_set_eq(get_entering_groups(expected, q0, q1, 'a', 0),
+                  get_entering_groups(aut, r0, r1, 'a', 0));
+    assert_set_eq(get_entering_groups(expected, q1, q2, 'b', 0),
+                  get_entering_groups(aut, r1, r2, 'b', 0));
+    assert_set_eq(get_leaving_group(expected, q3, NULL, 0, 0),
+                  get_leaving_group(aut, q3, NULL, 0, 0));
+
+    automaton_free(aut);
 }

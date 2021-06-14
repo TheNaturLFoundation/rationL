@@ -3,6 +3,7 @@
 #include "parsing/parsing.h"
 #include "test_utils.h"
 
+
 Test(paranthesis_nested, left_left_a_right_right)
 {
     Array *arr = tokenize("((a))");

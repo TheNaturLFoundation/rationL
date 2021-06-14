@@ -3,6 +3,7 @@
 #include "parsing/parsing.h"
 #include "test_utils.h"
 
+
 Test(paranthesis_unary, left_a_right_star)
 {
     Array *arr = tokenize("(a)*");

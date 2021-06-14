@@ -2,10 +2,13 @@
 
 #include "datatypes/array.h"
 #include "datatypes/matrix.h"
+#include "datatypes/map.h"
 #include "parsing/lexer.h"
 
-#define Automaton(size) automaton_create(size);
-#define State(term) state_create(term);
+#define NUMBER_OF_SYMB 257
+#define EPSILON_INDEX 256
+#define Automaton(size, letter_count) automaton_create(size, letter_count)
+#define State(term) state_create(term)
 
 /**
  * @struct Automaton
@@ -22,6 +25,11 @@ typedef struct
      * This order of the graph i.e. the number of states in the automaton.
      */
     size_t size;
+
+    /**
+     * This is the maximum number of states allowed.
+     */
+    size_t capacity;
 
     /**
      * Transition table of the automaton.
@@ -50,8 +58,18 @@ typedef struct
      * An array containing all states
     */
     Array *states;
+	
+    int * lookup_table;
+
+    size_t lookup_used;
 
     int is_determined;
+
+    size_t nb_groups;
+
+    Map * entering_transitions;
+
+    Map * leaving_transitions;
 
 } Automaton;
 
@@ -74,6 +92,23 @@ typedef struct State
     int terminal;
 } State;
 
+
+/**
+ * @struct State
+ * @brief Representation of transiton, used to store maps of transitions.
+ * @author Argatu Vlad
+ * @date 06/02/2021
+ */
+
+typedef struct Transition
+{
+    size_t old_src;
+    size_t old_dst;
+    Letter letter;
+    int is_epsilon;
+
+} Transition;
+
 /**
  * @author Vlad Argatu
  * @date 07/03/2021
@@ -90,6 +125,18 @@ State * state_create(int is_terminal);
 */
 Automaton * automaton_create();
 
+
+/**
+ * @author Vlad Argatu
+ * @date 21/04/2021
+ * @param automatonn: the automaton.
+ * @param state_id: the id of the state which is the source of the transition
+ * @param value: the character of the transition.
+ * @param is_epsilon: if set, the value is ignored and the transition is considered as epsilon.
+ * @return  NULL if no transition with the character exists in the entire automaton, the return of matrix_get otherwise.
+ */
+
+LinkedList * get_matrix_elt(const Automaton * automaton, size_t state_id, Letter value, int is_epsilon);
 
 /**
  * @author Vlad Argatu
@@ -141,6 +188,15 @@ int automaton_remove_transition(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon);
 
 /**
+ * @author Rostan Tabet
+ * @date 09/04/2021
+ * @brief Create a full copy of an automaton.
+ * @param source The source automaton, kept unchanged.
+ * @return A newly created automaton, identical to the source.
+ */
+Automaton *automaton_copy(Automaton *source);
+
+/**
  * @author Vlad Argatu
  * @date 05/03/2021
  * @param automaton: the automaton to free.
@@ -150,9 +206,12 @@ void automaton_free(Automaton * automaton);
 /**
  * @author Rostan Tabet
  * @date 24/03/2021
- * @filename: path to the .daut file.
+ * @param filename Path to the .daut file.
+ * @param size The number of states in the automaton
+ * @return The new automaton.
+ * If there is an error, return NULL and set errno accordingly.
  */
-Automaton *automaton_from_daut(const char *filename);
+Automaton *automaton_from_daut(const char *filename, size_t size);
 
 
 
@@ -163,3 +222,132 @@ Automaton *automaton_from_daut(const char *filename);
  * Prints the dot reprensentation of the automaton in the
  * stdout. */
 void automaton_to_dot(Automaton* aut);
+
+/**
+ * @author Vlad Argatu
+ * @date 25/04/2021
+ * @param automaton: The automaton.
+ * @param s: The State you are looking for.
+ * @return 0 if false, 1 if true.
+ */
+int state_is_entry(Automaton * automaton, State * s);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group Primitive function for _mark_to_map.
+ */
+void _mark_tr_to_map(Map * map, Transition * tr, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group Primitive function for marking entering and leaving.
+ */
+
+void _mark_to_map(Map * map, State * src, State * dst, Letter value, 
+    int epsilon, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group The number of group that this transition enters.
+ * This functions add the given transition to the map of entering transitions
+ * If src or dst is NULL, it is considered to be a transition from or to outside
+ * the automaton.
+ */
+
+void automaton_mark_entering(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon, size_t group);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * @param group The number of group that this transition leaves.
+ * This functions add the given transition to the map of leaving transitions.
+ * If src or dst is NULL, it is considered to be a transition from or to outside
+ * the automaton.
+ */
+
+void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon, size_t group);
+
+
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns 0 if the transition is in the automaton.
+*/
+
+Transition _generate_transition(State * src, State * dst, Letter value, int epsilon);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns 1 if the transition is in the automaton 0 otherwise.
+*/
+
+int automaton_is_transition(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns the resulting set
+*/
+
+Map * get_entering_groups(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
+
+
+/**
+ * @author Vlad Argatu
+ * @date 8/06/2021
+ * @param automaton The automaton on which the action is performed.
+ * @param src The source of the transition.
+ * @param dst The destination of the transition.
+ * @param value The value of the transiton. Note that this is ignored of epsilon is set.
+ * @param epsilon A booleen indicating wether the transition is epsilon or not.
+ * returns the resulting set
+*/
+Map * get_leaving_group(Automaton * automaton, State * src, State * dst,
+    Letter value, int epsilon);
+
+void automaton_clear_state_terminal(Automaton * automaton, State * state);
+
+void automaton_clear_state_entry(Automaton * automaton, size_t index);

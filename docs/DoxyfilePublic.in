@@ -2,12 +2,15 @@ PROJECT_NAME           = @PACKAGE_NAME@
 PROJECT_NUMBER         = @PACKAGE_VERSION@
 OUTPUT_DIRECTORY       = @top_srcdir@/docs/public/
 INPUT                  = @top_srcdir@/include \
-                         mainpage.md
+                         mainpage.md \
+                         get_started.md
 EXCLUDE                = @top_srcdir@/include/config.h
-GENERATE_LATEX         = NO
+GENERATE_LATEX         = YES 
+FULL_PATH_NAMES 	   = YES 
+STRIP_FROM_PATH 	   = ../
 GENERATE_MAN	       = NO
 JAVADOC_BANNER 	       = YES
-EXTRACT_ALL 	       = NO
-RECURSIVE	           = YES
+EXTRACT_ALL 	       = YES 
+RECURSIVE	       = YES
 GENERATE_TREEVIEW      = YES
 OPTIMIZE_OUTPUT_FOR_C  = YES

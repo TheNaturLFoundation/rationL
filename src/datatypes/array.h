@@ -5,13 +5,15 @@
 #define ARR_GROWTH_FACTOR 2.0
 
 #define Array(type) array_create(sizeof(type))
-#define arr_foreach(T, var, array)                       \
-    T var;                                               \
-    if ((array)->size)                                   \
-        (var) = *(T *)array_get(array, 0);               \
-    for (size_t i_ = 0; i_ < (array)->size; i_++,        \
-                (var) = *(T *)array_get(array,           \
-                i_ < (array)->size ? i_ : (array)->size - 1))
+#define arr_foreach(T, var, array)                                             \
+                                                                               \
+    T var;                                                                     \
+    if ((array)->size)                                                         \
+        (var) = *(T *)array_get(array, 0);                                     \
+    for (size_t i_##var = 0; i_##var < (array)->size; i_##var++,               \
+                (var) = *(T *)array_get(                                       \
+                    array,                                                     \
+                    i_##var < (array)->size ? i_##var : (array)->size - 1))
 
 /**
  * @struct Array
@@ -94,7 +96,7 @@ void array_remove(Array *array, size_t index);
  * @param value: Element to insert.
  * @return the element that was at the specified index.
  */
-void array_insert(Array *array, size_t index, void *value);
+void array_insert(Array *array, size_t index, const void *value);
 
 /**
  * Clears an array. The size is set to 0 but the capacity doesn't change.

@@ -79,7 +79,7 @@ void array_remove(Array *array, size_t index)
     array->size--;
 }
 
-void array_insert(Array *array, size_t index, void *value)
+void array_insert(Array *array, size_t index, const void *value)
 {
     if (index > array->size)
         errx(1, "Index %zu is out of range for array of size %zu\n",
