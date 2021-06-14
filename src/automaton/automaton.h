@@ -65,6 +65,8 @@ typedef struct
 
     int is_determined;
 
+    size_t nb_groups;
+
     Map * entering_transitions;
 
     Map * leaving_transitions;

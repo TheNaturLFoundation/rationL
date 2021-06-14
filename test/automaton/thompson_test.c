@@ -198,7 +198,7 @@ Test(thompson, simple)
     BinTree *b = parse_symbols(arr);
     //tree_to_dot(b);
     Automaton *aut = thompson(b);
-    automaton_to_dot(aut);
+    // automaton_to_dot(aut);
     automaton_free(aut);
     array_free(arr);
     bintree_free(b);

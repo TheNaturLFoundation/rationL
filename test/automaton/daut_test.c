@@ -114,6 +114,8 @@ Test(daut, special_transitions)
     State *r2 = *(State **)array_get(aut->states, 2);
     State *r3 = *(State **)array_get(aut->states, 3);
 
+    cr_assert_eq(aut->nb_groups, 3, "Expected 3, got %zu\n", aut->nb_groups);
+
     assert_set_eq(get_entering_groups(expected, NULL, q0, 0, 0),
                       get_entering_groups(aut, NULL, r0, 0, 0));
     assert_set_eq(get_entering_groups(expected, q0, q1, 'a', 0),

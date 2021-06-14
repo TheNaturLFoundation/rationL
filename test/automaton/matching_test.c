@@ -35,11 +35,14 @@ static void assert_match_eq_(Match *expected, Match *actual, size_t line)
                  expected->nb_groups, actual->nb_groups, line);
 
     if (expected->groups == NULL || actual->groups == NULL)
-        cr_assert_eq(expected->groups, actual->groups);
+        cr_assert_eq(expected->groups, actual->groups,
+                     "match groups: expected %snull, got %snull (line %zu)\n",
+                     expected->groups == NULL ? "" : "non-",
+                     actual->groups == NULL ? "" : "non-", line);
 
     for (size_t i = 0; i < expected->nb_groups; i++)
     {
-        cr_assert_eq(
+        cr_assert_str_eq(
             expected->groups[i], actual->groups[i],
             "match groups at pos %zu: expected '%s', got '%s' (line %zu)", i,
             expected->groups[i], actual->groups[i], line);
@@ -439,6 +442,37 @@ Test(substring_dfa, astar)
     expected.length = 3;
     assert_match_eq(&expected, match);
     free_matches_array(matches);
+
+    automaton_free(aut);
+}
+
+Test(substring_dfa, a_b_or_c_a_groups)
+{
+    Automaton *tmp = automaton_from_daut(
+        TEST_PATH "automaton/determine_daut/((a(b|c))a)_determined.daut", 5);
+    // Automaton *aut = build_search_dfa(tmp);
+    // automaton_free(tmp);
+    Automaton *aut = tmp;
+    Array *matches;
+    Match *match;
+
+    puts("before");
+    matches = search_dfa(aut, "aba");
+    puts("after");
+    cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
+    match = *(Match **)array_get(matches, 0);
+    char *groups[] = { "aba", "ab", "b" };
+    Match expected = {
+        .string = "aba",
+        .start = 0,
+        .length = 3,
+        .nb_groups = 3,
+        .groups = groups,
+    };
+    assert_match_eq(&expected, match);
+    free_matches_array(matches);
+
+    automaton_free(aut);
 }
 
 // --------------------

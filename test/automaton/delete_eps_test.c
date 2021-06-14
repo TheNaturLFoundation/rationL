@@ -751,11 +751,11 @@ Test(delete_eps, flex)
     automaton_mark_leaving(automaton, s[6], s[0], 0, 1, 2);
     automaton_mark_leaving(automaton, s[0], s[1], 0, 1, 1);
 
-    automaton_to_dot(automaton);
+    // automaton_to_dot(automaton);
 
     automaton_delete_epsilon_tr(automaton);
 
-    automaton_to_dot(automaton);
+    // automaton_to_dot(automaton);
 
     automaton_free(automaton);
 }

@@ -10,6 +10,7 @@ Automaton *determine(const Automaton *source)
 {
     Automaton *automaton = Automaton(1, source->lookup_used);
     automaton->is_determined = 1;
+    automaton->nb_groups = source->nb_groups;
     // Associate each powerset to a state id
     Map *powersets = Map(Set *, size_t, &hash_set, &compare_sets);
     // For each iterations, collect the set of ids associated to each letter
@@ -185,6 +186,7 @@ Automaton *build_search_dfa(Automaton *source)
 
     Automaton *aut = automaton_copy(source);
     aut->is_determined = 1;
+    aut->nb_groups = source->nb_groups;
 
     Letter letter_mapping[aut->transition_table->width];
     {

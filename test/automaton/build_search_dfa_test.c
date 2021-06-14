@@ -26,6 +26,8 @@ Test(build_search_dfa, a_or_bb_ab)
         TEST_PATH "automaton/search_dfa_daut/(a|bb)ab.daut", 8);
 
     Automaton *result = build_search_dfa(source);
+    // automaton_to_dot(source);
+    // automaton_to_dot(expected);
     ASSERT_AUTOMATON_EQ(result, expected);
 
     automaton_free(result);

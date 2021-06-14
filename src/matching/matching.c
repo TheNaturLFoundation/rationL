@@ -147,8 +147,17 @@ Array *search_dfa(const Automaton *automaton, const char *string)
     {
         State *current_state;
         const char *current_str;
+        LinkedList *queue_top;
     } context;
 
+    // The queue can contain two types of integers:
+    // * If it is positive, it is simply a letter.
+    // * If it is negative, it is a marker.
+    //   - If the marker is odd (-2n), it indicates an entering
+    //     transition into the group n.
+    //   - If it is even (-2n - 1), it indicates of leaving
+    //      transition from the group n.
+    LinkedList *queue = LinkedList(int);
     Array *matches = Array(Match *);
 
     context *last_final = NULL;
@@ -166,15 +175,51 @@ Array *search_dfa(const Automaton *automaton, const char *string)
             {
                 string = last_final->current_str;
                 curr = last_final->current_state;
-                last_final = NULL;
 
                 Match *match = SAFEMALLOC(sizeof(Match));
                 match->string = string_start;
                 match->start = match_start - string_start;
                 match->length = string - match_start;
-                // TODO: Fix when groups are supported
-                match->nb_groups = 0;
-                match->groups = NULL;
+                match->nb_groups = automaton->nb_groups;
+                if (match->nb_groups == 0)
+                    match->groups = NULL;
+                else
+                    match->groups =
+                        SAFECALLOC(sizeof(char *), match->nb_groups);
+
+                Array **arrays = SAFECALLOC(sizeof(Array *), automaton->nb_groups);
+                for (LinkedList *list_elt = queue->next;
+                     list_elt != last_final->queue_top->next && list_elt != NULL;
+                     list_elt = list_elt->next)
+                {
+                    int *value = list_elt->data;
+                    if (*value > 0)
+                    {
+                        for (size_t i = 0; i < automaton->nb_groups; i++)
+                            if (arrays[i] != NULL)
+                                array_append(arrays[i], value);
+                    }
+                    else
+                    {
+                        int mark = -*value;
+                        int group = mark / 2;
+                        if (mark % 2 == 0)
+                            arrays[group] = Array(char);
+                        else
+                        {
+                            char end_char = 0;
+                            array_append(arrays[group], &end_char);
+                            match->groups[group] = arrays[group]->data;
+                            match->groups[group] = SAFEREALLOC(
+                                match->groups[group], arrays[group]->size);
+                            free(arrays[group]);
+                            arrays[group] = NULL;
+                        }
+                    }
+                }
+                free(arrays);
+
+                last_final = NULL;
                 array_append(matches, &match);
             }
             else
@@ -189,7 +234,52 @@ Array *search_dfa(const Automaton *automaton, const char *string)
             continue;
         }
         string++;
+        State *prev_curr = curr;
         curr = *(State **)tr->next->data;
+        // Adding elements to the queue
+        Set *leaving = get_leaving_group((Automaton *)automaton,
+                                         prev_curr, curr, *(string - 1), 0);
+        if (leaving != NULL)
+        {
+            map_foreach_key(size_t, group, leaving, {
+                int mark = -(2 * group + 1);
+                list_push_back(queue, &mark);
+            })
+        }
+        leaving = get_leaving_group((Automaton *)automaton,
+                                    prev_curr, NULL, *(string - 1), 0);
+
+        if (leaving != NULL)
+        {
+            map_foreach_key(size_t, group, leaving, {
+                int mark = -(2 * group + 1);
+                list_push_back(queue, &mark);
+            })
+        }
+        Set *entering = get_entering_groups((Automaton *)automaton, NULL,
+                                            prev_curr, *(string - 1), 0);
+        if (entering != NULL)
+        {
+            map_foreach_key(size_t, group, entering, {
+                int mark = -2 * group;
+                list_push_back(queue, &mark);
+            })
+        }
+
+        {
+            int mark = (unsigned char)*(string - 1);
+            list_push_back(queue, &mark);
+        }
+        entering = get_entering_groups((Automaton *)automaton,
+                                            prev_curr, curr, *(string - 1), 0);
+        if (entering != NULL)
+        {
+            map_foreach_key(size_t, group, entering, {
+                int mark = -2 * group;
+                list_push_back(queue, &mark);
+            })
+        }
+
         if (tr->data != NULL)
         {
             // If a final state was encountered, don't take a back transition
@@ -198,25 +288,75 @@ Array *search_dfa(const Automaton *automaton, const char *string)
             {
                 string = last_final->current_str;
                 curr = last_final->current_state;
-                last_final = NULL;
 
                 Match *match = SAFEMALLOC(sizeof(Match));
                 match->string = string_start;
                 match->start = match_start - string_start;
                 match->length = string - match_start;
-                // TODO: Fix when groups are supported
-                match->nb_groups = 0;
-                match->groups = NULL;
+                match->nb_groups = automaton->nb_groups;
+                if (match->nb_groups == 0)
+                    match->groups = NULL;
+                else
+                    match->groups =
+                        SAFECALLOC(sizeof(char *), match->nb_groups);
+
+                Array **arrays = SAFECALLOC(sizeof(Array *), automaton->nb_groups);
+                for (LinkedList *list_elt = queue->next;
+                     list_elt != last_final->queue_top->next && list_elt != NULL;
+                     list_elt = list_elt->next)
+                {
+                    int *value = list_elt->data;
+                    if (*value > 0)
+                    {
+                        for (size_t i = 0; i < automaton->nb_groups; i++)
+                            if (arrays[i] != NULL)
+                                array_append(arrays[i], value);
+                    }
+                    else
+                    {
+                        int mark = -*value;
+                        int group = mark / 2;
+                        if (mark % 2 == 0)
+                            arrays[group] = Array(char);
+                        else
+                        {
+                            char end_char = 0;
+                            array_append(arrays[group], &end_char);
+                            match->groups[group] = arrays[group]->data;
+                            match->groups[group] = SAFEREALLOC(
+                                match->groups[group], arrays[group]->size);
+                            // Don't use array_free since the data field
+                            // is used elsewhere
+                            free(arrays[group]);
+                            arrays[group] = NULL;
+                        }
+                    }
+                }
+                free(arrays);
+
+                last_final = NULL;
                 array_append(matches, &match);
                 continue;
             }
             size_t offset = (size_t)tr->data;
             match_start = string - offset;
         }
+
         if (curr->terminal)
         {
+            Set *groups = get_leaving_group((Automaton *)automaton, curr, NULL, 0, 0);
+            if (groups != NULL)
+            {
+                map_foreach_key(size_t, group, groups, {
+                    int mark = -(2 * group + 1);
+                    list_push_back(queue, &mark);
+                })
+            }
             ctx.current_state = curr;
             ctx.current_str = string;
+            ctx.queue_top = queue;
+            while (ctx.queue_top->next != NULL)
+                ctx.queue_top = ctx.queue_top->next;
             last_final = &ctx;
         }
     }
@@ -228,9 +368,46 @@ Array *search_dfa(const Automaton *automaton, const char *string)
         match->string = string_start;
         match->start = match_start - string_start;
         match->length = string - match_start;
-        // TODO: Fix when groups are supported
-        match->nb_groups = 0;
-        match->groups = NULL;
+        match->nb_groups = automaton->nb_groups;
+        if (match->nb_groups == 0)
+            match->groups = NULL;
+        else
+            match->groups =
+                SAFECALLOC(sizeof(char *), match->nb_groups);
+
+        Array **arrays = SAFECALLOC(sizeof(Array *), automaton->nb_groups);
+        for (LinkedList *list_elt = queue->next;
+             list_elt != last_final->queue_top->next && list_elt != NULL;
+             list_elt = list_elt->next)
+        {
+            int *value = list_elt->data;
+            if (*value > 0)
+            {
+                for (size_t i = 0; i < automaton->nb_groups; i++)
+                    if (arrays[i] != NULL)
+                        array_append(arrays[i], value);
+            }
+            else
+            {
+                int mark = -*value;
+                int group = mark / 2;
+                if (mark % 2 == 0)
+                    arrays[group] = Array(char);
+                else
+                {
+                    char end_char = 0;
+                    array_append(arrays[group], &end_char);
+                    match->groups[group] = arrays[group]->data;
+                    match->groups[group] = SAFEREALLOC(
+                        match->groups[group], arrays[group]->size);
+                    free(arrays[group]);
+                    arrays[group] = NULL;
+                }
+            }
+        }
+        free(arrays);
+
+        last_final = NULL;
         array_append(matches, &match);
     }
 

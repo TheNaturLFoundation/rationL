@@ -45,7 +45,8 @@ Automaton *automaton_create(size_t state_count, size_t letter_count)
         autom->lookup_table[i] = -1;
     autom->lookup_used = 0;
     autom->is_determined = 0;
-    
+
+    autom->nb_groups = 0;
     autom->entering_transitions = Map(Transition, Map *, hash_transition, compare_transitions);
     autom->leaving_transitions = Map(Transition, Map *, hash_transition, compare_transitions);
     
@@ -322,6 +323,8 @@ void automaton_remove_state(Automaton *automaton, State *state)
 Automaton *automaton_copy(Automaton *source)
 {
     Automaton *copy = Automaton(source->size, source->transition_table->width);
+    copy->is_determined = source->is_determined;
+    copy->nb_groups = source->nb_groups;
 
     {
         arr_foreach(State *, state, source->states)
@@ -493,6 +496,8 @@ static int parse_daut_line(Automaton *automaton, const char *line,
         case '>': {
             char *no_symbol = get_symbol(&line);
             int no = atol(no_symbol); // Assume it's right
+            if (no + 1 > automaton->nb_groups)
+                automaton->nb_groups = no + 1;
             free(no_symbol);
             array_append(entering, &no);
             break;
@@ -500,6 +505,8 @@ static int parse_daut_line(Automaton *automaton, const char *line,
         case '<': {
             char *no_symbol = get_symbol(&line);
             int no = atol(no_symbol);
+            if (no + 1 > automaton->nb_groups)
+                automaton->nb_groups = no + 1;
             free(no_symbol);
             array_append(leaving, &no);
             break;
@@ -720,6 +727,8 @@ void _mark_to_map(Map * map, State * src, State * dst, Letter value,
 void automaton_mark_entering(Automaton * automaton, State * src, State * dst, 
     Letter value, int epsilon, size_t group)
 {
+    if (group + 1 > automaton->nb_groups)
+        automaton->nb_groups = group + 1;
     _check_transiton_in_automaton(automaton, src, dst, value, epsilon);
     _mark_to_map(automaton->entering_transitions, src, dst, value, epsilon, group);
 }
@@ -727,6 +736,8 @@ void automaton_mark_entering(Automaton * automaton, State * src, State * dst,
 void automaton_mark_leaving(Automaton * automaton, State * src, State * dst,
     Letter value, int epsilon, size_t group)
 {
+    if (group + 1 > automaton->nb_groups)
+        automaton->nb_groups = group + 1;
     _check_transiton_in_automaton(automaton, src, dst, value, epsilon);
     _mark_to_map(automaton->leaving_transitions, src, dst, value, epsilon, group);
 }
