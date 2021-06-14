@@ -49,15 +49,15 @@ void _build_epsilon(Automaton * aut, State * src, State * dst, int src_grp, size
 {
     automaton_add_transition(aut, src, dst, 'e', 1);
     Map * set;
-   // printf("%lu, %d\n", src->id, _leaves_self(aut, src, src_grp));
-    if(src_grp != dst_grp)
+    int dst_n = dst_grp;
+    if(src_grp != dst_n)
     {
-        if(src_grp > dst_grp)
+        if(src_grp > dst_n)
         {
             set = get_leaving_group(aut, src, NULL, 0, 1);
             _transfer_leaving_set_to(aut, set, src, dst);
         }
-        if(src_grp < dst_grp)
+        if(src_grp < dst_n)
         {
             set = get_entering_groups(aut, NULL, dst, 0, 1);
             _transfer_entering_set_to(aut, set, src, dst);

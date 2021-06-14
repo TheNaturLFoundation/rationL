@@ -71,11 +71,6 @@ static void add_range_except(Array *letters, char lower, char upper)
     }
 }
 
-static void add_literal(Array *tokens, char literal)
-{
-    const Token token = Literal(literal);
-    array_append(tokens, &token);
-}
 
 static void add_punctuation(Array *tokens, char punctuation)
 {
@@ -264,7 +259,6 @@ static int tokenize_repetition(const char **string, Array *tokens,
 // Assumes that the string ends with 0
 Array *tokenize(const char *string)
 {
-    const char *str = string;
     struct scope
     {
         /**

@@ -135,8 +135,7 @@ State *state_create(int is_terminal)
 
 void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
-    Matrix *mat = automaton->transition_table;
-    
+
     if(automaton->size + 1 > automaton->capacity)
     {
         automaton->capacity += 1;
@@ -475,7 +474,7 @@ static int parse_daut_line(Automaton *automaton, const char *line,
     const char *before = line;
     int is_epsilon = !move_to_next(&line);
     Letter value = 0;
-    if ((*line == '<' || *line == '>' && line) && line[1])
+    if (((*line == '<' || *line == '>') && line) && line[1])
         line = before;
     else if (!is_epsilon)
         value = *(line++);

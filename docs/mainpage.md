@@ -1,5 +1,6 @@
 \mainpage Main Page
 \tableofcontents
+
 # What is rationL
 
 **rationL** is a lightweight and quick regular expression (regexp) dynamic library written in C.
@@ -7,6 +8,17 @@
 It is written as part of the 4th semester project in the French IT School [EPITA](https://epita.fr).
 
 # Install
+
+## Arch Linux
+
+Arch linux users can use the aur package [rationl](https://aur.archlinux.org/packages/rationl/) with their favorite
+aur package manager such as ``yay``
+
+```
+yay -S rationl 
+```
+
+## Build from source
 
 To compile and install **rationL** you will need the following dependencies :
 
@@ -32,4 +44,6 @@ Clone the ``dev`` branch of the git and run the ``./bootstrap`` script to config
 
 # Documentation
 
-You can compile the documentation of the library in the ``docs`` folder using the ``make`` command.
+You can compile the documentation of the library in the ``docs`` folder using the ``make public`` command.
+
+You can also find the online documentation [here](https://thenaturlfoundation.github.io/rationL/)

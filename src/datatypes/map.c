@@ -380,8 +380,7 @@ char * stringify_set(Map * set, char pref)
     }
     if(n != 0)
     {
-        free(result);
-        result = malloc(sizeof(char) * (n + 2));
+        result = realloc(result, sizeof(char) * (n + 2));
         result[0] = pref;
         result[1] = 0;
         map_foreach_key(

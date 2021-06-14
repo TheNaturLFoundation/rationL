@@ -2,7 +2,8 @@ PROJECT_NAME           = @PACKAGE_NAME@
 PROJECT_NUMBER         = @PACKAGE_VERSION@
 OUTPUT_DIRECTORY       = @top_srcdir@/docs/public/
 INPUT                  = @top_srcdir@/include \
-                         mainpage.md
+                         mainpage.md \
+                         get_started.md
 EXCLUDE                = @top_srcdir@/include/config.h
 GENERATE_LATEX         = NO
 GENERATE_MAN	       = NO

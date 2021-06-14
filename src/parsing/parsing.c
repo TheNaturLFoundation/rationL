@@ -126,9 +126,6 @@ BinTree *parse_binary(BinTree *left, Array *arr, size_t *pos, int group,
     symbol.group = group;
     BinTree *b = BinTree(Symbol, &symbol, .left = left, .right = NULL);
 
-    // Save first token
-    Token *prev_token = array_get(arr, *pos);
-
     // Increment position
     *pos += 1;
     Token *token = array_get(arr, *pos);

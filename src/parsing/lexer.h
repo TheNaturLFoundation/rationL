@@ -7,9 +7,9 @@
 #define ASCII_FIRST_CONTROL 9
 #define ASCII_LAST_CONTROL 13
 
-#define Literal(val) { .type = LITERAL, .value = (val) }
+#define Literal(val) { .type = LITERAL, .value.letter = (Letter) (val) }
 
-#define Punctuation(val) { .type = PUNCTUATION, .value = (Letter) (val) }
+#define Punctuation(val) { .type = PUNCTUATION, .value.letter = (Letter) (val) }
 
 /**
  * Type used to represent letters in regular expressions.
