@@ -17,6 +17,8 @@ typedef struct match
     char **groups;
 } match;
 
+reg_t regexp_compile_string(char *pattern);
+
 reg_t regex_compile(char* pattern);
 
 reg_t regex_read_daut(char *path);
