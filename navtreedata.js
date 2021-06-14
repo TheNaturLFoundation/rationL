@@ -25,16 +25,33 @@ var NAVTREE =
   [ "rationL", "index.html", [
     [ "Main Page", "index.html", [
       [ "What is rationL", "index.html#autotoc_md0", null ],
-      [ "Install", "index.html#autotoc_md1", null ],
-      [ "Developers build", "index.html#autotoc_md2", null ],
-      [ "Documentation", "index.html#autotoc_md3", null ]
+      [ "Install", "index.html#autotoc_md1", [
+        [ "Arch Linux", "index.html#autotoc_md2", null ],
+        [ "Build from source", "index.html#autotoc_md3", null ]
+      ] ],
+      [ "Developers build", "index.html#autotoc_md4", null ],
+      [ "Documentation", "index.html#autotoc_md5", null ]
+    ] ],
+    [ "Getting started", "get_started.html", [
+      [ "Compile with the library", "get_started.html#autotoc_md6", null ],
+      [ "A simple program : verify an email", "get_started.html#autotoc_md7", null ],
+      [ "Extract all include headers from a C/C++ file.", "get_started.html#autotoc_md8", null ]
     ] ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
-      [ "Data Structure Index", "classes.html", null ]
+      [ "Data Structure Index", "classes.html", null ],
+      [ "Data Fields", "functions.html", [
+        [ "All", "functions.html", null ],
+        [ "Variables", "functions_vars.html", null ]
+      ] ]
     ] ],
     [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
+      [ "File List", "files.html", "files_dup" ],
+      [ "Globals", "globals.html", [
+        [ "All", "globals.html", null ],
+        [ "Functions", "globals_func.html", null ],
+        [ "Typedefs", "globals_type.html", null ]
+      ] ]
     ] ]
   ] ]
 ];
