@@ -1,18 +1,6 @@
 #include "delete_eps.h"
 #include "err.h"
 
-void add_entering_groups_to_src(Automaton * automaton, State * src, State * dst, 
-    Letter value, int epsilon, Map * set)
-{
-
-}
-
-void add_leaving_group_to_src(Automaton * automaton, State * src, State * dst,
-    Letter value, int epsilon, size_t * grp)
-{
-
-}
-
 Array * build_pred_lists(Automaton * automaton)
 {
     Array * pred_lists = Array(LinkedList *);
@@ -65,7 +53,7 @@ void add_to_pred_lists(Array * pred_lists, State * src, State * trg, Letter valu
 }
 
 void transfer_all_transitions(Automaton * automaton, State * src, 
-    State * new_src, Map * eps_entering, Array * pred_lists)
+    State * new_src, Map * eps_leaving, Array * pred_lists)
 {
     LinkedList * src_list;
     State * trg;
@@ -103,35 +91,35 @@ void transfer_all_transitions(Automaton * automaton, State * src,
                 tr_entering = get_entering_groups(automaton, src, trg, c, i == EPSILON_INDEX);
                 tr_leaving = get_leaving_group(automaton, src, trg, c, i == EPSILON_INDEX);
                 //deal with entering
-                if(eps_entering != NULL)
+                if(eps_leaving != NULL)
                 {
                     map_foreach_key(
-                        size_t, grp, eps_entering,
+                        size_t, grp, eps_leaving,
                         {
-                            automaton_mark_entering(automaton, new_src, trg,
+                            automaton_mark_leaving(automaton, new_src, trg,
                                 c, i == EPSILON_INDEX, grp);
                         }
                     )
                 }
 
-                if(tr_entering != NULL)
+                if(tr_leaving != NULL)
                 {
                     map_foreach_key(
-                        size_t, grp, tr_entering,
+                        size_t, grp, tr_leaving,
                         {
-                            automaton_mark_entering(automaton, new_src, trg,
+                            automaton_mark_leaving(automaton, new_src, trg,
                                 c, i == EPSILON_INDEX, grp);
                         }
                     )
                 }
 
                 //deal with leaving
-                if(tr_leaving != NULL)
+                if(tr_entering != NULL)
                 {
                     map_foreach_key(
-                        size_t, grp, tr_leaving,
+                        size_t, grp, tr_entering,
                         {
-                            automaton_mark_leaving(automaton, new_src, trg, 
+                            automaton_mark_entering(automaton, new_src, trg, 
                                 c, i == EPSILON_INDEX, grp);
                         }
                     )
@@ -166,28 +154,37 @@ void automaton_delete_epsilon_tr(Automaton * automaton)
                 entering_set = get_entering_groups(automaton, s, dst, 0, 1);
                 leaving_set = get_leaving_group(automaton, s, dst, 0, 1);
                 pred = *(LinkedList **)array_get(pred_lists, s->id);
-                if(leaving_set != NULL)
+                if(entering_set != NULL)
                 {
                     map_foreach_key(
-                        size_t, grp, leaving_set,
+                        size_t, grp, entering_set,
                         {
                             list_foreach(Transition, tr, pred)
                             {
                                 aux = *(State **)array_get(automaton->states, tr.old_src - 1);
                                 if(automaton_is_transition(automaton, aux, s, tr.letter, tr.is_epsilon) == 1)
                                 {
-                                    _mark_tr_to_map(automaton->leaving_transitions,
+                                    _mark_tr_to_map(automaton->entering_transitions,
                                         &tr, grp);
                                 }                
                             }
                         }
                         )
                 }
-                transfer_all_transitions(automaton, dst, s, entering_set, pred_lists);
+                transfer_all_transitions(automaton, dst, s, leaving_set, pred_lists);
                 eps_list = eps_list->next;
                 
                 if(dst->terminal)
                 {
+                    if(leaving_set != NULL)
+                    {
+                        map_foreach_key(
+                            size_t, grp, leaving_set,
+                            {
+                                automaton_mark_leaving(automaton, s, NULL, 0, 1, grp);
+                            }
+                        )
+                    }
                     s->terminal = 1;
                 }
                 
@@ -198,8 +195,7 @@ void automaton_delete_epsilon_tr(Automaton * automaton)
                         map_foreach_key(
                             size_t, grp, entering_set,
                             {
-                                automaton_mark_entering(automaton, NULL, dst,
-                                    0, 1, grp);
+                                automaton_mark_entering(automaton, NULL, s, 0, 1, grp);
                             }
                         )
                     }

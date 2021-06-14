@@ -590,22 +590,19 @@ Test(delete_eps, basic_moving_entries)
     //mark the groups on the automaton:
     automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
     automaton_mark_leaving(automaton, s[2], s[3], 0, 1, g1);
-
+    //automaton_to_dot(automaton);
     automaton_delete_epsilon_tr(automaton);
+    //automaton_to_dot(automaton);
 
-    cr_assert_eq(get_entering_groups(automaton, s[2], s[4], 'b', 0), NULL);
-    cr_assert_eq(get_entering_groups(automaton, s[3], s[4], 'b', 0), NULL);
+    cr_assert_eq(automaton->entering_transitions->size, 1);
 
-    set = get_entering_groups(automaton, s[0], s[2], 'a', 0);
-    cr_assert_eq(set->size, 1);
-    cr_assert_neq(map_get(set, &g1), NULL);
-
-    set = get_entering_groups(automaton, NULL, s[1], 0, 1);
+    set = get_entering_groups(automaton, NULL, s[0], 0, 1);
     cr_assert_eq(set->size, 1);
     cr_assert_neq(map_get(set, &g1), NULL);
 
     automaton_free(automaton);
 }
+
 
 Test(delete_eps, basic_moving_leaving)
 {
@@ -619,20 +616,15 @@ Test(delete_eps, basic_moving_leaving)
     {
         s[i] = *(State **)array_get(automaton->states, i);
     }
-
+    //automaton_to_dot(automaton);
     automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
     automaton_mark_leaving(automaton, s[2], s[3], 0, 1, g1);
-
+    //automaton_to_dot(automaton);
     automaton_delete_epsilon_tr(automaton);
 
-    cr_assert_eq(get_leaving_group(automaton, s[2], s[4], 'b', 0), NULL);
-    cr_assert_eq(get_leaving_group(automaton, s[3], s[4], 'b', 0), NULL);
+    cr_assert_eq(automaton->leaving_transitions->size, 1);
 
-    set = get_leaving_group(automaton, s[0], s[2], 'a', 0);
-    cr_assert_eq(set->size, 1);
-    cr_assert_neq(map_get(set, &g1), NULL);
-
-    set = get_leaving_group(automaton, s[1], s[2], 'a', 0);
+    set = get_leaving_group(automaton, s[2], s[4], 'b', 0);
     cr_assert_eq(set->size, 1);
     cr_assert_neq(map_get(set, &g1), NULL);
 
@@ -654,21 +646,18 @@ Test(delete_eps, moving_entering_eps_entering)
 
     automaton_mark_entering(automaton, s[0], s[1], 0, 1, g1);
     automaton_mark_leaving(automaton, s[3], s[4], 0, 1, g1);
+    //automaton_to_dot(automaton);
     automaton_delete_epsilon_tr(automaton);
+    //automaton_to_dot(automaton);
 
-    cr_assert_eq(get_entering_groups(automaton, NULL, s[0], 0, 1), NULL);
+    cr_assert_eq(get_entering_groups(automaton, NULL, s[1], 0, 1), NULL);
+    cr_assert_eq(get_entering_groups(automaton, NULL, s[2], 0, 1), NULL);
+    cr_assert_eq(get_entering_groups(automaton, NULL, s[4], 0, 1), NULL);
     cr_assert_eq(get_entering_groups(automaton, s[1], s[3], 'a', 0), NULL);
     cr_assert_eq(get_entering_groups(automaton, s[2], s[3], 'a', 0), NULL);
-    
-    set = get_entering_groups(automaton, s[0], s[3], 'a', 0);
-    cr_assert_eq(set->size, 1);
-    cr_assert_neq(map_get(set, &g1), NULL);
+    cr_assert_eq(get_entering_groups(automaton, s[0], s[3], 'a', 0), NULL);
 
-    set = get_entering_groups(automaton, NULL, s[1], 'a', 0);
-    cr_assert_eq(set->size, 1);
-    cr_assert_neq(map_get(set, &g1), NULL);
-
-    set = get_entering_groups(automaton, NULL, s[2], 'a', 0);
+    set = get_entering_groups(automaton, NULL, s[0], 'a', 1);
     cr_assert_eq(set->size, 1);
     cr_assert_neq(map_get(set, &g1), NULL);
 
@@ -692,15 +681,9 @@ Test(delete_eps, test_moving_leaving_back)
     automaton_mark_leaving(automaton, s[3], s[4], 0, 1, g1);
     automaton_delete_epsilon_tr(automaton);
 
-    set = get_leaving_group(automaton, s[0], s[3], 'a', 0);
-    cr_assert_eq(set->size, 1);
-    cr_assert_neq(map_get(set, &g1), NULL);
+    cr_assert_eq(automaton->leaving_transitions->size, 1);
 
-    set = get_leaving_group(automaton, s[1], s[3], 'a', 0);
-    cr_assert_eq(set->size, 1);
-    cr_assert_neq(map_get(set, &g1), NULL);
-
-    set = get_leaving_group(automaton, s[2], s[3], 'a', 0);
+    set = get_leaving_group(automaton, s[3], NULL, 'a', 0);
     cr_assert_eq(set->size, 1);
     cr_assert_neq(map_get(set, &g1), NULL);
 
@@ -721,8 +704,10 @@ Test(delete_eps, test_jump_leaving)
     }
 
     automaton_mark_leaving(automaton, s[1], s[2], 'a', 0, g1);
-
+    //automaton_to_dot(automaton);
     automaton_delete_epsilon_tr(automaton);
+    //automaton_to_dot(automaton);
+
 
     set = get_leaving_group(automaton, s[0], s[2], 'a', 0);
     cr_assert_eq(set->size, 1);
@@ -734,7 +719,7 @@ Test(delete_eps, test_jump_leaving)
 
     automaton_free(automaton);
 }
-
+/*
 Test(delete_eps, flex)
 {
     Automaton * automaton = automaton_from_daut("automaton/hardcore_el.daut", 9);
@@ -759,3 +744,4 @@ Test(delete_eps, flex)
 
     automaton_free(automaton);
 }
+*/

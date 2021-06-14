@@ -23,6 +23,17 @@ It is written as part of the 4th semester project in the French IT School [EPITA
 
 # Install
 
+## Arch Linux
+
+Arch linux users can use the aur package [rationl](https://aur.archlinux.org/packages/rationl/) with their favorite
+aur package manager such as ``yay``
+
+```
+yay -S isolate
+```
+
+## Build from source
+
 To compile and install **rationL** you will need the following dependencies :
 
 + gcc (or any other C compiler supporting C99)

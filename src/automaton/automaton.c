@@ -105,28 +105,25 @@ Transition _generate_transition(State * src, State * dst, Letter value,int epsil
     return tr;
 }
 
-void _remove_transition_from_map(Map * map, State * src, State * dst,
-    Letter value, int epsilon)
+void _remove_transition_from_map(Map * map, Transition * tr)
 {
-    Transition tr = _generate_transition(src, dst, value, epsilon);
-    
-    Map ** group_set_ptr = map_delete(map, &tr);
+    Map ** group_set_ptr = map_delete(map, tr);
     if(group_set_ptr != NULL)
     {
         map_free(*group_set_ptr);
     }
     free(group_set_ptr);
 
-    free(map_delete(map, &tr));
+    free(map_delete(map, tr));
 }
 
 void _automaton_remove_transition_from_maps(Automaton * automaton, 
     State * src, State * dst, Letter value, int epsilon)
 {
-    _remove_transition_from_map(automaton->entering_transitions, src, dst, 
+    Transition tr = _generate_transition(src, dst, 
         value, epsilon);
-    _remove_transition_from_map(automaton->leaving_transitions, src, dst,
-        value, epsilon);
+    _remove_transition_from_map(automaton->entering_transitions, &tr);
+    _remove_transition_from_map(automaton->leaving_transitions, &tr);
 }
 
 
@@ -139,8 +136,7 @@ State *state_create(int is_terminal)
 
 void automaton_add_state(Automaton *automaton, State *state, int is_entry)
 {
-    Matrix *mat = automaton->transition_table;
-    
+
     if(automaton->size + 1 > automaton->capacity)
     {
         automaton->capacity += 1;
@@ -226,6 +222,7 @@ void _free_start_marked_as_entering(Automaton * automaton, State * s)
     }
     free(set_ptr);
 }
+
 
 void automaton_remove_state(Automaton *automaton, State *state)
 {
@@ -320,6 +317,32 @@ void automaton_remove_state(Automaton *automaton, State *state)
     free(state);
 }
 
+Set * set_cpy(Set * set)
+{
+    Set * ret = Set(size_t, hash_size_t, compare_size_t);
+    map_foreach_key(
+        size_t, grp, set,
+        {
+            set_add(set, &grp);
+        }
+    )
+    return ret;
+}
+
+Map * _map_cpy(Map * src)
+{
+    Map * ret =  Map(Transition, Map *, hash_transition, compare_transitions);
+    Set * set;
+    map_foreach_key(
+        Transition, tr, src,
+        {
+            set = map_get(src, &tr);
+            map_set(ret, &tr, &(set_cpy(set)));
+        }
+    )
+    return ret;
+}
+
 Automaton *automaton_copy(Automaton *source)
 {
     Automaton *copy = Automaton(source->size, source->transition_table->width);
@@ -356,6 +379,8 @@ Automaton *automaton_copy(Automaton *source)
         }
     }
 
+    copy->entering_transitions = _map_cpy(source->entering_transitions);
+    copy->leaving_transitions =_map_cpy(source->leaving_transitions);
     return copy;
 }
 
@@ -481,7 +506,7 @@ static int parse_daut_line(Automaton *automaton, const char *line,
     const char *before = line;
     int is_epsilon = !move_to_next(&line);
     Letter value = 0;
-    if ((*line == '<' || *line == '>' && line) && line[1])
+    if (((*line == '<' || *line == '>') && line) && line[1])
         line = before;
     else if (!is_epsilon)
         value = *(line++);
@@ -772,4 +797,11 @@ void automaton_clear_state_terminal(Automaton * automaton, State * state)
         return;
     _automaton_remove_transition_from_maps(automaton, state, NULL, 0, 1);
     state->terminal = 0;
+}
+
+void automaton_clear_state_entry(Automaton * automaton, size_t index)
+{
+    State * s = *(State **)array_get(automaton->starting_states, index);
+    _automaton_remove_transition_from_maps(automaton, NULL, s, 0, 1);
+    array_remove(automaton->starting_states, index);
 }

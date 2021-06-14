@@ -72,8 +72,10 @@ void print_tokens(Array *tokens)
     puts("");
 }
 
-Test(lexer, simple_single)
+Test(lexer, simple_single, .disabled = 1)
 {
+    // Disabled because for a simple string
+    // a DFA is directly constructed
     char *regexp = "a";
     Array *tokens = tokenize(regexp);
     cr_assert_eq(tokens->size, 1);
@@ -719,23 +721,6 @@ Test(lexer, not_range)
     expected_group,
     Punctuation(')')
     };
-
-    /*
-    Token *tok = (Token *)array_get(tokens, 0);
-    char c = tok->value.letter;
-    printf("\n\n%c\n", c);
-
-    tok = (Token *)array_get(tokens, 1);
-    Array *arr = (Array *)(tok->value.letters);
-    for (size_t i = 0; i < arr->size; i++)
-    {
-        printf("char : %c\n", *(char *)array_get(arr, i));
-    }
-
-    tok = (Token *)array_get(tokens, 2);
-    c = tok->value.letter;
-    printf("%c\n\n", c);
-*/
 
     cr_assert_eq(tokens->size, 3);
     for (size_t i = 0; i < tokens->size; i++)

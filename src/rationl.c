@@ -28,9 +28,38 @@ typedef struct match
     char **groups;
 } match;
 
+reg_t regexp_compile_string(char *pattern)
+{
+    size_t size = strlen(pattern);
+    Automaton *aut = automaton_create(size+1, size);
+    for (size_t i = 0; i<size+1; i++)
+    {
+        State *s = state_create(i==size);
+        automaton_add_state(aut, s, i==0);
+    }
+
+    for (size_t i = 0; i<size; i++)
+    {
+        State *src = *(State **)array_get(aut->states, i);
+        State *dst = *(State **)array_get(aut->states, i+1);
+        automaton_add_transition(aut, src, dst, pattern[i], 0);
+    }
+
+    reg_t re;
+    re.aut = aut;
+    re.pattern = malloc((strlen(pattern) + 1) * sizeof(char));
+    strcpy(re.pattern, pattern);
+    return re;
+}
+
 reg_t regex_compile(char* pattern)
 {
     Array *arr = tokenize(pattern);
+
+    if (arr == NULL)
+        return regexp_compile_string(pattern);
+
+
     BinTree *tree = parse_symbols(arr);
     Automaton *aut = thompson(tree);
     automaton_delete_epsilon_tr(aut);
