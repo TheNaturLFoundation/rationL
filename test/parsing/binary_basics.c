@@ -9,15 +9,19 @@ Test(binary_basics, null)
     cr_assert_eq(got, NULL);
 }
 
-Test(binary_basics, a)
+Test(binary_basics, a, .disabled = 1)
 {
+    // Disabled because for a simple string
+    // a DFA is directly constructed
     Array *arr = tokenize("a");
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/a.dot");
     array_free(arr);
 }
 
-Test(binary_basics, ab)
+Test(binary_basics, ab, .disabled = 1)
 {
+    // Disabled because for a simple string
+    // a DFA is directly constructed
     Array *arr = tokenize("ab");
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/ab.dot");
     array_free(arr);
@@ -30,8 +34,10 @@ Test(binary_basics, a_or_b)
     array_free(arr);
 }
 
-Test(binary_basics, abc)
+Test(binary_basics, abc, .disabled = 1)
 {
+    // Disabled because for a simple string
+    // a DFA is directly constructed
     Array *arr = tokenize("abc");
     check_ast_from_file(arr, TEST_PATH "parsing/dotfiles/abc.dot");
     array_free(arr);
