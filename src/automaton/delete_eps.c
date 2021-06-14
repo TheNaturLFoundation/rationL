@@ -1,18 +1,6 @@
 #include "delete_eps.h"
 #include "err.h"
 
-void add_entering_groups_to_src(Automaton * automaton, State * src, State * dst, 
-    Letter value, int epsilon, Map * set)
-{
-
-}
-
-void add_leaving_group_to_src(Automaton * automaton, State * src, State * dst,
-    Letter value, int epsilon, size_t * grp)
-{
-
-}
-
 Array * build_pred_lists(Automaton * automaton)
 {
     Array * pred_lists = Array(LinkedList *);
