@@ -328,12 +328,12 @@ Set * set_cpy(Set * set)
     return ret;
 }
 
-Map * _map_cpy(map * src)
+Map * _map_cpy(Map * src)
 {
     Map * ret =  Map(Transition, Map *, hash_transition, compare_transitions);
     Set * set;
     map_foreach_key(
-        Transition, tr, src
+        Transition, tr, src,
         {
             set = map_get(src, &tr);
             map_set(ret, &tr, set_cpy(set));
