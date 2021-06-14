@@ -546,11 +546,11 @@ Test(thompson, testttt)
 
 Test(thompson, I_hate_thompson)
 {
-    Array *arr = tokenize("a|(c(dd))");
+    Array *arr = tokenize("a|(bc)");
     BinTree *b = parse_symbols(arr);
     //tree_to_dot(b);
     Automaton *aut = thompson(b);
-    automaton_to_dot(aut);
+    //automaton_to_dot(aut);
     automaton_free(aut);
     array_free(arr);
     bintree_free(b);
