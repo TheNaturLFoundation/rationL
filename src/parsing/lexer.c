@@ -264,6 +264,7 @@ static int tokenize_repetition(const char **string, Array *tokens,
 // Assumes that the string ends with 0
 Array *tokenize(const char *string)
 {
+    const char *str = string;
     struct scope
     {
         /**
@@ -276,6 +277,8 @@ Array *tokenize(const char *string)
          */
         ssize_t end_index;
     };
+
+    char isString = 1;
 
     Array *tokens = Array(Token);
     const Token concat_token = Punctuation('.');
@@ -300,270 +303,280 @@ Array *tokenize(const char *string)
         token.value.letter = c;
         switch (c)
         {
-        case '\\':
-            if (!escaped)
-            {
-                switch (*(string + 1))
+            case '\\':
+                if (!escaped)
                 {
-                case 'd': {
-                    struct scope scope = { .start_char = '[',
-                                           .start_index =
-                                               tokens->size + previous_concat,
-                                           .end_index = -1 };
-                    list_push_front(scopes, &scope);
-                    if (previous_concat)
-                        array_append(tokens, &concat_token);
-                    previous_concat = 1;
-                    array_append(tokens, &par_token);
-                    Token class;
-                    class.type = CLASS;
-                    class.value.letters = Array(Letter);
-                    add_range(class.value.letters, '0', '9');
-                    array_append(tokens, &class);
-                    string++;
-                    c = ')';
-                    goto char_switch;
-                }
-                case 'D': {
-                    struct scope scope = { .start_char = '[',
-                                           .start_index =
-                                               tokens->size + previous_concat,
-                                           .end_index = -1 };
-                    list_push_front(scopes, &scope);
-                    if (previous_concat)
-                        array_append(tokens, &concat_token);
-                    previous_concat = 1;
-                    array_append(tokens, &par_token);
-                    Token class;
-                    class.type = CLASS;
-                    class.value.letters = Array(Letter);
-                    add_range(class.value.letters, ASCII_FIRST_CONTROL,
-                              ASCII_LAST_CONTROL);
-                    add_range(class.value.letters, ASCII_FIRST_PRINTABLE,
-                              '0' - 1);
-                    add_range(class.value.letters, '9' + 1,
-                              ASCII_LAST_PRINTABLE);
-                    array_append(tokens, &class);
-                    string++;
-                    c = ')';
-                    goto char_switch;
-                }
-                case 'w': {
-                    struct scope scope = { .start_char = '[',
-                                           .start_index =
-                                               tokens->size + previous_concat,
-                                           .end_index = -1 };
-                    list_push_front(scopes, &scope);
-                    if (previous_concat)
-                        array_append(tokens, &concat_token);
-                    previous_concat = 1;
-                    array_append(tokens, &par_token);
-                    Token class;
-                    class.type = CLASS;
-                    class.value.letters = Array(Letter);
-                    add_range(class.value.letters, 'a', 'z');
-                    add_range(class.value.letters, 'A', 'Z');
-                    add_range(class.value.letters, '0', '9');
-                    array_append(class.value.letters, &(char){ '_' });
-                    array_append(tokens, &class);
-                    string++;
-                    c = ')';
-                    goto char_switch;
-                }
-                case 'W': {
-                    struct scope scope = { .start_char = '[',
-                                           .start_index =
-                                               tokens->size + previous_concat,
-                                           .end_index = -1 };
-                    list_push_front(scopes, &scope);
-                    if (previous_concat)
-                        array_append(tokens, &concat_token);
-                    previous_concat = 1;
-                    array_append(tokens, &par_token);
-                    Token class;
-                    class.type = CLASS;
-                    class.value.letters = Array(Letter);
-                    add_range(class.value.letters, ASCII_FIRST_CONTROL,
-                              ASCII_LAST_CONTROL);
-                    add_range(class.value.letters, ASCII_FIRST_PRINTABLE,
-                              '0' - 1);
-                    add_range(class.value.letters, '9' + 1, 'A' - 1);
-                    add_range(class.value.letters, 'Z' + 1, '_' - 1);
-                    add_range(class.value.letters, '_' + 1, 'a' - 1);
-                    add_range(class.value.letters, 'z' + 1,
-                              ASCII_LAST_PRINTABLE);
-                    array_append(tokens, &class);
-                    string++;
-                    c = ')';
-                    goto char_switch;
-                }
-                case 's': {
-                    struct scope scope = { .start_char = '[',
-                                           .start_index =
-                                               tokens->size + previous_concat,
-                                           .end_index = -1 };
-                    list_push_front(scopes, &scope);
-                    if (previous_concat)
-                        array_append(tokens, &concat_token);
-                    previous_concat = 1;
-                    array_append(tokens, &par_token);
-                    Token class;
-                    class.type = CLASS;
-                    class.value.letters = Array(Letter);
-                    array_append(class.value.letters, &(char){ ' ' });
-                    add_range(class.value.letters, ASCII_FIRST_CONTROL,
-                              ASCII_LAST_CONTROL);
-                    array_append(tokens, &class);
-                    string++;
-                    c = ')';
-                    goto char_switch;
-                }
-                case 'S': {
-                    struct scope scope = { .start_char = '[',
-                                           .start_index =
-                                               tokens->size + previous_concat,
-                                           .end_index = -1 };
-                    list_push_front(scopes, &scope);
-                    if (previous_concat)
-                        array_append(tokens, &concat_token);
-                    previous_concat = 1;
+                    isString = 0;
+                    switch (*(string + 1))
+                    {
+                        case 'd': {
+                            struct scope scope = { .start_char = '[',
+                            .start_index =
+                            tokens->size + previous_concat,
+                            .end_index = -1 };
+                            list_push_front(scopes, &scope);
+                            if (previous_concat)
+                                array_append(tokens, &concat_token);
+                            previous_concat = 1;
+                            array_append(tokens, &par_token);
+                            Token class;
+                            class.type = CLASS;
+                            class.value.letters = Array(Letter);
+                            add_range(class.value.letters, '0', '9');
+                            array_append(tokens, &class);
+                            string++;
+                            c = ')';
+                            goto char_switch;
+                        }
+                        case 'D': {
+                            struct scope scope = { .start_char = '[',
+                            .start_index =
+                            tokens->size + previous_concat,
+                            .end_index = -1 };
+                            list_push_front(scopes, &scope);
+                            if (previous_concat)
+                                array_append(tokens, &concat_token);
+                            previous_concat = 1;
+                            array_append(tokens, &par_token);
+                            Token class;
+                            class.type = CLASS;
+                            class.value.letters = Array(Letter);
+                            add_range(class.value.letters, ASCII_FIRST_CONTROL,
+                                      ASCII_LAST_CONTROL);
+                            add_range(class.value.letters, ASCII_FIRST_PRINTABLE,
+                                      '0' - 1);
+                            add_range(class.value.letters, '9' + 1,
+                                      ASCII_LAST_PRINTABLE);
+                            array_append(tokens, &class);
+                            string++;
+                            c = ')';
+                            goto char_switch;
+                        }
+                        case 'w': {
+                            struct scope scope = { .start_char = '[',
+                            .start_index =
+                            tokens->size + previous_concat,
+                            .end_index = -1 };
+                            list_push_front(scopes, &scope);
+                            if (previous_concat)
+                                array_append(tokens, &concat_token);
+                            previous_concat = 1;
+                            array_append(tokens, &par_token);
+                            Token class;
+                            class.type = CLASS;
+                            class.value.letters = Array(Letter);
+                            add_range(class.value.letters, 'a', 'z');
+                            add_range(class.value.letters, 'A', 'Z');
+                            add_range(class.value.letters, '0', '9');
+                            array_append(class.value.letters, &(char){ '_' });
+                            array_append(tokens, &class);
+                            string++;
+                            c = ')';
+                            goto char_switch;
+                        }
+                        case 'W': {
+                            struct scope scope = { .start_char = '[',
+                            .start_index =
+                            tokens->size + previous_concat,
+                            .end_index = -1 };
+                            list_push_front(scopes, &scope);
+                            if (previous_concat)
+                                array_append(tokens, &concat_token);
+                            previous_concat = 1;
+                            array_append(tokens, &par_token);
+                            Token class;
+                            class.type = CLASS;
+                            class.value.letters = Array(Letter);
+                            add_range(class.value.letters, ASCII_FIRST_CONTROL,
+                                      ASCII_LAST_CONTROL);
+                            add_range(class.value.letters, ASCII_FIRST_PRINTABLE,
+                                      '0' - 1);
+                            add_range(class.value.letters, '9' + 1, 'A' - 1);
+                            add_range(class.value.letters, 'Z' + 1, '_' - 1);
+                            add_range(class.value.letters, '_' + 1, 'a' - 1);
+                            add_range(class.value.letters, 'z' + 1,
+                                      ASCII_LAST_PRINTABLE);
+                            array_append(tokens, &class);
+                            string++;
+                            c = ')';
+                            goto char_switch;
+                        }
+                        case 's': {
+                            struct scope scope = { .start_char = '[',
+                            .start_index =
+                            tokens->size + previous_concat,
+                            .end_index = -1 };
+                            list_push_front(scopes, &scope);
+                            if (previous_concat)
+                                array_append(tokens, &concat_token);
+                            previous_concat = 1;
+                            array_append(tokens, &par_token);
+                            Token class;
+                            class.type = CLASS;
+                            class.value.letters = Array(Letter);
+                            array_append(class.value.letters, &(char){ ' ' });
+                            add_range(class.value.letters, ASCII_FIRST_CONTROL,
+                                      ASCII_LAST_CONTROL);
+                            array_append(tokens, &class);
+                            string++;
+                            c = ')';
+                            goto char_switch;
+                        }
+                        case 'S': {
+                            struct scope scope = { .start_char = '[',
+                            .start_index =
+                            tokens->size + previous_concat,
+                            .end_index = -1 };
+                            list_push_front(scopes, &scope);
+                            if (previous_concat)
+                                array_append(tokens, &concat_token);
+                            previous_concat = 1;
 
-                    array_append(tokens, &par_token);
-                    Token class;
-                    class.type = CLASS;
-                    class.value.letters = Array(Letter);
-                    // First printable caracter is ' ' so first no space is ' '
-                    // + 1
-                    add_range(class.value.letters, ' ' + 1,
-                              ASCII_LAST_PRINTABLE);
-                    array_append(tokens, &class);
-                    string++;
+                            array_append(tokens, &par_token);
+                            Token class;
+                            class.type = CLASS;
+                            class.value.letters = Array(Letter);
+                            // First printable caracter is ' ' so first no space is ' '
+                            // + 1
+                            add_range(class.value.letters, ' ' + 1,
+                                      ASCII_LAST_PRINTABLE);
+                            array_append(tokens, &class);
+                            string++;
+                            c = ')';
+                            goto char_switch;
+                        }
+                    }
+                    escaped = 1;
+                    continue;
+                }
+                is_escapable = 1;
+                /* fall through */
+            case '|':
+                if (!escaped)
+                {
+                    isString = 0;
+                    previous_concat = 0;
+                    token.type = PUNCTUATION;
+                    break;
+                }
+                is_escapable = 1;
+                /* fall through */
+            case '(':
+                {
+                    if (!escaped)
+                    {
+                        isString = 0;
+                        int capturing = *(string + 1) != '?' || *(string + 2) != ':';
+                        struct scope scope = { .start_char = capturing ? '{' : '(',
+                        .start_index =
+                        tokens->size + previous_concat,
+                        .end_index = -1 };
+                        if (capturing)
+                            token.value.letter = '{';
+                        else
+                            string += 2;
+                        list_push_front(scopes, &scope);
+                        curr_concat = previous_concat;
+                        previous_concat = 0;
+                        token.type = PUNCTUATION;
+                        break;
+                    }
+                    is_escapable = 1;
+                }
+                /* fall through */
+            case ')':
+                {
+                    if (!escaped)
+                    {
+                        isString = 0;
+                        if (list_empty(scopes))
+                            errx(EXIT_FAILURE,
+                                 "parenthesis not balanced"); // LCOV_EXCL_LINE
+                        LinkedList *last_scope_node = list_pop_front(scopes);
+                        last_scope = *(struct scope *)last_scope_node->data;
+                        last_scope.end_index = tokens->size;
+                        if (last_scope.start_char == '{') // Capturing group
+                            token.value.letter = '}';
+                        list_free_from(last_scope_node);
+                    }
+                    is_escapable = 1;
+                }
+                /* fall through */
+            case '+':
+            case '?':
+            case '*':
+                if (!escaped)
+                {
+                    isString = 0;
+                    previous_concat = 1;
+                    token.type = PUNCTUATION;
+                    break;
+                }
+                is_escapable = 1;
+                /* fall through */
+            case '[':
+                if (!escaped)
+                {
+                    isString = 0;
+                    struct scope scope = { .start_char = '[',
+                    .start_index =
+                    tokens->size + previous_concat,
+                    .end_index = -1 };
+                    list_push_front(scopes, &scope);
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    tokenize_group(&string, tokens);
+                    c = ')';
+                    goto char_switch; // Don't hurt me. Please.
+                    break;
+                }
+                is_escapable = 1;
+                /* fall through */
+            case ']':
+                if (!escaped)
+                    errx(EXIT_FAILURE, "unbalanced brackets"); // LCOV_EXCL_LINE
+                is_escapable = 1;
+                /* fall through */
+            case '.':
+                if (!escaped)
+                {
+                    isString = 0;
+                    struct scope scope = { .start_char = '[',
+                    .start_index =
+                    tokens->size + previous_concat,
+                    .end_index = -1 };
+                    list_push_front(scopes, &scope);
+                    if (previous_concat)
+                        array_append(tokens, &concat_token);
+                    previous_concat = 1;
+                    tokenize_dot(tokens);
                     c = ')';
                     goto char_switch;
                 }
+                is_escapable = 1;
+                /* fall through */
+            case '{':
+                if (!escaped && tokens->size != 0)
+                {
+                    isString = 0;
+                    ssize_t upper = tokens->size - 1;
+                    ssize_t lower = upper;
+                    if (last_scope.end_index == upper)
+                        lower = last_scope.start_index;
+                    if (tokenize_repetition(&string, tokens, lower, upper))
+                        continue;
                 }
-                escaped = 1;
-                continue;
-            }
-            is_escapable = 1;
-        /* fall through */
-        case '|':
-            if (!escaped)
-            {
-                previous_concat = 0;
-                token.type = PUNCTUATION;
-                break;
-            }
-            is_escapable = 1;
-        /* fall through */
-        case '(': {
-            if (!escaped)
-            {
-                int capturing = *(string + 1) != '?' || *(string + 2) != ':';
-                struct scope scope = { .start_char = capturing ? '{' : '(',
-                                       .start_index =
-                                           tokens->size + previous_concat,
-                                       .end_index = -1 };
-                if (capturing)
-                    token.value.letter = '{';
-                else
-                    string += 2;
-                list_push_front(scopes, &scope);
+                is_escapable = 1;
+                /* fall through */
+            default:
+                if (escaped && !is_escapable)
+                    errx(EXIT_FAILURE, "Can't escape character '%c'",
+                         c); // LCOV_EXCL_LINE
                 curr_concat = previous_concat;
-                previous_concat = 0;
-                token.type = PUNCTUATION;
-                break;
-            }
-            is_escapable = 1;
-        }
-        /* fall through */
-        case ')': {
-            if (!escaped)
-            {
-                if (list_empty(scopes))
-                    errx(EXIT_FAILURE,
-                         "parenthesis not balanced"); // LCOV_EXCL_LINE
-                LinkedList *last_scope_node = list_pop_front(scopes);
-                last_scope = *(struct scope *)last_scope_node->data;
-                last_scope.end_index = tokens->size;
-                if (last_scope.start_char == '{') // Capturing group
-                    token.value.letter = '}';
-                list_free_from(last_scope_node);
-            }
-            is_escapable = 1;
-        }
-        /* fall through */
-        case '+':
-        case '?':
-        case '*':
-            if (!escaped)
-            {
                 previous_concat = 1;
-                token.type = PUNCTUATION;
+                token.type = LITERAL;
                 break;
-            }
-            is_escapable = 1;
-            /* fall through */
-        case '[':
-            if (!escaped)
-            {
-                struct scope scope = { .start_char = '[',
-                                       .start_index =
-                                           tokens->size + previous_concat,
-                                       .end_index = -1 };
-                list_push_front(scopes, &scope);
-                if (previous_concat)
-                    array_append(tokens, &concat_token);
-                previous_concat = 1;
-                tokenize_group(&string, tokens);
-                c = ')';
-                goto char_switch; // Don't hurt me. Please.
-                break;
-            }
-            is_escapable = 1;
-            /* fall through */
-        case ']':
-            if (!escaped)
-                errx(EXIT_FAILURE, "unbalanced brackets"); // LCOV_EXCL_LINE
-            is_escapable = 1;
-            /* fall through */
-        case '.':
-            if (!escaped)
-            {
-                struct scope scope = { .start_char = '[',
-                                       .start_index =
-                                           tokens->size + previous_concat,
-                                       .end_index = -1 };
-                list_push_front(scopes, &scope);
-                if (previous_concat)
-                    array_append(tokens, &concat_token);
-                previous_concat = 1;
-                tokenize_dot(tokens);
-                c = ')';
-                goto char_switch;
-            }
-            is_escapable = 1;
-        /* fall through */
-        case '{':
-            if (!escaped && tokens->size != 0)
-            {
-                ssize_t upper = tokens->size - 1;
-                ssize_t lower = upper;
-                if (last_scope.end_index == upper)
-                    lower = last_scope.start_index;
-                if (tokenize_repetition(&string, tokens, lower, upper))
-                    continue;
-            }
-            is_escapable = 1;
-            /* fall through */
-        default:
-            if (escaped && !is_escapable)
-                errx(EXIT_FAILURE, "Can't escape character '%c'",
-                     c); // LCOV_EXCL_LINE
-            curr_concat = previous_concat;
-            previous_concat = 1;
-            token.type = LITERAL;
-            break;
         }
         escaped = 0;
 
@@ -573,5 +586,9 @@ Array *tokenize(const char *string)
     }
 
     list_free(scopes);
+
+    if(isString)
+        return NULL;
+
     return tokens;
 }

@@ -132,3 +132,13 @@ Test(interface_replace, replace_whitespace)
     free(str);
     regex_free(whitespace_reg);
 }
+
+
+
+
+Test(lexer, simple_string)
+{
+    reg_t reg = regex_compile("abc");
+    //automaton_to_dot(reg.aut);
+    regex_free(reg);
+}
