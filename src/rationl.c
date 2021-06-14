@@ -28,7 +28,7 @@ typedef struct match
     char **groups;
 } match;
 
-Automaton *fast_automaton(char *pattern)
+Automaton *regexp_compile_string(char *pattern)
 {
     size_t size = strlen(pattern);
     Automaton *aut = automaton_create(size+1, size);
@@ -55,7 +55,7 @@ reg_t regex_compile(char* pattern)
     if (arr == NULL)
     {
         reg_t re;
-        re.aut = fast_automaton(pattern);
+        re.aut = regexp_compile_string(pattern);
         re.pattern = malloc((strlen(pattern) + 1) * sizeof(char));
         strcpy(re.pattern, pattern);
         return re;
