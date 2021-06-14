@@ -28,7 +28,7 @@ typedef struct match
     char **groups;
 } match;
 
-Automaton *regexp_compile_string(char *pattern)
+reg_t regexp_compile_string(char *pattern)
 {
     size_t size = strlen(pattern);
     Automaton *aut = automaton_create(size+1, size);
@@ -45,7 +45,11 @@ Automaton *regexp_compile_string(char *pattern)
         automaton_add_transition(aut, src, dst, pattern[i], 0);
     }
 
-    return aut;
+    reg_t re;
+    re.aut = aut;
+    re.pattern = malloc((strlen(pattern) + 1) * sizeof(char));
+    strcpy(re.pattern, pattern);
+    return re;
 }
 
 reg_t regex_compile(char* pattern)
@@ -53,13 +57,7 @@ reg_t regex_compile(char* pattern)
     Array *arr = tokenize(pattern);
 
     if (arr == NULL)
-    {
-        reg_t re;
-        re.aut = regexp_compile_string(pattern);
-        re.pattern = malloc((strlen(pattern) + 1) * sizeof(char));
-        strcpy(re.pattern, pattern);
-        return re;
-    }
+        return regexp_compile_string(pattern);
 
 
     BinTree *tree = parse_symbols(arr);
