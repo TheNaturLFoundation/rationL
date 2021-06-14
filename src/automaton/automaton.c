@@ -336,7 +336,7 @@ Map * _map_cpy(Map * src)
         Transition, tr, src,
         {
             set = map_get(src, &tr);
-            map_set(ret, &tr, set_cpy(set));
+            map_set(ret, &tr, &(set_cpy(set)));
         }
     )
     return ret;
@@ -376,7 +376,8 @@ Automaton *automaton_copy(Automaton *source)
         }
     }
 
-
+    copy->entering_transitions = _map_cpy(source->entering_transitions);
+    copy->leaving_transitions =_map_cpy(source->leaving_transitions);
     return copy;
 }
 
