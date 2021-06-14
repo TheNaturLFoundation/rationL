@@ -456,9 +456,7 @@ Test(substring_dfa, a_b_or_c_a_groups)
     Array *matches;
     Match *match;
 
-    puts("before");
     matches = search_dfa(aut, "aba");
-    puts("after");
     cr_assert_eq(matches->size, 1, "expected 1, got %zu", matches->size);
     match = *(Match **)array_get(matches, 0);
     char *groups[] = { "aba", "ab", "b" };

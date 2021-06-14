@@ -337,7 +337,8 @@ Map * _map_cpy(Map * src)
         Transition, tr, src,
         {
             set = map_get(src, &tr);
-            map_set(ret, &tr, &(set_cpy(set)));
+            Set *copy = set_cpy(set);
+            map_set(ret, &tr, &copy);
         }
     )
     return ret;
