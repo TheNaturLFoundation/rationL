@@ -222,6 +222,7 @@ void _free_start_marked_as_entering(Automaton * automaton, State * s)
     free(set_ptr);
 }
 
+
 void automaton_remove_state(Automaton *automaton, State *state)
 {
     // Remove all transitions pointing to it
@@ -315,6 +316,32 @@ void automaton_remove_state(Automaton *automaton, State *state)
     free(state);
 }
 
+Set * set_cpy(Set * set)
+{
+    Set * ret = Set(size_t, hash_size_t, compare_size_t);
+    map_foreach_key(
+        size_t, grp, set,
+        {
+            set_add(set, &grp);
+        }
+    )
+    return ret;
+}
+
+Map * _map_cpy(map * src)
+{
+    Map * ret =  Map(Transition, Map *, hash_transition, compare_transitions);
+    Set * set;
+    map_foreach_key(
+        Transition, tr, src
+        {
+            set = map_get(src, &tr);
+            map_set(ret, &tr, set_cpy(set));
+        }
+    )
+    return ret;
+}
+
 Automaton *automaton_copy(Automaton *source)
 {
     Automaton *copy = Automaton(source->size, source->transition_table->width);
@@ -348,6 +375,7 @@ Automaton *automaton_copy(Automaton *source)
                 }
         }
     }
+
 
     return copy;
 }
