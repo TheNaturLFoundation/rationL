@@ -29,7 +29,7 @@ Arch linux users can use the aur package [rationl](https://aur.archlinux.org/pac
 aur package manager such as ``yay``
 
 ```
-yay -S isolate
+yay -S rationl
 ```
 
 ## Build from source
